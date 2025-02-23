@@ -1,0 +1,39 @@
+config-version: 1.0.0
+gui-type: CHEST_54
+name: "<#99ff99><bold>Members</bold></#99ff99>"
+entries:
+    filler:
+        item:
+            material: GRAY_STAINED_GLASS_PANE
+            name: " "
+            lore: [ ]
+    exit:
+        slot: 45
+        item:
+            material: BARRIER
+            name: "<white><bold>Return to SkyHopper Settings</bold></white>"
+            lore:
+                - ' <white>|</white> <gray>Click to go back to the</gray>'
+                - ' <white>|</white> <gray>main menu.</gray>'
+    previous-page:
+        slot: 47
+        item:
+            material: ARROW
+            name: "<white><bold>Previous Page</bold></white>"
+            lore: [ ]
+    next-page:
+        slot: 51
+        item:
+            material: ARROW
+            name: "<white><bold>Next Page</bold></white>"
+            lore: [ ]
+    add:
+        slot: 53
+        item:
+            material: PAPER
+            name: "<white><bold>Add Member</bold></white>"
+            lore: [ ]
+    player-head:
+        item:
+            name: "<white><bold><player_name></bold></white>"
+            lore: [ ]

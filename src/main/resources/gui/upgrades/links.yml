@@ -1,0 +1,38 @@
+config-version: 1.0.0
+gui-type: CHEST_54
+name: "<#99ff99><bold>Number of Links</bold></#99ff99>"
+entries:
+    filler:
+        item:
+            material: GRAY_STAINED_GLASS_PANE
+            name: " "
+            lore: [ ]
+    exit:
+        slot: 49
+        item:
+            material: BARRIER
+            name: "<white><bold>Return to SkyHopper Upgrades</bold></white>"
+            lore:
+                - " <white>|</white> <gray>Click to go back to the</gray>"
+                - " <white>|</white> <gray>SkyHopper's upgrades.</gray>"
+    upgrade:
+        slot: 22
+        item:
+            material: CHEST
+            name: "<#99ff99><bold>+1 Linked Container</bold></#99ff99>"
+            lore:
+                - " <white>|</white> <gray>Click to upgrade the maximum linked containers.</gray>"
+                - " <white>|</white>"
+                - " <white>|</white> <gray>Linked Containers refers to how many"
+                - " <white>|</white> <gray>chests, furnaces, etc. that can be linked.</gray>"
+                - " <white>|</white>"
+                - " <white>|</white> <#99ff99>Current:</#99ff99> <yellow><current></yellow>"
+                - " <white>|</white> <#99ff99>Next:</#99ff99> <yellow><next></yellow>"
+                - " <white>|</white> <#99ff99>Price:</#99ff99> <yellow><price></yellow>"
+    upgrade-max:
+        slot: 22
+        item:
+            material: BEDROCK
+            name: "<#99ff99><bold>Linked Containers</bold></#99ff99>"
+            lore:
+                - " <white>|</white> <gray>The number of linked containers upgrade is maxed out.</gray>"

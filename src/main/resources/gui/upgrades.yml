@@ -1,0 +1,65 @@
+config-version: 1.0.0
+gui-type: CHEST_54
+name: "<#99ff99><bold>SkyHopper Upgrades</bold></#99ff99>"
+entries:
+    filler:
+        item:
+            material: GRAY_STAINED_GLASS_PANE
+            name: " "
+            lore: [ ]
+    exit:
+        slot: 49
+        item:
+            material: BARRIER
+            name: "<white><bold>Return to SkyHopper Settings</bold></white>"
+            lore:
+                - ' <white>|</white> <gray>Click to go back to the</gray>'
+                - ' <white>|</white> <gray>main menu.</gray>'
+    suction-speed:
+        slot: 19
+        item:
+            material: RABBIT_FOOT
+            name: "<#99ff99><bold>Click to manage suction speed</bold></#99ff99>"
+            lore:
+                - " <white>|</white> <gray>Lets you increase, decrease,</gray>"
+                - " <white>|</white> <gray>and upgrade the suction speed.</gray>"
+    suction-amount:
+        slot: 21
+        item:
+            material: WIND_CHARGE
+            name: "<#99ff99><bold>Click to manage suction amount</bold></#99ff99>"
+            lore:
+                - " <white>|</white> <gray>Lets you increase, decrease,</gray>"
+                - " <white>|</white> <gray>and upgrade the suction amount.</gray>"
+    suction-range:
+        slot: 23
+        item:
+            material: WATER_BUCKET
+            name: "<#99ff99><bold>Click to manage suction range</bold></#99ff99>"
+            lore:
+                - " <white>|</white> <gray>Lets you increase, decrease,</gray>"
+                - " <white>|</white> <gray>and upgrade the suction range.</gray>"
+    max-links:
+        slot: 25
+        item:
+            material: CHEST
+            name: "<#99ff99><bold>Click to manage the max linked containers.</bold></#99ff99>"
+            lore:
+                - " <white>|</white> <gray>Lets you upgrade the maximum.</gray>"
+                - " <white>|</white> <gray>number of linked containers.<gray>"
+    transfer-speed:
+        slot: 30
+        item:
+            material: CLOCK
+            name: "<#99ff99><bold>Click to manage transfer speed</bold></#99ff99>"
+            lore:
+                - " <white>|</white> <gray>Lets you increase, decrease,</gray>"
+                - " <white>|</white> <gray>and upgrade the transfer speed.</gray>"
+    transfer-amount:
+        slot: 32
+        item:
+            material: PAPER
+            name: "<#99ff99><bold>Click to manage transfer amount</bold></#99ff99>"
+            lore:
+                - " <white>|</white> <gray>Lets you increase, decrease,</gray>"
+                - " <white>|</white> <gray>and upgrade the transfer amount.</gray>"

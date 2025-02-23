@@ -1,0 +1,36 @@
+name: SkyHoppers
+version: '${version}'
+main: com.github.lukesky19.skyHoppers.SkyHoppers
+api-version: '1.21'
+load: POSTWORLD
+depend: [SkyLib, Vault]
+softdepend: [BentoBox, QuickShop-Hikari, RoseStacker]
+
+permissions:
+    skyhoppers.admin:
+        description: The permission to edit SkyHoppers.
+        default: op
+    skyhoppers.commands.skyhoppers:
+        description: The permission to access the base command.
+        default: op
+    skyhoppers.commands.skyhoppers.reload:
+        description: The permission to reload the plugin.
+        default: op
+    skyhoppers.commands.skyhoppers.help:
+        description: The permission to view the plugin's help message.
+        default: op
+    skyhoppers.commands.skyhoppers.give:
+        description: The permission to give a SkyHopper to a player.
+        default: op
+    skyhoppers.commands.skyhoppers.transfer:
+        description: The permission to transfer a SkyHopper to another player.
+        default: op
+    skyhoppers.commands.skyhoppers.load:
+        description: The permission to load SkyHoppers.
+        default: op
+    skyhoppers.commands.skyhoppers.pause:
+        description: The permission to globally pause all SkyHoppers.
+        default: op
+    skyhoppers.commands.skyhoppers.unpause:
+        description: The permission to globally unpause all SkyHoppers.
+        default: op

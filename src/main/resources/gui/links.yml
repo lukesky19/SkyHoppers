@@ -1,0 +1,41 @@
+config-version: 1.0.0
+gui-type: CHEST_54
+name: "<#99ff99><bold>Linked Containers</bold></#99ff99>"
+entries:
+    filler:
+        item:
+            material: GRAY_STAINED_GLASS_PANE
+            name: " "
+            lore: [ ]
+    exit:
+        slot: 45
+        item:
+            material: BARRIER
+            name: "<white><bold>Return to SkyHopper Settings</bold></white>"
+            lore:
+                - ' <white>|</white> <gray>Click to go back to the</gray>'
+                - ' <white>|</white> <gray>main menu.</gray>'
+    previous-page:
+        slot: 47
+        item:
+            material: ARROW
+            name: "<white><bold>Previous Page</bold></white>"
+            lore: [ ]
+    next-page:
+        slot: 51
+        item:
+            material: ARROW
+            name: "<white><bold>Next Page</bold></white>"
+            lore: [ ]
+    link:
+        slot: 53
+        item:
+            material: DIAMOND
+            name: "<white><bold>Link Container</bold></white>"
+            lore: [ ]
+    linked-item:
+        item:
+            lore:
+                - " <white>|</white> <gray>x: <x> y: <y> z: <z>"
+                - " <white>|</white> <gray>Left-click to edit the output filter."
+                - " <white>|</white> <gray>Right-click to remove the linked container."

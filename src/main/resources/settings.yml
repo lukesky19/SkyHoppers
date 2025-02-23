@@ -1,0 +1,244 @@
+config-version: 1.0.0
+locale: en_US
+skyhopper:
+    # Starting upgrade numbers
+    # Default: 10
+    starting-transfer-speed: 10
+    # Default: 1
+    starting-transfer-amount: 1
+    # Default: 10
+    starting-suction-speed: 10
+    # Default: 1
+    starting-suction-amount: 1
+    # Default: 1
+    starting-suction-range: 1
+    # Default: 1
+    starting-max-containers: 1
+    # The SkyHopper item's name and lore.
+    item:
+        name: '<#99ff99><bold>SkyHopper</bold></#99ff99>'
+        lore:
+            - '<gray>An upgradable hopper that can suction and transfer items'
+            - "<gray>based on it's upgrades, filters, and connected containers."
+            - ' '
+            - ' <white><strikethrough>---------------------------------------------'
+            - ' <white>| <#99ff99><bold>Status</bold></#99ff99> <gray>:</gray> <white><status></white>'
+            - ' <white>| <#99ff99><bold>Owner</bold></#99ff99> <gray>:</gray> <white><name></white>'
+            - ' <white>| <#99ff99><bold>Members</bold></#99ff99> <gray>:</gray> <white><member_count></white>'
+            - ' <white>| <#99ff99><bold>Filter Type</bold></#99ff99> <gray>:</gray> <white><filter_type></white>'
+            - ' <white>| <#99ff99><bold>Links</bold></#99ff99> <gray>:</gray> <white><current_links></white><#99ff99><bold>/</bold></#99ff99><white><max_links></white>'
+            - ' <white>| <#99ff99><bold>Transfer Speed</bold></#99ff99> <gray>:</gray> <white><transfer_amount></white> <#99ff99><bold>item(s) per</bold></#99ff99> <white><transfer_speed></white> <#99ff99><bold>second(s).</bold></#99ff99>'
+            - ' <white>| <#99ff99><bold>Suction Speed</bold></#99ff99> <gray>:</gray> <white><suction_amount></white> <#99ff99><bold>item(s) per</bold></#99ff99> <white><suction_speed></white> <#99ff99><bold>second(s).</bold></#99ff99>'
+            - ' <white>| <#99ff99><bold>Suction Range</bold></#99ff99> <gray>:</gray> <white><suction_range></white>'
+            - ' <white><strikethrough>---------------------------------------------'
+        # Should the hopper item glow like it was enchanted?
+        # Default: true
+        glow: true
+        # Placeholders for extra customization.
+        # Currently only used for the <status> placeholder to color Enabled green and Disabled red.
+        placeholders:
+            enabled: "<green>Enabled</green>"
+            disabled: "<red>Disabled</red>"
+upgrades:
+    transfer-speed:
+        upgrades:
+            10: 0.0
+            9: 500.0
+            8: 1000.0
+            7: 1500.0
+            6: 2000.0
+            5: 2500.0
+            4: 3000.0
+            3: 3500.0
+            2: 4000.0
+            1: 4500.0
+            0.5: 5000.0
+    transfer-amount:
+        upgrades:
+            1: 0.0
+            2: 150.0
+            3: 300.0
+            4: 450.0
+            5: 600.0
+            6: 750.0
+            7: 900.0
+            8: 1050.0
+            9: 1200.0
+            10: 1350.0
+            11: 1500.0
+            12: 1650.0
+            13: 1800.0
+            14: 1950.0
+            15: 2100.0
+            16: 2250.0
+            17: 2400.0
+            18: 2550.0
+            19: 2700.0
+            20: 2850.0
+            21: 3000.0
+            22: 3150.0
+            23: 3300.0
+            24: 3450.0
+            25: 3600.0
+            26: 3750.0
+            27: 3900.0
+            28: 4050.0
+            29: 4200.0
+            30: 4350.0
+            31: 4500.0
+            32: 4650.0
+            33: 4800.0
+            34: 4950.0
+            35: 5100.0
+            36: 5250.0
+            37: 5400.0
+            38: 5550.0
+            39: 5700.0
+            40: 5850.0
+            41: 6000.0
+            42: 6150.0
+            43: 6300.0
+            44: 6450.0
+            45: 6600.0
+            46: 6750.0
+            47: 6900.0
+            48: 7050.0
+            49: 7200.0
+            50: 7350.0
+            51: 7500.0
+            52: 7650.0
+            53: 7800.0
+            54: 7950.0
+            55: 8100.0
+            56: 8250.0
+            57: 8400.0
+            58: 8550.0
+            59: 8700.0
+            60: 8850.0
+            61: 9000.0
+            62: 9150.0
+            63: 9300.0
+            64: 9450.0
+    suction-speed:
+        upgrades:
+            10: 0.0
+            9: 500.0
+            8: 1000.0
+            7: 1500.0
+            6: 2000.0
+            5: 2500.0
+            4: 3000.0
+            3: 3500.0
+            2: 4000.0
+            1: 4500.0
+            0.5: 5000.0
+    suction-amount:
+        upgrades:
+            1: 0.0
+            2: 150.0
+            3: 300.0
+            4: 450.0
+            5: 600.0
+            6: 750.0
+            7: 900.0
+            8: 1050.0
+            9: 1200.0
+            10: 1350.0
+            11: 1500.0
+            12: 1650.0
+            13: 1800.0
+            14: 1950.0
+            15: 2100.0
+            16: 2250.0
+            17: 2400.0
+            18: 2550.0
+            19: 2700.0
+            20: 2850.0
+            21: 3000.0
+            22: 3150.0
+            23: 3300.0
+            24: 3450.0
+            25: 3600.0
+            26: 3750.0
+            27: 3900.0
+            28: 4050.0
+            29: 4200.0
+            30: 4350.0
+            31: 4500.0
+            32: 4650.0
+            33: 4800.0
+            34: 4950.0
+            35: 5100.0
+            36: 5250.0
+            37: 5400.0
+            38: 5550.0
+            39: 5700.0
+            40: 5850.0
+            41: 6000.0
+            42: 6150.0
+            43: 6300.0
+            44: 6450.0
+            45: 6600.0
+            46: 6750.0
+            47: 6900.0
+            48: 7050.0
+            49: 7200.0
+            50: 7350.0
+            51: 7500.0
+            52: 7650.0
+            53: 7800.0
+            54: 7950.0
+            55: 8100.0
+            56: 8250.0
+            57: 8400.0
+            58: 8550.0
+            59: 8700.0
+            60: 8850.0
+            61: 9000.0
+            62: 9150.0
+            63: 9300.0
+            64: 9450.0
+    suction-range:
+        upgrades:
+            1: 0.0
+            2: 500.0
+            3: 1000.0
+            4: 1500.0
+            5: 2000.0
+            6: 2500.0
+            7: 3000.0
+            8: 3500.0
+    containers:
+        upgrades:
+            1: 0.0
+            2: 500.0
+            3: 1000.0
+            4: 1500.0
+            5: 2000.0
+            6: 2500.0
+            7: 3000.0
+            8: 3500.0
+            9: 4000.0
+            10: 4500.0
+            11: 5000.0
+            12: 5500.0
+            13: 6000.0
+            14: 6500.0
+            15: 7000.0
+            16: 7500.0
+            17: 8000.0
+            18: 8500.0
+            19: 9000.0
+            20: 9500.0
+            21: 10000.0
+            22: 10500.0
+            23: 11000.0
+            24: 11500.0
+            25: 12000.0
+            26: 12500.0
+            27: 13000.0
+            28: 13500.0
+            29: 14000.0
+            30: 14500.0
+            31: 15000.0
+            32: 15500.0

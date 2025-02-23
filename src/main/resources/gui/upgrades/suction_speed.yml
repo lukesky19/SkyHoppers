@@ -1,0 +1,76 @@
+config-version: 1.0.0
+gui-type: CHEST_54
+name: "<#99ff99><bold>SkyHopper's Suction Speed</bold></#99ff99>"
+entries:
+    filler:
+        item:
+            material: GRAY_STAINED_GLASS_PANE
+            name: " "
+            lore: [ ]
+    exit:
+        slot: 49
+        item:
+            material: BARRIER
+            name: "<white><bold>Return to SkyHopper Upgrades</bold></white>"
+            lore:
+                - " <white>|</white> <gray>Click to go back to the</gray>"
+                - " <white>|</white> <gray>SkyHopper's upgrades.</gray>"
+    increase:
+        slot: 20
+        item:
+            material: GREEN_DYE
+            name: "<#99ff99><bold>Increase Suction Speed</bold></#99ff99>"
+            lore:
+                - " <white>|</white> <gray>Click to increase the suction speed.</gray>"
+                - " <white>|</white>"
+                - " <white>|</white> <gray>Will make items suction faster.</gray>"
+                - " <white>|</white>"
+                - " <white>|</white> <#99ff99>Current:</#99ff99> <yellow><current></yellow>"
+                - " <white>|</white> <#99ff99>Change:</#99ff99> <yellow><change></yellow>"
+    increase-max:
+        slot: 20
+        item:
+            material: BEDROCK
+            name: "<#99ff99><bold>Suction Speed</bold></#99ff99>"
+            lore:
+                - " <white>|</white> <gray>Suction speed is at its maximum.</gray>"
+    upgrade:
+        slot: 22
+        item:
+            material: RABBIT_FOOT
+            name: "<#99ff99><bold>Suction Speed -1</bold></#99ff99>"
+            lore:
+                - " <white>|</white> <gray>Click to upgrade suction speed.</gray>"
+                - " <white>|</white>"
+                - " <white>|</white> <gray>Suction speed refers to the time</gray>"
+                - " <white>|</white> <gray>it takes to transfer items in seconds.</gray>"
+                - " <white>|</white>"
+                - " <white>|</white> <#99ff99>Current:</#99ff99> <yellow><current></yellow>"
+                - " <white>|</white> <#99ff99>Next:</#99ff99> <yellow><next></yellow>"
+                - " <white>|</white> <#99ff99>Price:</#99ff99> <yellow><price></yellow>"
+    upgrade-max:
+        slot: 22
+        item:
+            material: BEDROCK
+            name: "<#99ff99><bold>Suction Speed</bold></#99ff99>"
+            lore:
+                - " <white>|</white> <gray>The suction speed upgrade is maxed out.</gray>"
+    decrease:
+        slot: 24
+        item:
+            material: RED_DYE
+            name: "<#99ff99><bold>Decrease Suction Speed</bold></#99ff99>"
+            lore:
+                - " <white>|</white> <gray>Click to decrease the suction speed.</gray>"
+                - " <white>|</white>"
+                - " <white>|</white> <gray>Will make items suction slower.</gray>"
+                - " <white>|</white>"
+                - " <white>|</white> <#99ff99>Current:</#99ff99> <yellow><current></yellow>"
+                - " <white>|</white> <#99ff99>Change:</#99ff99> <yellow><change></yellow>"
+    decrease-min:
+        slot: 24
+        item:
+            material: BEDROCK
+            name: "<#99ff99><bold>Suction Speed</bold></#99ff99>"
+            lore:
+                - " <white>|</white> <gray>Suction speed is at its minimum.</gray>"
