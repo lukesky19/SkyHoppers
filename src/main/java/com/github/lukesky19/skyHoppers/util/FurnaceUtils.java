@@ -43,7 +43,7 @@ public class FurnaceUtils {
         int amountTransferred = 0;
         int itemAmount = sourceItem.getAmount();
 
-        if(sourceItem.getType().isFuel()) {
+        if(destinationInventory.isFuel(sourceItem)) {
             ItemStack furnaceFuel = destinationInventory.getFuel();
 
             int fuelAmountToAdd = Math.min(itemAmount, amount);
@@ -67,51 +67,55 @@ public class FurnaceUtils {
             if(itemAmount <= 0) return amountTransferred;
             if(amount <= 0) return amountTransferred;
 
-            // Some items can also be smeltable so if the fuel is full, move the rest to the smelt item slot.
-            ItemStack smeltItem = destinationInventory.getSmelting();
-            int smeltAmountToAdd = Math.min(itemAmount, amount);
+            if(destinationInventory.canSmelt(sourceItem)) {
+                // Some items can also be smeltable so if the fuel is full, move the rest to the smelt item slot.
+                ItemStack smeltItem = destinationInventory.getSmelting();
+                int smeltAmountToAdd = Math.min(itemAmount, amount);
 
-            if (smeltItem != null && !smeltItem.isEmpty()) {
-                if (smeltItem.isSimilar(sourceItem)) {
-                    int transferred = addToItem(sourceItem, smeltItem, sourceSlot, sourceInventory, smeltAmountToAdd);
+                if (smeltItem != null && !smeltItem.isEmpty()) {
+                    if(smeltItem.isSimilar(sourceItem)) {
+                        int transferred = addToItem(sourceItem, smeltItem, sourceSlot, sourceInventory, smeltAmountToAdd);
+
+                        amount -= transferred;
+                        itemAmount -= transferred;
+                        amountTransferred += transferred;
+                    }
+                } else {
+                    int transferred = setItem(sourceItem, sourceInventory, destinationInventory, sourceSlot, 0, smeltAmountToAdd);
 
                     amount -= transferred;
                     itemAmount -= transferred;
                     amountTransferred += transferred;
                 }
-            } else {
-                int transferred = setItem(sourceItem, sourceInventory, destinationInventory, sourceSlot, 0, smeltAmountToAdd);
 
-                amount -= transferred;
-                itemAmount -= transferred;
-                amountTransferred += transferred;
+                if (itemAmount <= 0) return amountTransferred;
+                if (amount <= 0) return amountTransferred;
             }
-
-            if(itemAmount <= 0) return amountTransferred;
-            if(amount <= 0) return amountTransferred;
         } else {
-            ItemStack smeltItem = destinationInventory.getSmelting();
+            if(destinationInventory.canSmelt(sourceItem)) {
+                ItemStack smeltItem = destinationInventory.getSmelting();
 
-            int amountToAdd = Math.min(itemAmount, amount);
+                int amountToAdd = Math.min(itemAmount, amount);
 
-            if (smeltItem != null && !smeltItem.isEmpty()) {
-                if (smeltItem.isSimilar(sourceItem)) {
-                    int transferred = addToItem(sourceItem, smeltItem, sourceSlot, sourceInventory, amountToAdd);
+                if (smeltItem != null && !smeltItem.isEmpty()) {
+                    if (smeltItem.isSimilar(sourceItem)) {
+                        int transferred = addToItem(sourceItem, smeltItem, sourceSlot, sourceInventory, amountToAdd);
+
+                        amount -= transferred;
+                        itemAmount -= transferred;
+                        amountTransferred += transferred;
+                    }
+                } else {
+                    int transferred = setItem(sourceItem, sourceInventory, destinationInventory, sourceSlot, 0, amountToAdd);
 
                     amount -= transferred;
                     itemAmount -= transferred;
                     amountTransferred += transferred;
                 }
-            } else {
-                int transferred = setItem(sourceItem, sourceInventory, destinationInventory, sourceSlot, 0, amountToAdd);
 
-                amount -= transferred;
-                itemAmount -= transferred;
-                amountTransferred += transferred;
+                if (itemAmount <= 0) return amountTransferred;
+                if (amount <= 0) return amountTransferred;
             }
-
-            if(itemAmount <= 0) return amountTransferred;
-            if(amount <= 0) return amountTransferred;
         }
 
         return amountTransferred;
