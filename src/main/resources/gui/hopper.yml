@@ -110,7 +110,7 @@ entries:
                 - " <white>| <#99ff99><bold>Owner</bold></#99ff99> <gray>:</gray> <white><owner></white>"
                 - " <white>| <#99ff99><bold>Members</bold></#99ff99> <gray>:</gray> <white><member_count></white>"
                 - " <white>| <#99ff99><bold>Filter Type</bold></#99ff99> <gray>:</gray> <white><filter_type></white>"
-                - " <white>| <#99ff99><bold>Links</bold></#99ff99> <gray>:</gray> <white><links_count></white><#99ff99><bold>/</bold></#99ff99><white><links_amount>></white>"
+                - " <white>| <#99ff99><bold>Links</bold></#99ff99> <gray>:</gray> <white><links_count></white><#99ff99><bold>/</bold></#99ff99><white><links_amount></white>"
                 - " <white>| <#99ff99><bold>Transfer Speed</bold></#99ff99> <gray>:</gray> <white><transfer_amount></white> <#99ff99><bold>item(s) per</bold></#99ff99> <white><transfer_speed></white> <#99ff99><bold>second(s).</bold></#99ff99>"
                 - " <white>| <#99ff99><bold>Suction Speed</bold></#99ff99> <gray>:</gray> <white><suction_amount></white> <#99ff99><bold>item(s) per</bold></#99ff99> <white><suction_speed></white> <#99ff99><bold>second(s).</bold></#99ff99>"
                 - " <white>| <#99ff99><bold>Suction Range</bold></#99ff99> <gray>:</gray> <white><suction_range></white>"
