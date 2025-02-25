@@ -138,7 +138,7 @@ public class HopperManager {
                     // Get the SkyHopper from the given Hopper
                     SkyHopper skyHopper = getSkyHopperFromPDC(location, pdc);
 
-                    // Check if the SkyHopper is valid or remove the Location from the database.
+                    // Check if the SkyHopper is valid
                     if(skyHopper != null) {
                         // Save any updated SkyHopper data to the Hopper PDC
                         this.saveSkyHopperToBlockPDC(skyHopper, hopper);

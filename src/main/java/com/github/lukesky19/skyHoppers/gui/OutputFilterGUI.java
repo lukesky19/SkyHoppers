@@ -56,7 +56,7 @@ public class OutputFilterGUI extends ChestGUI {
     private final HopperManager hopperManager;
     private final LinksGUI linksGUI;
     private final Location location;
-    private final SkyContainer skyContainer;
+    private SkyContainer skyContainer;
     private final GUIConfig guiConfig;
     private final GUIType guiType;
 
@@ -582,6 +582,9 @@ public class OutputFilterGUI extends ChestGUI {
         }
     }
 
+    /**
+     * Creates the Exit button.
+     */
     private void createExitButton() {
         GUIConfig.GenericEntry exit = guiConfig.entries().exit();
 
@@ -641,23 +644,23 @@ public class OutputFilterGUI extends ChestGUI {
 
         switch (skyContainer.filterType()) {
             case NONE -> {
-                SkyContainer newSkyContainer = new SkyContainer(skyContainer.location(), FilterType.WHITELIST, skyContainer.filterItems());
-                containers.set(index, newSkyContainer);
+                skyContainer = new SkyContainer(skyContainer.location(), FilterType.WHITELIST, skyContainer.filterItems());
+                containers.set(index, skyContainer);
             }
 
             case WHITELIST -> {
-                SkyContainer newSkyContainer = new SkyContainer(skyContainer.location(), FilterType.BLACKLIST, skyContainer.filterItems());
-                containers.set(index, newSkyContainer);
+                skyContainer = new SkyContainer(skyContainer.location(), FilterType.BLACKLIST, skyContainer.filterItems());
+                containers.set(index, skyContainer);
             }
 
             case BLACKLIST -> {
-                SkyContainer newSkyContainer = new SkyContainer(skyContainer.location(), FilterType.DESTROY, skyContainer.filterItems());
-                containers.set(index, newSkyContainer);
+                skyContainer = new SkyContainer(skyContainer.location(), FilterType.DESTROY, skyContainer.filterItems());
+                containers.set(index, skyContainer);
             }
 
             case DESTROY -> {
-                SkyContainer newSkyContainer = new SkyContainer(skyContainer.location(), FilterType.NONE, skyContainer.filterItems());
-                containers.set(index, newSkyContainer);
+                skyContainer = new SkyContainer(skyContainer.location(), FilterType.NONE, skyContainer.filterItems());
+                containers.set(index, skyContainer);
             }
         }
         return containers;
