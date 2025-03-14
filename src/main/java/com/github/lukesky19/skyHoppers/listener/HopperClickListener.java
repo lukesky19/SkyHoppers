@@ -109,7 +109,16 @@ public class HopperClickListener implements Listener {
         final UUID uuid = player.getUniqueId();
         final Block block = playerInteractEvent.getClickedBlock();
 
-        if (!playerInteractEvent.hasBlock() || playerInteractEvent.getAction() != Action.LEFT_CLICK_BLOCK || block == null) return;
+        if(!playerInteractEvent.hasBlock() || block == null) return;
+
+        // Extra check if a Hopper is a SkyHopper and it wasn't loaded.
+        final Location location = block.getLocation();
+        if(hopperManager.getSkyHopper(location) == null) {
+            // Chunk should already be loaded so performance costs aren't an issue
+            hopperManager.loadSkyHopperAtLocation(location);
+        }
+
+        if(playerInteractEvent.getAction() != Action.LEFT_CLICK_BLOCK) return;
 
         if(isPlayerLinking(uuid)) {
             if (!(block.getState(false) instanceof Container container)) return;
