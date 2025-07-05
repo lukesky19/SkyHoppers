@@ -1,16 +1,15 @@
-config-version: 1.0.0
+config-version: 1.1.0.0
 gui-type: CHEST_54
 name: "<#99ff99><bold>Output Filter</bold></#99ff99>"
 entries:
     filler:
-        item:
-            material: GRAY_STAINED_GLASS_PANE
-            name: " "
-            lore: [ ]
+        item-type: GRAY_STAINED_GLASS_PANE
+        name: " "
+        lore: [ ]
     exit:
         slot: 45
         item:
-            material: BARRIER
+            item-type: BARRIER
             name: "<white><bold>Return to Linked Containers</bold></white>"
             lore:
                 - ' <white>|</white> <gray>Click to go back to the</gray>'
@@ -18,7 +17,7 @@ entries:
     previous-page:
         slot: 47
         item:
-            material: ARROW
+            item-type: ARROW
             name: "<white><bold>Previous Page</bold></white>"
             lore:
                 - ' <white>|</white> <gray>Click to go to</gray>'
@@ -26,7 +25,7 @@ entries:
     next-page:
         slot: 51
         item:
-            material: ARROW
+            item-type: ARROW
             name: "<white><bold>Next Page</bold></white>"
             lore:
                 - ' <white>|</white> <gray>Click to go to</gray>'
@@ -34,7 +33,7 @@ entries:
     filter:
         slot: 53
         item:
-            material: PAPER
+            item-type: PAPER
             name: "<white><bold>Filter Type:</bold></white> <#99ff99><bold><filter_type></bold></#99ff99>"
             lore:
                 - ' <white>|</white> <gray>Click to cycle through the filter types.</gray>'

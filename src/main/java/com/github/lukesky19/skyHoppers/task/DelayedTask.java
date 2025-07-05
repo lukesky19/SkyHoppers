@@ -24,6 +24,7 @@ import com.github.lukesky19.skyHoppers.manager.HopperManager;
 import org.bukkit.Location;
 import org.bukkit.block.Container;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -34,16 +35,16 @@ import static com.github.lukesky19.skyHoppers.util.InventoryUtils.transferInvent
  * This Task handles transfers scheduled from the HopperMoveItemListener.
  */
 public class DelayedTask extends BukkitRunnable {
-    private final SkyHoppers plugin;
-    private final HopperManager hopperManager;
-    private final HashMap<Location, DelayedEntry> delayedEntriesMap = new HashMap<>();
+    private final @NotNull SkyHoppers plugin;
+    private final @NotNull HopperManager hopperManager;
+    private final @NotNull Map<Location, DelayedEntry> delayedEntriesMap = new HashMap<>();
 
     /**
      * Constructor
-     * @param plugin The SkyHopper Plugin.
-     * @param hopperManager A HopperManager instance.
+     * @param plugin A {@link SkyHoppers} instance.
+     * @param hopperManager A {@link HopperManager} instance.
      */
-    public DelayedTask(SkyHoppers plugin, HopperManager hopperManager) {
+    public DelayedTask(@NotNull SkyHoppers plugin, @NotNull HopperManager hopperManager) {
         this.plugin = plugin;
         this.hopperManager = hopperManager;
     }
@@ -76,7 +77,7 @@ public class DelayedTask extends BukkitRunnable {
             SkyHopper sourceSkyHopper = hopperManager.getSkyHopper(sourceLocation);
             SkyHopper destinationSkyHopper = hopperManager.getSkyHopper(destinationLocation);
 
-            if (sourceSkyHopper == null && destinationSkyHopper == null) {
+            if(sourceSkyHopper == null && destinationSkyHopper == null) {
                 iterator.remove();
                 continue;
             }
@@ -84,8 +85,8 @@ public class DelayedTask extends BukkitRunnable {
             if(sourceLocation.getBlock().getState(false) instanceof Container source
                     && delayedEntry.destinationLocation().getBlock().getState(false) instanceof Container destination) {
                 if (sourceSkyHopper != null && destinationSkyHopper != null) {
-                    if(!sourceSkyHopper.enabled()
-                            || !destinationSkyHopper.enabled()
+                    if(!sourceSkyHopper.isSkyHopperEnabled()
+                            || !destinationSkyHopper.isSkyHopperEnabled()
                             || source.getBlock().isBlockPowered()
                             || destination.getBlock().isBlockPowered()) {
                         iterator.remove();
@@ -94,67 +95,67 @@ public class DelayedTask extends BukkitRunnable {
 
                     if (delayedEntry.initiatorIsSource()) {
                         if (delayedEntry.isSuction()) {
-                            if(sourceSkyHopper.nextSuctionTime() < System.currentTimeMillis()) {
-                                transferContainerToSkyHopper(plugin, destinationSkyHopper, source, source.getInventory(), destination.getInventory(), sourceSkyHopper.suctionAmount());
+                            if(sourceSkyHopper.getNextSuctionTime() < System.currentTimeMillis()) {
+                                transferContainerToSkyHopper(plugin, destinationSkyHopper, source, source.getInventory(), destination.getInventory(), sourceSkyHopper.getSuctionAmount());
 
                                 updateSkyHopperSuctionTime(sourceSkyHopper);
                             }
                         } else {
-                            if(sourceSkyHopper.nextTransferTime() < System.currentTimeMillis()) {
-                                transferContainerToSkyHopper(plugin, destinationSkyHopper, source, source.getInventory(), destination.getInventory(), sourceSkyHopper.transferAmount());
+                            if(sourceSkyHopper.getNextTransferTime() < System.currentTimeMillis()) {
+                                transferContainerToSkyHopper(plugin, destinationSkyHopper, source, source.getInventory(), destination.getInventory(), sourceSkyHopper.getTransferAmount());
 
                                 updateSkyHopperTransferTime(sourceSkyHopper);
                             }
                         }
                     } else {
                         if (delayedEntry.isSuction()) {
-                            if(destinationSkyHopper.nextSuctionTime() < System.currentTimeMillis()) {
-                                transferContainerToSkyHopper(plugin, sourceSkyHopper, source, source.getInventory(), destination.getInventory(), destinationSkyHopper.suctionAmount());
+                            if(destinationSkyHopper.getNextSuctionTime() < System.currentTimeMillis()) {
+                                transferContainerToSkyHopper(plugin, sourceSkyHopper, source, source.getInventory(), destination.getInventory(), destinationSkyHopper.getSuctionAmount());
 
                                 updateSkyHopperSuctionTime(destinationSkyHopper);
                             }
                         } else {
-                            if(destinationSkyHopper.nextTransferTime() < System.currentTimeMillis()) {
-                                transferContainerToSkyHopper(plugin, sourceSkyHopper, source, source.getInventory(), destination.getInventory(), destinationSkyHopper.transferAmount());
+                            if(destinationSkyHopper.getNextTransferTime() < System.currentTimeMillis()) {
+                                transferContainerToSkyHopper(plugin, sourceSkyHopper, source, source.getInventory(), destination.getInventory(), destinationSkyHopper.getTransferAmount());
 
                                 updateSkyHopperTransferTime(destinationSkyHopper);
                             }
                         }
                     }
                 } else if (sourceSkyHopper != null) {
-                    if(!sourceSkyHopper.enabled() || source.getBlock().isBlockPowered()) {
+                    if(!sourceSkyHopper.isSkyHopperEnabled() || source.getBlock().isBlockPowered()) {
                         iterator.remove();
                         continue;
                     }
 
                     if (delayedEntry.isSuction()) {
-                        if(sourceSkyHopper.nextSuctionTime() < System.currentTimeMillis()) {
-                            transferInventoryToContainer(plugin, source.getInventory(), source, destination, destination.getInventory(), sourceSkyHopper.suctionAmount());
+                        if(sourceSkyHopper.getNextSuctionTime() < System.currentTimeMillis()) {
+                            transferInventoryToContainer(plugin, source.getInventory(), source, destination, destination.getInventory(), sourceSkyHopper.getSuctionAmount());
 
                             updateSkyHopperSuctionTime(sourceSkyHopper);
                         }
                     } else {
-                        if(sourceSkyHopper.nextTransferTime() < System.currentTimeMillis()) {
-                            transferInventoryToContainer(plugin, source.getInventory(), source, destination, destination.getInventory(), sourceSkyHopper.transferAmount());
+                        if(sourceSkyHopper.getNextTransferTime() < System.currentTimeMillis()) {
+                            transferInventoryToContainer(plugin, source.getInventory(), source, destination, destination.getInventory(), sourceSkyHopper.getTransferAmount());
 
                             updateSkyHopperTransferTime(sourceSkyHopper);
                         }
                     }
                 } else {
-                    if(!destinationSkyHopper.enabled() || destination.getBlock().isBlockPowered()) {
+                    if(!destinationSkyHopper.isSkyHopperEnabled() || destination.getBlock().isBlockPowered()) {
                         iterator.remove();
                         continue;
                     }
 
                     if (delayedEntry.isSuction()) {
-                        if(destinationSkyHopper.nextSuctionTime() < System.currentTimeMillis()) {
-                            transferContainerToSkyHopper(plugin, destinationSkyHopper, source, source.getInventory(), destination.getInventory(), destinationSkyHopper.suctionAmount());
+                        if(destinationSkyHopper.getNextSuctionTime() < System.currentTimeMillis()) {
+                            transferContainerToSkyHopper(plugin, destinationSkyHopper, source, source.getInventory(), destination.getInventory(), destinationSkyHopper.getSuctionAmount());
 
                             updateSkyHopperSuctionTime(destinationSkyHopper);
                         }
                     } else {
-                        if(destinationSkyHopper.nextTransferTime() < System.currentTimeMillis()) {
-                            transferContainerToSkyHopper(plugin, destinationSkyHopper, source, source.getInventory(), destination.getInventory(), destinationSkyHopper.transferAmount());
+                        if(destinationSkyHopper.getNextTransferTime() < System.currentTimeMillis()) {
+                            transferContainerToSkyHopper(plugin, destinationSkyHopper, source, source.getInventory(), destination.getInventory(), destinationSkyHopper.getTransferAmount());
 
                             updateSkyHopperTransferTime(destinationSkyHopper);
                         }
@@ -169,74 +170,28 @@ public class DelayedTask extends BukkitRunnable {
     }
 
     /**
-     * Update the SkyHopper's next scheduled suction time.
-     * @param skyHopper The SkyHopper to update.
+     * Update the {@link SkyHopper}'s next scheduled suction time.
+     * @param skyHopper The {@link SkyHopper} to update the next suction time for.
      */
-    private void updateSkyHopperSuctionTime(SkyHopper skyHopper) {
-        double suctionSpeed = skyHopper.suctionSpeed();
+    private void updateSkyHopperSuctionTime(@NotNull SkyHopper skyHopper) {
+        double suctionSpeed = skyHopper.getSuctionSpeed();
 
         long addMs = (long) (suctionSpeed * 1000);
         long time = System.currentTimeMillis() + addMs;
 
-        SkyHopper updatedSkyHopper = new SkyHopper(
-                true,
-                skyHopper.particles(),
-                skyHopper.owner(),
-                skyHopper.members(),
-                skyHopper.location(),
-                skyHopper.containers(),
-                skyHopper.filterType(),
-                skyHopper.filterItems(),
-                skyHopper.transferSpeed(),
-                skyHopper.maxTransferSpeed(),
-                skyHopper.transferAmount(),
-                skyHopper.maxTransferAmount(),
-                skyHopper.suctionSpeed(),
-                skyHopper.maxSuctionSpeed(),
-                skyHopper.suctionAmount(),
-                skyHopper.maxSuctionAmount(),
-                skyHopper.suctionRange(),
-                skyHopper.maxSuctionRange(),
-                skyHopper.maxContainers(),
-                time,
-                skyHopper.nextTransferTime());
-
-        hopperManager.cacheSkyHopper(updatedSkyHopper.location(), updatedSkyHopper);
+        skyHopper.setNextSuctionTime(time);
     }
 
     /**
-     * Update the SkyHopper's next scheduled transfer time.
-     * @param skyHopper The SkyHopper to update.
+     * Update the {@link SkyHopper}'s next scheduled transfer time.
+     * @param skyHopper The {@link SkyHopper} to update the next transfer time for.
      */
-    private void updateSkyHopperTransferTime(SkyHopper skyHopper) {
-        double transferSpeed = skyHopper.transferSpeed();
+    private void updateSkyHopperTransferTime(@NotNull SkyHopper skyHopper) {
+        double transferSpeed = skyHopper.getTransferSpeed();
 
         long addMs = (long) (transferSpeed * 1000);
         long time = System.currentTimeMillis() + addMs;
 
-        SkyHopper updatedSkyHopper = new SkyHopper(
-                true,
-                skyHopper.particles(),
-                skyHopper.owner(),
-                skyHopper.members(),
-                skyHopper.location(),
-                skyHopper.containers(),
-                skyHopper.filterType(),
-                skyHopper.filterItems(),
-                skyHopper.transferSpeed(),
-                skyHopper.maxTransferSpeed(),
-                skyHopper.transferAmount(),
-                skyHopper.maxTransferAmount(),
-                skyHopper.suctionSpeed(),
-                skyHopper.maxSuctionSpeed(),
-                skyHopper.suctionAmount(),
-                skyHopper.maxSuctionAmount(),
-                skyHopper.suctionRange(),
-                skyHopper.maxSuctionRange(),
-                skyHopper.maxContainers(),
-                skyHopper.nextSuctionTime(),
-                time);
-
-        hopperManager.cacheSkyHopper(updatedSkyHopper.location(), updatedSkyHopper);
+        skyHopper.setNextTransferTime(time);
     }
 }

@@ -18,10 +18,14 @@
 package com.github.lukesky19.skyHoppers.util;
 
 import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Material;
 import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
+import org.jetbrains.annotations.NotNull;
 
 import static com.github.lukesky19.skyHoppers.util.InventoryUtils.addToItem;
 import static com.github.lukesky19.skyHoppers.util.InventoryUtils.setItem;
@@ -122,20 +126,26 @@ public class FurnaceUtils {
     }
 
     /**
-     * Transfers an Item from a Furnace's output to a SkyHopper.
-     * @param skyHopper The SkyHopper to transfer to.
-     * @param sourceInventory The Inventory of the Furnace to transfer from.
-     * @param destinationInventory The Inventory of the SkyHopper to transfer to.
+     * Transfers an {@link ItemStack} from a Furnace's output to a {@link SkyHopper}.
+     * @param logger The {@link ComponentLogger} of the plugin.
+     * @param skyHopper The {@link SkyHopper} to transfer to.
+     * @param sourceInventory The {@link FurnaceInventory} to transfer from.
+     * @param destinationInventory The Inventory of the {@link SkyHopper} to transfer to.
      * @param amount The amount to transfer.
      */
-    public static void transferFurnaceToSkyHopper(SkyHopper skyHopper, FurnaceInventory sourceInventory, Inventory destinationInventory, int amount) {
+    public static void transferFurnaceToSkyHopper(@NotNull ComponentLogger logger, @NotNull SkyHopper skyHopper, @NotNull FurnaceInventory sourceInventory, @NotNull Inventory destinationInventory, int amount) {
         ItemStack fuel = sourceInventory.getFuel();
-
         if(fuel != null && !fuel.isEmpty() && fuel.getType().equals(Material.BUCKET)) {
+            ItemType fuelType = fuel.getType().asItemType();
+            if(fuelType == null) {
+                logger.warn(AdventureUtil.serialize("Unable to transfer fuel to a SkyHopper as the ItemType is null. [Method: transferFurnaceToSkyHopper]"));
+                return;
+            }
+
             int fuelAmount = fuel.getAmount();
             int amountToAdd = Math.min(fuelAmount, amount);
 
-            switch(skyHopper.filterType()) {
+            switch(skyHopper.getFilterType()) {
                 case NONE -> {
                     amount -= transferFurnaceFuelToSkyHopper(fuel, sourceInventory, destinationInventory, amountToAdd);
 
@@ -143,7 +153,7 @@ public class FurnaceUtils {
                 }
 
                 case WHITELIST -> {
-                    if(skyHopper.filterItems().contains(fuel.getType())) {
+                    if(skyHopper.getFilterItems().contains(fuelType)) {
                         amount -= transferFurnaceFuelToSkyHopper(fuel, sourceInventory, destinationInventory, amountToAdd);
 
                         if(amount <= 0) return;
@@ -151,7 +161,7 @@ public class FurnaceUtils {
                 }
 
                 case BLACKLIST -> {
-                    if(!skyHopper.filterItems().contains(fuel.getType())) {
+                    if(!skyHopper.getFilterItems().contains(fuelType)) {
                         amount -= transferFurnaceFuelToSkyHopper(fuel, sourceInventory, destinationInventory, amountToAdd);
 
                         if(amount <= 0) return;
@@ -159,7 +169,7 @@ public class FurnaceUtils {
                 }
 
                 case DESTROY -> {
-                    if(skyHopper.filterItems().contains(fuel.getType())) {
+                    if(skyHopper.getFilterItems().contains(fuelType)) {
                         final int fuelResult = fuelAmount - amountToAdd;
                         if (fuelResult <= 0) {
                             amount -= fuelAmount;
@@ -181,26 +191,32 @@ public class FurnaceUtils {
 
         ItemStack output = sourceInventory.getResult();
         if(output != null && !output.isEmpty()) {
+            ItemType outputType = output.getType().asItemType();
+            if(outputType == null) {
+                logger.warn(AdventureUtil.serialize("Unable to transfer the furnace's output to a SkyHopper as the ItemType is null. [Method: transferFurnaceToSkyHopper]"));
+                return;
+            }
+
             int outputAmount = output.getAmount();
             int amountToAdd = Math.min(outputAmount, amount);
 
-            switch(skyHopper.filterType()) {
+            switch(skyHopper.getFilterType()) {
                 case NONE -> transferFurnaceResultToSkyHopper(output, sourceInventory, destinationInventory, amountToAdd);
 
                 case WHITELIST -> {
-                    if(skyHopper.filterItems().contains(output.getType())) {
+                    if(skyHopper.getFilterItems().contains(outputType)) {
                         transferFurnaceResultToSkyHopper(output, sourceInventory, destinationInventory, amountToAdd);
                     }
                 }
 
                 case BLACKLIST -> {
-                    if(!skyHopper.filterItems().contains(output.getType())) {
+                    if(!skyHopper.getFilterItems().contains(outputType)) {
                         transferFurnaceResultToSkyHopper(output, sourceInventory, destinationInventory, amountToAdd);
                     }
                 }
 
                 case DESTROY -> {
-                    if(skyHopper.filterItems().contains(output.getType())) {
+                    if(skyHopper.getFilterItems().contains(outputType)) {
                         final int outputResult = outputAmount - amountToAdd;
                         if (outputResult <= 0) {
                             amount -= outputAmount;

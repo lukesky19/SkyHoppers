@@ -19,9 +19,11 @@ package com.github.lukesky19.skyHoppers.config.manager;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.config.record.Settings;
-import com.github.lukesky19.skylib.config.ConfigurationUtility;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -124,6 +126,8 @@ public class SettingsManager {
         try {
             settings = loader.load().get(Settings.class);
 
+            checkVersion();
+
             parseUpgrades();
         } catch (ConfigurateException e) {
             throw new RuntimeException(e);
@@ -131,7 +135,25 @@ public class SettingsManager {
     }
 
     /**
-     * Pares the upgrades from the Plugin's settings into TreeMaps
+     * Check the version of the settings.yml file and display warnings if outdated.
+     */
+    private void checkVersion() {
+        if(settings == null) return;
+        ComponentLogger logger = plugin.getComponentLogger();
+
+        if(settings.configVersion() == null) {
+            logger.warn(AdventureUtil.serialize("Unable to check settings version as it is not configured."));
+            return;
+        }
+
+        if(!settings.configVersion().equals("1.1.0.0")) {
+            logger.warn(AdventureUtil.serialize("Your plugin settings are outdated. Current version: " + settings.configVersion() + ". Latest version: 1.1.0.0."));
+            logger.warn(AdventureUtil.serialize("You should regenerate your settings.yml or migrate your settings.yml to the new version."));
+        }
+    }
+
+    /**
+     * Parses the upgrades from the Plugin's settings into TreeMaps
      */
     private void parseUpgrades() {
         if(settings == null) return;

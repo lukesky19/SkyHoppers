@@ -1,16 +1,15 @@
-config-version: 1.0.0
+config-version: 1.1.0.0
 gui-type: CHEST_54
 name: "<#99ff99><bold>SkyHopper's Suction Range</bold></#99ff99>"
 entries:
     filler:
-        item:
-            material: GRAY_STAINED_GLASS_PANE
-            name: " "
-            lore: [ ]
+        item-type: GRAY_STAINED_GLASS_PANE
+        name: " "
+        lore: [ ]
     exit:
         slot: 49
         item:
-            material: BARRIER
+            item-type: BARRIER
             name: "<white><bold>Return to SkyHopper Upgrades</bold></white>"
             lore:
                 - " <white>|</white> <gray>Click to go back to the</gray>"
@@ -18,7 +17,7 @@ entries:
     increase:
         slot: 20
         item:
-            material: GREEN_DYE
+            item-type: GREEN_DYE
             name: "<#99ff99><bold>Increase Suction Range</bold></#99ff99>"
             lore:
                 - " <white>|</white> <gray>Click to increase the suction range.</gray>"
@@ -30,14 +29,14 @@ entries:
     increase-max:
         slot: 20
         item:
-            material: BEDROCK
+            item-type: BEDROCK
             name: "<#99ff99><bold>Suction Range</bold></#99ff99>"
             lore:
                 - " <white>|</white> <gray>Suction range is at its maximum.</gray>"
     upgrade:
         slot: 22
         item:
-            material: WATER_BUCKET
+            item-type: WATER_BUCKET
             name: "<#99ff99><bold>Suction Range +1</bold></#99ff99>"
             lore:
                 - " <white>|</white> <gray>Click to upgrade suction range.</gray>"
@@ -52,14 +51,14 @@ entries:
     upgrade-max:
         slot: 22
         item:
-            material: BEDROCK
+            item-type: BEDROCK
             name: "<#99ff99><bold>Suction Range</bold></#99ff99>"
             lore:
                 - " <white>|</white> <gray>The suction range upgrade is maxed out.</gray>"
     decrease:
         slot: 24
         item:
-            material: RED_DYE
+            item-type: RED_DYE
             name: "<#99ff99><bold>Decrease Suction Range</bold></#99ff99>"
             lore:
                 - " <white>|</white> <gray>Click to decrease the suction range.</gray>"
@@ -71,7 +70,7 @@ entries:
     decrease-min:
         slot: 24
         item:
-            material: BEDROCK
+            item-type: BEDROCK
             name: "<#99ff99><bold>Suction Range</bold></#99ff99>"
             lore:
                 - " <white>|</white> <gray>Suction range is at its minimum.</gray>"

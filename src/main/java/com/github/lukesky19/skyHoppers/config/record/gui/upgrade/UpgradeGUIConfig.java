@@ -1,9 +1,27 @@
+/*
+    SkyHoppers adds upgradable hoppers that can suction items, transfer items wirelessly to linked containers.
+    Copyright (C) 2024  lukeskywlker19
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 package com.github.lukesky19.skyHoppers.config.record.gui.upgrade;
 
+import com.github.lukesky19.skylib.api.gui.GUIType;
+import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 /**
  * he GUI configuration for only upgrade GUIs.
@@ -15,9 +33,9 @@ import java.util.List;
 @ConfigSerializable
 public record UpgradeGUIConfig(
         @Nullable String configVersion,
-        @Nullable String guiType,
+        @Nullable GUIType guiType,
         @Nullable String name,
-        Entries entries) {
+        @NotNull Buttons entries) {
 
     /**
      * The possible items that can be displayed inside GUIs.
@@ -32,22 +50,15 @@ public record UpgradeGUIConfig(
      * @param decreaseMin The decrease min item configuration.
      */
     @ConfigSerializable
-    public record Entries(
-            Filler filler,
-            GenericEntry exit,
-            GenericEntry increase,
-            GenericEntry increaseMax,
-            GenericEntry upgrade,
-            GenericEntry upgradeMax,
-            GenericEntry decrease,
-            GenericEntry decreaseMin) {}
-
-    /**
-     * The item configuration for Filler buttons.
-     * @param item The item configuration
-     */
-    @ConfigSerializable
-    public record Filler(Item item) {}
+    public record Buttons(
+            @NotNull ItemStackConfig filler,
+            @NotNull Button exit,
+            @NotNull Button increase,
+            @NotNull Button increaseMax,
+            @NotNull Button upgrade,
+            @NotNull Button upgradeMax,
+            @NotNull Button decrease,
+            @NotNull Button decreaseMin) {}
 
     /**
      * The generic item configuration for all other buttons.
@@ -55,20 +66,6 @@ public record UpgradeGUIConfig(
      * @param item The item configuration
      */
     @ConfigSerializable
-    public record GenericEntry(int slot, Item item) {}
-
-    /**
-     * The item configuration to create an ItemStack.
-     * @param material The material name.
-     * @param name The name of the item.
-     * @param lore The lore of the item.
-     * @param itemFlags The item flags to add.
-     */
-    @ConfigSerializable
-    public record Item(
-            @Nullable String material,
-            @Nullable String name,
-            List<String> lore,
-            List<String> itemFlags) {}
+    public record Button(@Nullable Integer slot, @NotNull ItemStackConfig item) {}
 }
 

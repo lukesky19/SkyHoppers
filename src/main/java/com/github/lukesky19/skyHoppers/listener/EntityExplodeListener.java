@@ -54,12 +54,12 @@ public class EntityExplodeListener implements Listener {
             Block block = iterator.next();
 
             SkyHopper skyHopper = hopperManager.getSkyHopper(block.getLocation());
-            if (skyHopper != null) {
+            if(skyHopper != null) {
                 iterator.remove();
 
                 block.setType(Material.AIR);
 
-                hopperManager.removeSkyHopper(skyHopper.location().clone());
+                if(skyHopper.getLocation() != null) hopperManager.removeSkyHopper(skyHopper.getLocation());
 
                 ItemStack skyHopperItem = hopperManager.createItemStackFromSkyHopper(skyHopper, 1);
                 if(skyHopperItem != null) {

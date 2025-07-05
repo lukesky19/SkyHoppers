@@ -55,7 +55,11 @@ import java.util.List;
  * @param skyHoppersPaused The message to display when SkyHoppers are paused.
  * @param skyhoppersUnpaused The message to display when SkyHoppers are unpaused.
  * @param invalidSettings The message to display when the plugin's settings are invalid.
+ * @param itemNotSkyHopper The message sent when an ItemStack is not a SkyHopper.
+ * @param noAccessOwnerChange The message sent when a player doesn't have permission to change a SkyHopper's owner.
+ * @param newOwner The message sent when a SkyHopper's owner is changed.
  * @param failedSkyHopperLoad The message to display when a SkyHopper failed to load.
+ * @param guiOpenError The message sent when a GUI fails to open.
  */
 @ConfigSerializable
 public record Locale(
@@ -94,4 +98,5 @@ public record Locale(
         String failedSkyHopperLoad,
         String itemNotSkyHopper,
         String noAccessOwnerChange,
-        String newOwner) {}
+        String newOwner,
+        String guiOpenError) {}

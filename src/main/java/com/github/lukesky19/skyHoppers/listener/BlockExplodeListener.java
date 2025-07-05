@@ -54,12 +54,12 @@ public class BlockExplodeListener implements Listener {
             Block block = iterator.next();
 
             SkyHopper skyHopper = hopperManager.getSkyHopper(block.getLocation());
-            if (skyHopper != null) {
+            if(skyHopper != null) {
                 iterator.remove();
 
                 block.setType(Material.AIR);
 
-                hopperManager.removeSkyHopper(skyHopper.location());
+                if(skyHopper.getLocation() != null) hopperManager.removeSkyHopper(skyHopper.getLocation());
 
                 final ItemStack skyHopperItem = hopperManager.createItemStackFromSkyHopper(skyHopper, 1);
                 if(skyHopperItem != null) {

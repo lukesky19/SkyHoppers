@@ -20,9 +20,11 @@ package com.github.lukesky19.skyHoppers.config.manager;
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.config.record.Locale;
 import com.github.lukesky19.skyHoppers.config.record.Settings;
-import com.github.lukesky19.skylib.config.ConfigurationUtility;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -79,7 +81,8 @@ public class LocaleManager {
             "<red>The plugin failed to load a SkyHopper's settings.<red>",
             "<red>The item in your hand is not a SkyHopper.</red>",
             "<red>You don't have access to this SkyHopper to change the owner.</red>",
-            "<green>This SkyHopper's owner is now <yellow><player_name></yellow>.</green>");
+            "<green>This SkyHopper's owner is now <yellow><player_name></yellow>.</green>",
+            "<red>Unable to open this GUI because of a configuration error.</red>");
 
     /**
      * Constructor
@@ -106,26 +109,51 @@ public class LocaleManager {
      */
     public void reload() {
         locale = null;
+        ComponentLogger logger = plugin.getComponentLogger();
 
         copyDefaultLocales();
 
         Settings settings = settingsManager.getSettings();
-        if(settings != null) {
-            String localeString = settingsManager.getSettings().locale();
-            if(localeString != null) {
-                Path path = Path.of(plugin.getDataFolder() + File.separator + "locale" + File.separator + (localeString + ".yml"));
+        if(settings == null) {
+            logger.warn(AdventureUtil.serialize("Unable to load locale configuration as the plugin's settings.yml is invalid."));
+            return;
+        }
 
-                if (!path.toFile().exists()) {
-                    plugin.saveResource("en_US.yml", false);
-                }
+        String localeString = settingsManager.getSettings().locale();
+        if(localeString == null) {
+            logger.warn(AdventureUtil.serialize("Unable to load locale configuration as no locale name is configured in settings.yml."));
+            return;
+        }
 
-                YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(path);
-                try {
-                    locale = loader.load().get(Locale.class);
-                } catch (ConfigurateException e) {
-                    throw new RuntimeException(e);
-                }
-            }
+        Path path = Path.of(plugin.getDataFolder() + File.separator + "locale" + File.separator + (localeString + ".yml"));
+        YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(path);
+        try {
+            locale = loader.load().get(Locale.class);
+
+            checkVersion(localeString);
+        } catch (ConfigurateException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    /**
+     * Check the version of locale file and display warnings if outdated.
+     */
+    private void checkVersion(@NotNull String localeString) {
+        if(locale == null) return;
+        ComponentLogger logger = plugin.getComponentLogger();
+
+        if(locale.configVersion() == null) {
+            logger.warn(AdventureUtil.serialize("Unable to check locale version as it is not configured."));
+            return;
+        }
+
+        if(!locale.configVersion().equals("1.1.0.0")) {
+            logger.warn(AdventureUtil.serialize("Your plugin locale is outdated. Current version: " + locale.configVersion() + ". Latest version: 1.1.0.0."));
+            logger.warn(AdventureUtil.serialize("You should regenerate your " + localeString + ".yml or migrate your " + localeString + ".yml to the new version."));
+            logger.warn(AdventureUtil.serialize("The default config will be used until you fix your locale configuration."));
+
+            locale = null;
         }
     }
 

@@ -17,14 +17,15 @@
 */
 package com.github.lukesky19.skyHoppers.listener;
 
-import com.github.lukesky19.skyHoppers.manager.HopperManager;
-import com.github.lukesky19.skylib.gui.abstracts.ChestGUI;
+import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
+import com.github.lukesky19.skyHoppers.manager.GUIManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.PlayerInventory;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
@@ -32,14 +33,14 @@ import java.util.UUID;
  * Listens to Inventory related methods to pass the events to open GUIs.
  */
 public class InventoryListener implements Listener {
-    private final HopperManager hopperManager;
+    private final @NotNull GUIManager guiManager;
 
     /**
      * Constructor
-     * @param hopperManager A HopperManager instance.
+     * @param guiManager A {@link GUIManager} instance.
      */
-    public InventoryListener(HopperManager hopperManager) {
-        this.hopperManager = hopperManager;
+    public InventoryListener(@NotNull GUIManager guiManager) {
+        this.guiManager = guiManager;
     }
 
     /**
@@ -51,7 +52,7 @@ public class InventoryListener implements Listener {
         UUID uuid = inventoryClickEvent.getWhoClicked().getUniqueId();
         Inventory inventory = inventoryClickEvent.getClickedInventory();
 
-        ChestGUI gui = hopperManager.getGuiByUUID(uuid);
+        SkyHopperGUI gui = guiManager.getGuiByUUID(uuid);
         if(gui == null) return;
 
         gui.handleGlobalClick(inventoryClickEvent);
@@ -72,7 +73,7 @@ public class InventoryListener implements Listener {
         UUID uuid = inventoryDragEvent.getWhoClicked().getUniqueId();
         Inventory inventory = inventoryDragEvent.getInventory();
 
-        ChestGUI gui = hopperManager.getGuiByUUID(uuid);
+        SkyHopperGUI gui = guiManager.getGuiByUUID(uuid);
         if(gui == null) return;
 
         gui.handleGlobalDrag(inventoryDragEvent);
@@ -92,7 +93,7 @@ public class InventoryListener implements Listener {
     public void onClose(InventoryCloseEvent inventoryCloseEvent) {
         UUID uuid = inventoryCloseEvent.getPlayer().getUniqueId();
 
-        ChestGUI gui = hopperManager.getGuiByUUID(uuid);
+        SkyHopperGUI gui = guiManager.getGuiByUUID(uuid);
         if (gui != null) {
             gui.handleClose(inventoryCloseEvent);
         }

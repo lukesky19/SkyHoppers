@@ -17,10 +17,11 @@
 */
 package com.github.lukesky19.skyHoppers.config.record.gui;
 
+import com.github.lukesky19.skylib.api.gui.GUIType;
+import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 /**
  * The GUI configuration for non-upgrade GUIs.
@@ -31,10 +32,10 @@ import java.util.List;
  */
 @ConfigSerializable
 public record GUIConfig(
-        String configVersion,
-        String guiType,
-        String name,
-        Entries entries) {
+        @Nullable String configVersion,
+        @Nullable GUIType guiType,
+        @Nullable String name,
+        @NotNull Buttons entries) {
 
     /**
      * The possible items that can be displayed inside GUIs.
@@ -65,38 +66,31 @@ public record GUIConfig(
      * @param suctionRange The suction range item configuration
      */
     @ConfigSerializable
-    public record Entries(
-            Filler filler,
-            GenericEntry previousPage,
-            GenericEntry exit,
-            GenericEntry nextPage,
-            GenericEntry hopperEnabled,
-            GenericEntry hopperDisabled,
-            GenericEntry particlesEnabled,
-            GenericEntry particlesDisabled,
-            GenericEntry link,
-            GenericEntry filter,
-            GenericEntry upgrades,
-            GenericEntry visualize,
-            GenericEntry members,
-            GenericEntry info,
-            GenericEntry add,
-            GenericEntry playerHead,
-            GenericEntry filterItem,
-            GenericEntry linkedItem,
-            GenericEntry transferSpeed,
-            GenericEntry transferAmount,
-            GenericEntry suctionSpeed,
-            GenericEntry suctionAmount,
-            GenericEntry maxLinks,
-            GenericEntry suctionRange) {}
-
-    /**
-     * The item configuration for Filler buttons.
-     * @param item The item configuration
-     */
-    @ConfigSerializable
-    public record Filler(Item item) {}
+    public record Buttons(
+            @NotNull ItemStackConfig filler,
+            @NotNull Button previousPage,
+            @NotNull Button exit,
+            @NotNull Button nextPage,
+            @NotNull Button hopperEnabled,
+            @NotNull Button hopperDisabled,
+            @NotNull Button particlesEnabled,
+            @NotNull Button particlesDisabled,
+            @NotNull Button link,
+            @NotNull Button filter,
+            @NotNull Button upgrades,
+            @NotNull Button visualize,
+            @NotNull Button members,
+            @NotNull Button info,
+            @NotNull Button add,
+            @NotNull Button playerHead,
+            @NotNull Button filterItem,
+            @NotNull Button linkedItem,
+            @NotNull Button transferSpeed,
+            @NotNull Button transferAmount,
+            @NotNull Button suctionSpeed,
+            @NotNull Button suctionAmount,
+            @NotNull Button maxLinks,
+            @NotNull Button suctionRange) {}
 
     /**
      * The generic item configuration for all other buttons.
@@ -104,19 +98,5 @@ public record GUIConfig(
      * @param item The item configuration
      */
     @ConfigSerializable
-    public record GenericEntry(int slot, Item item) {}
-
-    /**
-     * The item configuration to create an ItemStack.
-     * @param material The material name.
-     * @param name The name of the item.
-     * @param lore The lore of the item.
-     * @param itemFlags The item flags to add.
-     */
-    @ConfigSerializable
-    public record Item(
-            @Nullable String material,
-            @Nullable String name,
-            List<String> lore,
-            List<String> itemFlags) {}
+    public record Button(@Nullable Integer slot, @NotNull ItemStackConfig item) {}
 }

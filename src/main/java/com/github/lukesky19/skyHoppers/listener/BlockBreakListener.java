@@ -17,42 +17,57 @@
 */
 package com.github.lukesky19.skyHoppers.listener;
 
+import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.config.manager.LocaleManager;
+import com.github.lukesky19.skyHoppers.config.manager.SettingsManager;
 import com.github.lukesky19.skyHoppers.config.record.Locale;
+import com.github.lukesky19.skyHoppers.config.record.Settings;
 import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
 import com.github.lukesky19.skyHoppers.manager.HookManager;
 import com.github.lukesky19.skyHoppers.manager.HopperManager;
-import com.github.lukesky19.skylib.format.FormatUtil;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.player.PlayerUtil;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.block.Container;
+import org.bukkit.block.Hopper;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
-
-import java.util.Arrays;
-import java.util.Objects;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * This class listens for when a SkyHopper is broken to check if it can be broken, to remove all necessary data, and to drop the SkyHopper item.
  */
 public class BlockBreakListener implements Listener {
-    private final LocaleManager localeManager;
-    private final HopperManager hopperManager;
-    private final HookManager hookManager;
+    private final @NotNull ComponentLogger logger;
+    private final @NotNull SettingsManager settingsManager;
+    private final @NotNull LocaleManager localeManager;
+    private final @NotNull HopperManager hopperManager;
+    private final @NotNull HookManager hookManager;
+    private final @NotNull HopperClickListener hopperClickListener;
 
     /**
      * Constructor
-     * @param localeManager A LocaleManager instance.
-     * @param hopperManager A HopperManager instance.
-     * @param hookManager A HookManager instance.
+     * @param skyHoppers A {@link SkyHoppers} instance.
+     * @param settingsManager A {@link SettingsManager} instance.
+     * @param localeManager A {@link LocaleManager} instance.
+     * @param hopperManager A {@link HopperManager} instance.
+     * @param hookManager A {@link HookManager} instance.
+     * @param hopperClickListener A {@link HopperClickListener} instance.
      */
-    public BlockBreakListener(LocaleManager localeManager, HopperManager hopperManager, HookManager hookManager) {
+    public BlockBreakListener(@NotNull SkyHoppers skyHoppers, @NotNull SettingsManager settingsManager, @NotNull LocaleManager localeManager, @NotNull HopperManager hopperManager, @NotNull HookManager hookManager, @NotNull HopperClickListener hopperClickListener) {
+        this.logger = skyHoppers.getComponentLogger();
+        this.settingsManager = settingsManager;
         this.localeManager = localeManager;
         this.hopperManager = hopperManager;
         this.hookManager = hookManager;
+        this.hopperClickListener = hopperClickListener;
     }
 
     /**
@@ -61,47 +76,80 @@ public class BlockBreakListener implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onHopperBreak(BlockBreakEvent blockBreakEvent) {
-        final Block block = blockBreakEvent.getBlock();
-        final Locale locale = localeManager.getLocale();
-        final Player player = blockBreakEvent.getPlayer();
+        Block block = blockBreakEvent.getBlock();
+        Locale locale = localeManager.getLocale();
+        Player player = blockBreakEvent.getPlayer();
 
-        if (!(blockBreakEvent.getBlock().getState(false) instanceof org.bukkit.block.Hopper hopper)) {
+        if(!(blockBreakEvent.getBlock().getState(false) instanceof Hopper hopper)) {
             return;
         }
 
         Location hopperLocation = hopper.getLocation().clone();
 
-        final SkyHopper skyHopper = hopperManager.getSkyHopper(hopperLocation);
-        if (skyHopper == null)
-            return;
+        SkyHopper skyHopper = hopperManager.getSkyHopper(hopperLocation);
+        if(skyHopper == null) return;
 
-        if (hookManager.canNotBuild(player, hopperLocation)) {
-            player.sendMessage(FormatUtil.format(locale.prefix() + locale.noBuild()));
+        if(hookManager.canNotBuild(player, hopperLocation)) {
+            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.noBuild()));
             blockBreakEvent.setCancelled(true);
             return;
         }
 
-        if(player.hasPermission("skyhoppers.admin") || (skyHopper.owner() != null && skyHopper.owner().equals(player.getUniqueId())) || skyHopper.members().contains(player.getUniqueId())) {
+        if(player.hasPermission("skyhoppers.admin") || (skyHopper.getOwner() != null && skyHopper.getOwner().equals(player.getUniqueId())) || skyHopper.getMembers().contains(player.getUniqueId())) {
             // Delete the hopper's data
             hopperManager.removeSkyHopper(hopperLocation);
 
-            player.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperBroken()));
+            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperBroken()));
 
-            // Drop the items in the hopper
-            Arrays.stream(hopper.getInventory().getContents())
-                    .filter(Objects::nonNull)
-                    .forEach(itemStack -> hopper.getWorld().dropItemNaturally(hopperLocation, itemStack));
+            boolean dropToInventory;
+            @Nullable Settings settings = settingsManager.getSettings();
+            if(settings == null) {
+                logger.warn(AdventureUtil.serialize("Plugin settings are invalid. Broken SkyHoppers will be dropped to the ground by default."));
+                dropToInventory = false;
+            } else {
+                dropToInventory = settings.dropToInventory();
+            }
 
             // Cancel drops so that the hopper item doesn't drop.
             blockBreakEvent.setDropItems(false);
 
-            final ItemStack skyHopperItem = hopperManager.createItemStackFromSkyHopper(skyHopper, 1);
-            if(skyHopperItem != null) {
-                block.getWorld().dropItem(block.getLocation().clone(), skyHopperItem);
+            // Drop the items in the hopper
+            for(ItemStack itemStack : hopper.getInventory().getContents()) {
+                if(itemStack == null || itemStack.isEmpty()) continue;
+
+                if(dropToInventory) {
+                    PlayerUtil.giveItem(player.getInventory(), itemStack, itemStack.getAmount(), player.getLocation());
+                } else {
+                    hopper.getWorld().dropItemNaturally(hopperLocation, itemStack);
+                }
             }
+
+            ItemStack skyHopperItem = hopperManager.createItemStackFromSkyHopper(skyHopper, 1);
+            if(skyHopperItem != null) {
+                if(dropToInventory) {
+                    PlayerUtil.giveItem(player.getInventory(), skyHopperItem, skyHopperItem.getAmount(), player.getLocation());
+                } else {
+                    block.getWorld().dropItem(block.getLocation().clone(), skyHopperItem);
+                }
+            }
+
+            hopperClickListener.disableLinkingForLocation(hopperLocation);
         } else {
-            player.sendMessage(FormatUtil.format(locale.prefix() + locale.noBreak()));
+            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.noBreak()));
             blockBreakEvent.setCancelled(true);
         }
+    }
+
+    /**
+     * Handles when a {@link Container} is broken and checks if that container is a linked container.
+     * For the purposes of refreshing GUIs.
+     */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onLinkedContainerBreak(BlockBreakEvent blockBreakEvent) {
+        if(!(blockBreakEvent.getBlock().getState(false) instanceof Container container)) {
+            return;
+        }
+
+        hopperManager.handleContainerBroken(container);
     }
 }

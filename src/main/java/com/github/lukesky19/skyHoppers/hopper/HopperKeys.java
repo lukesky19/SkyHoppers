@@ -21,7 +21,7 @@ import org.bukkit.NamespacedKey;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * The SkyHopper settings keys that are used to retrive and store SkyHopper data to the PersistentDataContainer
+ * The SkyHopper settings keys that are used to retrieve and store SkyHopper data to the PersistentDataContainer
  */
 public enum HopperKeys {
     ENABLED,

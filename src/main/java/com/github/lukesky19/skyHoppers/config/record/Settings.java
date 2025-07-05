@@ -17,7 +17,9 @@
 */
 package com.github.lukesky19.skyHoppers.config.record;
 
+import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
@@ -28,12 +30,19 @@ import java.util.Map;
  * Contains all the plugin's settings configuration.
  * @param configVersion The config version of the file.
  * @param locale The locale string to use.
+ * @param dropToInventory Should SkyHoppers when broken be added to the player's inventory directly?
  * @param disabledHooks A list of disabled hooks.
- * @param skyhopper The configuration for the SkyHopper ItemStack and starting upgrades.
+ * @param skyHopperConfig The configuration for the SkyHopper ItemStack and starting upgrades.
  * @param upgrades The configuration for the SkyHopper upgrades.
  */
 @ConfigSerializable
-public record Settings(@Nullable String configVersion, @Nullable String locale, List<String> disabledHooks, SkyHopper skyhopper, Upgrades upgrades) {
+public record Settings(
+        @Nullable String configVersion,
+        @Nullable String locale,
+        boolean dropToInventory,
+        @NotNull List<String> disabledHooks,
+        @NotNull SkyHopperConfig skyHopperConfig,
+        @NotNull Upgrades upgrades) {
 
     /**
      * The configuration for the SkyHopper ItemStack.
@@ -43,27 +52,18 @@ public record Settings(@Nullable String configVersion, @Nullable String locale, 
      * @param startingSuctionAmount The starting suction amount.
      * @param startingSuctionRange The starting suction range.
      * @param startingMaxContainers The starting number of linked containers.
-     * @param item The item configuration for the SkyHopper ItemStack
+     * @param item The {@link ItemStackConfig} configuration for the SkyHopper ItemStack
      */
     @ConfigSerializable
-    public record SkyHopper(
+    public record SkyHopperConfig(
             double startingTransferSpeed,
             int startingTransferAmount,
             double startingSuctionSpeed,
             int startingSuctionAmount,
             int startingSuctionRange,
             int startingMaxContainers,
-            Item item) {}
-
-    /**
-     * The configuration for the SkyHopper ItemStack.
-     * @param name The name of the ItemStack.
-     * @param lore The lore for the ItemStack.
-     * @param glow Whether the items hould glow like it is enchanted or not.
-     * @param placeholders The configuration for the enabled and disabled Strings.
-     */
-    @ConfigSerializable
-    public record Item(@CheckForNull String name, List<String> lore, boolean glow, Placeholders placeholders) {}
+            @NotNull ItemStackConfig item,
+            @NotNull Placeholders placeholders) {}
 
     /**
      * Configuration for the Strings to be displayed when a SkyHopper or SkyHopper particles are enabled or disabled.

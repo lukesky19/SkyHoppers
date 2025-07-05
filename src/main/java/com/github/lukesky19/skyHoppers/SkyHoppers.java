@@ -21,27 +21,25 @@ import com.ghostchu.quickshop.QuickShop;
 import com.ghostchu.quickshop.QuickShopBukkit;
 import com.ghostchu.quickshop.api.QuickShopAPI;
 import com.github.lukesky19.skyHoppers.command.SkyHopperCommand;
-import com.github.lukesky19.skyHoppers.config.manager.GUIManager;
+import com.github.lukesky19.skyHoppers.config.manager.GUIConfigManager;
 import com.github.lukesky19.skyHoppers.config.manager.LocaleManager;
 import com.github.lukesky19.skyHoppers.config.manager.SettingsManager;
+import com.github.lukesky19.skyHoppers.database.ConnectionManager;
+import com.github.lukesky19.skyHoppers.database.DatabaseManager;
+import com.github.lukesky19.skyHoppers.database.QueueManager;
 import com.github.lukesky19.skyHoppers.listener.*;
-import com.github.lukesky19.skyHoppers.manager.DataManager;
-import com.github.lukesky19.skyHoppers.manager.HookManager;
-import com.github.lukesky19.skyHoppers.manager.HopperManager;
-import com.github.lukesky19.skyHoppers.manager.TaskManager;
+import com.github.lukesky19.skyHoppers.manager.*;
 import com.github.lukesky19.skyHoppers.task.DelayedTask;
 import com.github.lukesky19.skylib.libs.bstats.bukkit.Metrics;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.milkbowl.vault.economy.Economy;
-import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import javax.annotation.Nullable;
-import java.io.File;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -52,8 +50,9 @@ public final class SkyHoppers extends JavaPlugin {
     private HookManager hookManager;
     private SettingsManager settingsManager;
     private LocaleManager localeManager;
-    private GUIManager guiManager;
+    private GUIConfigManager guiConfigManager;
     private TaskManager taskManager;
+    private GUIManager guiManager;
     private Economy economy;
     private QuickShop quickShop;
     private boolean pauseSkyHoppers = true;
@@ -100,7 +99,6 @@ public final class SkyHoppers extends JavaPlugin {
     /**
      * Plugin's startup logic
      */
-    @SuppressWarnings("UnstableApiUsage")
     @Override
     public void onEnable() {
         // Setup dependencies
@@ -115,24 +113,16 @@ public final class SkyHoppers extends JavaPlugin {
             quickShop = ((QuickShopBukkit) QuickShopAPI.getPluginInstance()).getQuickShop();
         }
 
-        DataManager dataManager;
-        try {
-            if (!getDataFolder().exists()) {
-                //noinspection ResultOfMethodCallIgnored
-                getDataFolder().mkdirs();
-            }
-
-            dataManager = new DataManager(this,getDataFolder().getAbsolutePath() + File.separator + "database.db");
-        } catch (SQLException e) {
-            Bukkit.getPluginManager().disablePlugin(this);
-            throw new RuntimeException(e);
-        }
+        ConnectionManager connectionManager = new ConnectionManager(this);
+        QueueManager queueManager = new QueueManager(connectionManager);
+        DatabaseManager databaseManager = new DatabaseManager(this, connectionManager, queueManager);
 
         settingsManager = new SettingsManager(this);
         localeManager = new LocaleManager(this, settingsManager);
+        guiConfigManager = new GUIConfigManager(this);
         guiManager = new GUIManager(this);
         hookManager = new HookManager(this, settingsManager);
-        hopperManager = new HopperManager(this, dataManager, settingsManager, localeManager);
+        hopperManager = new HopperManager(this, settingsManager, localeManager, databaseManager, guiManager);
         taskManager = new TaskManager(this, hopperManager);
         SkyHopperCommand skyHopperCommand = new SkyHopperCommand(this, localeManager, hopperManager, settingsManager);
 
@@ -144,7 +134,10 @@ public final class SkyHoppers extends JavaPlugin {
         pluginManager.registerEvents(new EntityExplodeListener(hopperManager), this);
         pluginManager.registerEvents(new BlockExplodeListener(hopperManager), this);
         pluginManager.registerEvents(new EntityChangeBlockListener(hopperManager), this);
-        pluginManager.registerEvents(new BlockBreakListener(localeManager, hopperManager, hookManager), this);
+
+        HopperClickListener hopperClickListener = new HopperClickListener(this, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager, guiManager);
+
+        pluginManager.registerEvents(new BlockBreakListener(this, settingsManager, localeManager, hopperManager, hookManager, hopperClickListener), this);
         pluginManager.registerEvents(new HopperPlaceListener(localeManager, hopperManager, hookManager), this);
         pluginManager.registerEvents(new HopperPickupItemListener(this, hopperManager), this);
         pluginManager.registerEvents(new ChunkLoadListener(hopperManager), this);
@@ -153,8 +146,12 @@ public final class SkyHoppers extends JavaPlugin {
         delayedTask.runTaskTimer(this, 0L, 1L);
 
         pluginManager.registerEvents(new HopperMoveItemListener(this, hopperManager, delayedTask), this);
-        pluginManager.registerEvents(new HopperClickListener(this, settingsManager, localeManager, guiManager, hopperManager, hookManager), this);
-        pluginManager.registerEvents(new InventoryListener(hopperManager), this);
+        pluginManager.registerEvents(hopperClickListener, this);
+        pluginManager.registerEvents(new InventoryListener(guiManager), this);
+
+        // Register API
+        SkyHoppersAPI skyHoppersAPI = new SkyHoppersAPI(hopperManager);
+        this.getServer().getServicesManager().register(SkyHoppersAPI.class, skyHoppersAPI, this, ServicePriority.Lowest);
 
         reload();
     }
@@ -166,7 +163,7 @@ public final class SkyHoppers extends JavaPlugin {
     public void onDisable() {
         this.getServer().getScheduler().cancelTasks(this);
 
-        hopperManager.closeOpenGuis(true);
+        guiManager.closeOpenGUIs(true);
     }
 
     /**
@@ -175,11 +172,11 @@ public final class SkyHoppers extends JavaPlugin {
     public void reload() {
         this.pauseSkyHoppers();
 
-        hopperManager.closeOpenGuis(false);
+        guiManager.closeOpenGUIs(false);
 
         settingsManager.reload();
         localeManager.reload();
-        guiManager.reload();
+        guiConfigManager.reload();
         hookManager.reload();
         hopperManager.reload();
         taskManager.stopTransferTask();

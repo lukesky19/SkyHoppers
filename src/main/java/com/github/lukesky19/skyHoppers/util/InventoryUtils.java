@@ -21,15 +21,14 @@ import com.ghostchu.quickshop.QuickShop;
 import com.ghostchu.quickshop.api.shop.Shop;
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Container;
 import org.bukkit.block.Crafter;
 import org.bukkit.entity.Item;
-import org.bukkit.inventory.BrewerInventory;
-import org.bukkit.inventory.FurnaceInventory;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.*;
 import org.jetbrains.annotations.NotNull;
 
 import static com.github.lukesky19.skyHoppers.util.BrewingStandUtils.transferBrewingStandOutputToSkyHopper;
@@ -44,21 +43,28 @@ import static com.github.lukesky19.skyHoppers.util.RoseStackerUtils.setItemAmoun
  */
 public class InventoryUtils {
     /**
-     * Transfers items from an Inventory to a SkyHopper.
-     * @param skyHopper The SkyHopper to transfer to.
-     * @param sourceInventory The Inventory to transfer from.
-     * @param destinationInventory The SkyHopper's Inventory to transfer to.
+     * Transfers items from an {@link Inventory} to a SkyHopper.
+     * @param logger The {@link ComponentLogger} of the plugin.
+     * @param skyHopper The {@link SkyHopper} to transfer to.
+     * @param sourceInventory The {@link Inventory} to transfer from.
+     * @param destinationInventory The {@link SkyHopper}'s Inventory to transfer to.
      * @param amount The amount to transfer.
      * @return The amount transferred.
      */
-    public static int transferInventoryToSkyHopper(SkyHopper skyHopper, Inventory sourceInventory, Inventory destinationInventory, int amount) {
+    public static int transferInventoryToSkyHopper(@NotNull ComponentLogger logger, @NotNull SkyHopper skyHopper, @NotNull Inventory sourceInventory, @NotNull Inventory destinationInventory, int amount) {
         int amountTransferred = 0;
 
         for(int i = 0; i <= (sourceInventory.getSize() - 1); i++) {
             ItemStack sourceItem = sourceInventory.getItem(i);
 
             if(sourceItem != null && !sourceItem.isEmpty()) {
-                switch(skyHopper.filterType()) {
+                ItemType sourceItemType = sourceItem.getType().asItemType();
+                if(sourceItemType == null) {
+                    logger.warn(AdventureUtil.serialize("Unable to transfer an ItemStack to a SkyHopper as the ItemType is null. [Method: transferInventoryToSkyHopper]"));
+                    continue;
+                }
+
+                switch(skyHopper.getFilterType()) {
                     case NONE -> {
                         int transferred = transferInventoryToInventory(sourceInventory, destinationInventory, i, amount);
                         amount -= transferred;
@@ -68,7 +74,7 @@ public class InventoryUtils {
                     }
 
                     case WHITELIST -> {
-                        if(skyHopper.filterItems().contains(sourceItem.getType())) {
+                        if(skyHopper.getFilterItems().contains(sourceItemType)) {
                             int transferred = transferInventoryToInventory(sourceInventory, destinationInventory, i, amount);
                             amount -= transferred;
                             amountTransferred += transferred;
@@ -78,7 +84,7 @@ public class InventoryUtils {
                     }
 
                     case BLACKLIST -> {
-                        if(!skyHopper.filterItems().contains(sourceItem.getType())) {
+                        if(!skyHopper.getFilterItems().contains(sourceItemType)) {
                             int transferred = transferInventoryToInventory(sourceInventory, destinationInventory, i, amount);
                             amount -= transferred;
                             amountTransferred += transferred;
@@ -88,7 +94,7 @@ public class InventoryUtils {
                     }
 
                     case DESTROY -> {
-                        if(skyHopper.filterItems().contains(sourceItem.getType())) {
+                        if(skyHopper.getFilterItems().contains(sourceItemType)) {
                             final int destroyResult = sourceItem.getAmount() - amount;
                             if(destroyResult <= 0) {
                                 amount -= sourceItem.getAmount();
@@ -160,21 +166,23 @@ public class InventoryUtils {
     }
 
     /**
-     * Transfers items from a Container to a SkyHopper. Runs different methods depending on the container.
-     * @param plugin The SkyHopper Plugin.
-     * @param skyHopper The SkyHopper to transfer to.
-     * @param sourceContainer The container to transfer from.
-     * @param sourceInventory The container's Inventory.
-     * @param destinationInventory The SkyHopper's Inventory.
+     * Transfers items from a {@link Container} to a {@link SkyHopper}. Runs different methods depending on the container.
+     * @param plugin The {@link SkyHoppers} Plugin.
+     * @param skyHopper The {@link SkyHopper} to transfer to.
+     * @param sourceContainer The {@link Container} to transfer from.
+     * @param sourceInventory The {@link Container}'s Inventory.
+     * @param destinationInventory The {@link SkyHopper}'s Inventory.
      * @param amount The amount to transfer.
      */
-    public static void transferContainerToSkyHopper(SkyHoppers plugin, SkyHopper skyHopper, Container sourceContainer, Inventory sourceInventory, Inventory destinationInventory, int amount) {
+    public static void transferContainerToSkyHopper(@NotNull SkyHoppers plugin, @NotNull SkyHopper skyHopper, @NotNull Container sourceContainer, @NotNull Inventory sourceInventory, @NotNull Inventory destinationInventory, int amount) {
+        ComponentLogger logger = plugin.getComponentLogger();
+
         if(sourceInventory instanceof FurnaceInventory furnaceInventory) {
-            transferFurnaceToSkyHopper(skyHopper, furnaceInventory, destinationInventory, amount);
+            transferFurnaceToSkyHopper(logger, skyHopper, furnaceInventory, destinationInventory, amount);
         } else if(sourceInventory instanceof BrewerInventory brewerInventory) {
-            transferBrewingStandOutputToSkyHopper(skyHopper, brewerInventory, destinationInventory, amount);
+            transferBrewingStandOutputToSkyHopper(logger, skyHopper, brewerInventory, destinationInventory, amount);
         } else {
-            int result = transferInventoryToSkyHopper(skyHopper, sourceInventory, destinationInventory, amount);
+            int result = transferInventoryToSkyHopper(logger, skyHopper, sourceInventory, destinationInventory, amount);
 
             // If any items were transferred, update the QuickShop shop sign (if container is also a QuickShop shop)
             if(result > 0) {
@@ -195,15 +203,17 @@ public class InventoryUtils {
     }
 
     /**
-     * Transfers items from an Inventory to a Container. Runs different methods depending on the container.
-     * @param plugin The SkyHopper Plugin.
-     * @param sourceInventory The Inventory to transfer from.
-     * @param sourceContainer The Container to transfer from.
-     * @param destinationContainer The Container to transfer to.
-     * @param destinationInventory The Inventory to transfer to.
+     * Transfers items from an {@link Inventory} to a {@link Container}. Runs different methods depending on the container.
+     * @param plugin The {@link SkyHoppers} Plugin.
+     * @param sourceInventory The {@link Inventory} to transfer from.
+     * @param sourceContainer The {@link Container} to transfer from.
+     * @param destinationContainer The {@link Container} to transfer to.
+     * @param destinationInventory The {@link Inventory}  to transfer to.
      * @param amount The amount to transfer.
      */
-    public static void transferInventoryToContainer(SkyHoppers plugin, Inventory sourceInventory, Container sourceContainer, Container destinationContainer, Inventory destinationInventory, int amount) {
+    public static void transferInventoryToContainer(@NotNull SkyHoppers plugin, @NotNull Inventory sourceInventory, @NotNull Container sourceContainer, @NotNull Container destinationContainer, @NotNull Inventory destinationInventory, int amount) {
+        ComponentLogger logger = plugin.getComponentLogger();
+
         if(destinationInventory instanceof FurnaceInventory furnaceInventory) {
             for(int i = 0; i <= (sourceInventory.getSize() - 1); i++) {
                 ItemStack sourceItem = sourceInventory.getItem(i);
@@ -229,7 +239,7 @@ public class InventoryUtils {
                 ItemStack sourceItem = sourceInventory.getItem(i);
 
                 if(sourceItem != null && !sourceItem.isEmpty()) {
-                    amount -= transferItemToBrewingStand(sourceItem, sourceInventory, brewerInventory, i, amount);
+                    amount -= transferItemToBrewingStand(logger, sourceItem, sourceInventory, brewerInventory, i, amount);
 
                     if(amount <= 0) return;
                 }
@@ -275,7 +285,7 @@ public class InventoryUtils {
 
     /**
      * Transfers an item from one Inventory to another. Runs different methods depending on the container.
-     * @param plugin The SkyHopper Plugin.
+     * @param plugin A {@link SkyHoppers} instance.
      * @param item The item to transfer.
      * @param sourceInventory The Inventory containing the item to transfer.
      * @param sourceSlot The slot containing the item to transfer.

@@ -20,9 +20,12 @@ package com.github.lukesky19.skyHoppers.config.manager;
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.config.record.gui.GUIConfig;
 import com.github.lukesky19.skyHoppers.config.record.gui.upgrade.UpgradeGUIConfig;
-import com.github.lukesky19.skylib.config.ConfigurationUtility;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -33,7 +36,7 @@ import java.util.Map;
 /**
  * This class manages the loading and parsing of the plugin gui configuration files.
  */
-public class GUIManager {
+public class GUIConfigManager {
     private final SkyHoppers plugin;
     private final Map<String, GUIConfig> guiConfigs = new HashMap<>();
     private final Map<String, UpgradeGUIConfig> upgradeGuiConfigs = new HashMap<>();
@@ -65,7 +68,7 @@ public class GUIManager {
      * Constructor
      * @param plugin The SkyHoppers Plugin
      */
-    public GUIManager(SkyHoppers plugin) {
+    public GUIConfigManager(SkyHoppers plugin) {
         this.plugin = plugin;
     }
 
@@ -121,13 +124,15 @@ public class GUIManager {
 
     /**
      * Loads an individual non-upgrade GUI configuration file.
-     * @param file The name of the file to load.
+     * @param fileName The name of the file to load.
      */
-    private void loadGuiConfig(String file) {
-        Path path = Path.of(plugin.getDataFolder() + File.separator + GUI_PATH + file);
+    private void loadGuiConfig(@NotNull String fileName) {
+        Path path = Path.of(plugin.getDataFolder() + File.separator + GUI_PATH + fileName);
         YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(path);
         try {
-            guiConfigs.put(file, loader.load().get(GUIConfig.class));
+            GUIConfig guiConfig = loader.load().get(GUIConfig.class);
+
+            if(checkGUIConfigVersion(fileName, guiConfig)) guiConfigs.put(fileName, guiConfig);
         } catch (ConfigurateException e) {
             throw new RuntimeException(e);
         }
@@ -135,17 +140,66 @@ public class GUIManager {
 
     /**
      * Loads an individual upgrade GUI configuration file.
-     * @param file The name of the file to load.
+     * @param fileName The name of the file to load.
      */
-    private void loadUpgradeGuiConfig(String file) {
-        Path path = Path.of(plugin.getDataFolder() + File.separator + UPGRADES_PATH + file);
+    private void loadUpgradeGuiConfig(@NotNull String fileName) {
+        Path path = Path.of(plugin.getDataFolder() + File.separator + UPGRADES_PATH + fileName);
         YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(path);
         try {
-            upgradeGuiConfigs.put(file, loader.load().get(UpgradeGUIConfig.class));
+            UpgradeGUIConfig upgradeGUIConfig = loader.load().get(UpgradeGUIConfig.class);
+
+            if(checkUpgradeGUIConfigVersion(fileName, upgradeGUIConfig)) upgradeGuiConfigs.put(fileName, upgradeGUIConfig);
         } catch (ConfigurateException e) {
             throw new RuntimeException(e);
         }
     }
+
+    /**
+     * Check the version of a {@link GUIConfig} and display warnings if outdated.
+     */
+    private boolean checkGUIConfigVersion(@NotNull String fileName, @Nullable GUIConfig guiConfig) {
+        if(guiConfig == null) return false;
+        ComponentLogger logger = plugin.getComponentLogger();
+
+        if(guiConfig.configVersion() == null) {
+            logger.warn(AdventureUtil.serialize("Unable to check the config version in " + fileName + " as it is not configured."));
+            return false;
+        }
+
+        if(!guiConfig.configVersion().equals("1.1.0.0")) {
+            logger.warn(AdventureUtil.serialize("The gui configuration for " + fileName + " is outdated. Current version: " + guiConfig.configVersion() + ". Latest version: 1.1.0.0."));
+            logger.warn(AdventureUtil.serialize("You should regenerate your " + fileName + " or migrate your " + fileName + " to the new version."));
+            logger.warn(AdventureUtil.serialize("The GUI for " + fileName + " will not be able to open until this is corrected."));
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check the version of an {@link UpgradeGUIConfig} and display warnings if outdated.
+     */
+    private boolean checkUpgradeGUIConfigVersion(@NotNull String fileName, @Nullable UpgradeGUIConfig upgradeGUIConfig) {
+        if(upgradeGUIConfig == null) return false;
+        ComponentLogger logger = plugin.getComponentLogger();
+
+        if(upgradeGUIConfig.configVersion() == null) {
+            logger.warn(AdventureUtil.serialize("Unable to check the config version in " + fileName + " as it is not configured."));
+            return false;
+        }
+
+        if(!upgradeGUIConfig.configVersion().equals("1.1.0.0")) {
+            logger.warn(AdventureUtil.serialize("The gui configuration for " + fileName + " is outdated. Current version: " + upgradeGUIConfig.configVersion() + ". Latest version: 1.1.0.0."));
+            logger.warn(AdventureUtil.serialize("You should regenerate your " + fileName + " or migrate your " + fileName + " to the new version."));
+            logger.warn(AdventureUtil.serialize("The GUI for " + fileName + " will not be able to open until this is corrected."));
+
+            return false;
+        }
+
+        return true;
+    }
+
 
     /**
      * Saves the default GUI configuration files bundled with the plugin.
