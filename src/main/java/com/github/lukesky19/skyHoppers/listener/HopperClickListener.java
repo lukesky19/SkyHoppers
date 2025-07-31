@@ -180,15 +180,22 @@ public class HopperClickListener implements Listener {
             }
 
             if(linkingSkyHopper.getLocation() != null) {
-                linkingSkyHopper.getLinkedContainers().removeIf(skyContainer -> skyContainer.getLocation().equals(container.getLocation()));
+                Iterator<SkyContainer> iterator = linkingSkyHopper.getLinkedContainers().iterator();
+                while(iterator.hasNext()) {
+                    SkyContainer skyContainer = iterator.next();
 
-                hopperManager.saveSkyHopperToPDC(linkingSkyHopper);
+                    if(skyContainer.getLocation().equals(container.getLocation())) {
+                        iterator.remove();
 
-                guiManager.refreshViewersGUI(location);
+                        hopperManager.saveSkyHopperToPDC(linkingSkyHopper);
 
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.containerUnlinked()));
+                        guiManager.refreshViewersGUI(location);
 
-                return;
+                        player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.containerUnlinked()));
+
+                        return;
+                    }
+                }
             }
 
             if(linkingSkyHopper.getLinkedContainers().size() != linkingSkyHopper.getMaxContainers()) {
@@ -222,21 +229,18 @@ public class HopperClickListener implements Listener {
 
                 boolean creationResult = hopperGUI.create();
                 if(!creationResult) {
-                    System.out.println("Creation Error");
                     player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean updateResult = hopperGUI.update();
                 if(!updateResult) {
-                    System.out.println("Update Error");
                     player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean openResult = hopperGUI.open();
                 if(!openResult) {
-                    System.out.println("Open Error");
                     player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
                 }
             } else {

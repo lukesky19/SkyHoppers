@@ -469,15 +469,11 @@ public class LinksGUI extends SkyHopperGUI {
                     guiManager.removeViewer(location, uuid);
                 }, 1L);
 
-                if(skyHopper.getLinkedContainers().size() != skyHopper.getMaxContainers()) {
-                    if(skyHopper.getLocation() != null) {
-                        hopperClickListener.addLinkingPlayer(player, skyHopper.getLocation());
+                if(skyHopper.getLocation() != null) {
+                    hopperClickListener.addLinkingPlayer(player, skyHopper.getLocation());
 
-                        player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.linkingEnabled()));
-                        player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.linkingHowToExit()));
-                    }
-                } else {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.containerLinksMaxed()));
+                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.linkingEnabled()));
+                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.linkingHowToExit()));
                 }
             });
 
