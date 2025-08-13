@@ -15,13 +15,15 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package com.github.lukesky19.skyHoppers.config.record.gui;
+package com.github.lukesky19.skyHoppers.data.config.gui;
 
 import com.github.lukesky19.skylib.api.gui.GUIType;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * The GUI configuration for non-upgrade GUIs.
@@ -36,7 +38,6 @@ public record GUIConfig(
         @Nullable GUIType guiType,
         @Nullable String name,
         @NotNull Buttons entries) {
-
     /**
      * The possible items that can be displayed inside GUIs.
      * NOTE: Not all are available in every GUI.
@@ -64,39 +65,33 @@ public record GUIConfig(
      * @param suctionAmount The suction amount item configuration
      * @param maxLinks The max links item configuration
      * @param suctionRange The suction range item configuration
+     * @param dummyButtons A {@link List} of {@link ButtonConfig}s to display in the GUI.
      */
     @ConfigSerializable
     public record Buttons(
             @NotNull ItemStackConfig filler,
-            @NotNull Button previousPage,
-            @NotNull Button exit,
-            @NotNull Button nextPage,
-            @NotNull Button hopperEnabled,
-            @NotNull Button hopperDisabled,
-            @NotNull Button particlesEnabled,
-            @NotNull Button particlesDisabled,
-            @NotNull Button link,
-            @NotNull Button filter,
-            @NotNull Button upgrades,
-            @NotNull Button visualize,
-            @NotNull Button members,
-            @NotNull Button info,
-            @NotNull Button add,
-            @NotNull Button playerHead,
-            @NotNull Button filterItem,
-            @NotNull Button linkedItem,
-            @NotNull Button transferSpeed,
-            @NotNull Button transferAmount,
-            @NotNull Button suctionSpeed,
-            @NotNull Button suctionAmount,
-            @NotNull Button maxLinks,
-            @NotNull Button suctionRange) {}
-
-    /**
-     * The generic item configuration for all other buttons.
-     * @param slot The slot for the button.
-     * @param item The item configuration
-     */
-    @ConfigSerializable
-    public record Button(@Nullable Integer slot, @NotNull ItemStackConfig item) {}
+            @NotNull ButtonConfig previousPage,
+            @NotNull ButtonConfig exit,
+            @NotNull ButtonConfig nextPage,
+            @NotNull ButtonConfig hopperEnabled,
+            @NotNull ButtonConfig hopperDisabled,
+            @NotNull ButtonConfig particlesEnabled,
+            @NotNull ButtonConfig particlesDisabled,
+            @NotNull ButtonConfig link,
+            @NotNull ButtonConfig filter,
+            @NotNull ButtonConfig upgrades,
+            @NotNull ButtonConfig visualize,
+            @NotNull ButtonConfig members,
+            @NotNull ButtonConfig info,
+            @NotNull ButtonConfig add,
+            @NotNull ButtonConfig playerHead,
+            @NotNull ButtonConfig filterItem,
+            @NotNull ButtonConfig linkedItem,
+            @NotNull ButtonConfig transferSpeed,
+            @NotNull ButtonConfig transferAmount,
+            @NotNull ButtonConfig suctionSpeed,
+            @NotNull ButtonConfig suctionAmount,
+            @NotNull ButtonConfig maxLinks,
+            @NotNull ButtonConfig suctionRange,
+            @NotNull List<ButtonConfig> dummyButtons) {}
 }

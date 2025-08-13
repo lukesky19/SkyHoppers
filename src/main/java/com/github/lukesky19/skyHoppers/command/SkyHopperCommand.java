@@ -18,10 +18,10 @@
 package com.github.lukesky19.skyHoppers.command;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.config.manager.LocaleManager;
-import com.github.lukesky19.skyHoppers.config.manager.SettingsManager;
-import com.github.lukesky19.skyHoppers.config.record.Locale;
-import com.github.lukesky19.skyHoppers.config.record.Settings;
+import com.github.lukesky19.skyHoppers.manager.LocaleManager;
+import com.github.lukesky19.skyHoppers.manager.SettingsManager;
+import com.github.lukesky19.skyHoppers.data.config.Locale;
+import com.github.lukesky19.skyHoppers.data.config.Settings;
 import com.github.lukesky19.skyHoppers.hopper.FilterType;
 import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
 import com.github.lukesky19.skyHoppers.manager.HopperManager;

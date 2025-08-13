@@ -18,10 +18,10 @@
 package com.github.lukesky19.skyHoppers.listener;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.config.manager.GUIConfigManager;
-import com.github.lukesky19.skyHoppers.config.manager.LocaleManager;
-import com.github.lukesky19.skyHoppers.config.manager.SettingsManager;
-import com.github.lukesky19.skyHoppers.config.record.Locale;
+import com.github.lukesky19.skyHoppers.manager.GUIConfigManager;
+import com.github.lukesky19.skyHoppers.manager.LocaleManager;
+import com.github.lukesky19.skyHoppers.manager.SettingsManager;
+import com.github.lukesky19.skyHoppers.data.config.Locale;
 import com.github.lukesky19.skyHoppers.gui.menu.HopperGUI;
 import com.github.lukesky19.skyHoppers.hopper.*;
 import com.github.lukesky19.skyHoppers.manager.GUIManager;

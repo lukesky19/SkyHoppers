@@ -18,7 +18,6 @@
 package com.github.lukesky19.skyHoppers.manager;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.config.manager.SettingsManager;
 import com.github.lukesky19.skyHoppers.hook.protection.BentoBoxHook;
 import com.github.lukesky19.skyHoppers.hook.protection.ProtectionHook;
 import com.github.lukesky19.skyHoppers.hook.stacker.RoseStackerHook;

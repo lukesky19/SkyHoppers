@@ -15,11 +15,11 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package com.github.lukesky19.skyHoppers.config.manager;
+package com.github.lukesky19.skyHoppers.manager;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.config.record.gui.GUIConfig;
-import com.github.lukesky19.skyHoppers.config.record.gui.upgrade.UpgradeGUIConfig;
+import com.github.lukesky19.skyHoppers.data.config.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.data.config.gui.upgrade.UpgradeGUIConfig;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;

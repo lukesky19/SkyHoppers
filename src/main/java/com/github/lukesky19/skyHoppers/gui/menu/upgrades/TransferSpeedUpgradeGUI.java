@@ -18,12 +18,13 @@
 package com.github.lukesky19.skyHoppers.gui.menu.upgrades;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.config.manager.GUIConfigManager;
-import com.github.lukesky19.skyHoppers.config.manager.LocaleManager;
-import com.github.lukesky19.skyHoppers.config.manager.SettingsManager;
-import com.github.lukesky19.skyHoppers.config.record.Locale;
-import com.github.lukesky19.skyHoppers.config.record.Settings;
-import com.github.lukesky19.skyHoppers.config.record.gui.upgrade.UpgradeGUIConfig;
+import com.github.lukesky19.skyHoppers.data.config.gui.ButtonConfig;
+import com.github.lukesky19.skyHoppers.manager.GUIConfigManager;
+import com.github.lukesky19.skyHoppers.manager.LocaleManager;
+import com.github.lukesky19.skyHoppers.manager.SettingsManager;
+import com.github.lukesky19.skyHoppers.data.config.Locale;
+import com.github.lukesky19.skyHoppers.data.config.Settings;
+import com.github.lukesky19.skyHoppers.data.config.gui.upgrade.UpgradeGUIConfig;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
 import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
 import com.github.lukesky19.skyHoppers.manager.GUIManager;
@@ -159,6 +160,8 @@ public class TransferSpeedUpgradeGUI extends SkyHopperGUI {
         int guiSize = inventoryView.getTopInventory().getSize();
 
         createFiller(guiSize);
+        // Dummy Buttons
+        createDummyButtons();
         createExitButton();
         createIncreaseButton(upgrades);
         createDecreaseButton(upgrades);
@@ -257,7 +260,7 @@ public class TransferSpeedUpgradeGUI extends SkyHopperGUI {
      */
     private void createExitButton() {
         assert guiConfig != null;
-        UpgradeGUIConfig.Button buttonConfig = guiConfig.entries().exit();
+        ButtonConfig buttonConfig = guiConfig.entries().exit();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the exit button in the transfer speed upgrade gui due to no slot configured."));
@@ -286,7 +289,7 @@ public class TransferSpeedUpgradeGUI extends SkyHopperGUI {
         assert guiConfig != null;
 
         if(skyHopper.getTransferSpeed() != skyHopper.getMaxTransferSpeed()) {
-            UpgradeGUIConfig.Button buttonConfig = guiConfig.entries().increase();
+            ButtonConfig buttonConfig = guiConfig.entries().increase();
 
             if(buttonConfig.slot() == null) {
                 logger.warn(AdventureUtil.serialize("Unable to create the increase button in the transfer speed upgrade gui due to no slot configured."));
@@ -323,7 +326,7 @@ public class TransferSpeedUpgradeGUI extends SkyHopperGUI {
                 setButton(buttonConfig.slot(), buttonBuilder.build());
             }
         } else {
-            UpgradeGUIConfig.Button buttonConfig = guiConfig.entries().increaseMax();
+            ButtonConfig buttonConfig = guiConfig.entries().increaseMax();
 
             if(buttonConfig.slot() == null) {
                 logger.warn(AdventureUtil.serialize("Unable to create the increase max button in the transfer speed upgrade gui due to no slot configured."));
@@ -351,7 +354,7 @@ public class TransferSpeedUpgradeGUI extends SkyHopperGUI {
         assert guiConfig != null;
 
         if(skyHopper.getTransferSpeed() != displayUpgrades.lastKey()) {
-            UpgradeGUIConfig.Button buttonConfig = guiConfig.entries().decrease();
+            ButtonConfig buttonConfig = guiConfig.entries().decrease();
 
             if(buttonConfig.slot() == null) {
                 logger.warn(AdventureUtil.serialize("Unable to create the decrease button in the transfer speed upgrade gui due to no slot configured."));
@@ -388,7 +391,7 @@ public class TransferSpeedUpgradeGUI extends SkyHopperGUI {
                 setButton(buttonConfig.slot(), buttonBuilder.build());
             }
         } else {
-            UpgradeGUIConfig.Button buttonConfig = guiConfig.entries().decreaseMin();
+            ButtonConfig buttonConfig = guiConfig.entries().decreaseMin();
 
             if(buttonConfig.slot() == null) {
                 logger.warn(AdventureUtil.serialize("Unable to create the decrease min button in the transfer speed upgrade gui due to no slot configured."));
@@ -417,7 +420,7 @@ public class TransferSpeedUpgradeGUI extends SkyHopperGUI {
 
         Optional<Map.Entry<Double, Double>> nextUpgrade = getNextUpgrade(upgrades, skyHopper.getMaxTransferSpeed());
         if(nextUpgrade.isPresent()) {
-            UpgradeGUIConfig.Button buttonConfig = guiConfig.entries().upgrade();
+            ButtonConfig buttonConfig = guiConfig.entries().upgrade();
 
             if(buttonConfig.slot() == null) {
                 logger.warn(AdventureUtil.serialize("Unable to create the upgrade button in the transfer speed upgrade gui due to no slot configured."));
@@ -469,7 +472,7 @@ public class TransferSpeedUpgradeGUI extends SkyHopperGUI {
                 setButton(buttonConfig.slot(), buttonBuilder.build());
             }
         } else {
-            UpgradeGUIConfig.Button buttonConfig = guiConfig.entries().upgradeMax();
+            ButtonConfig buttonConfig = guiConfig.entries().upgradeMax();
 
             if(buttonConfig.slot() == null) {
                 logger.warn(AdventureUtil.serialize("Unable to create the upgrade max button in the transfer speed upgrade gui due to no slot configured."));
@@ -488,6 +491,32 @@ public class TransferSpeedUpgradeGUI extends SkyHopperGUI {
                 setButton(buttonConfig.slot(), buttonBuilder.build());
             }
         }
+    }
+
+    /**
+     * Create the dummy buttons for the GUI.
+     */
+    private void createDummyButtons() {
+        if(guiConfig == null) return;
+
+        guiConfig.entries().dummyButtons().forEach(buttonConfig -> {
+            if(buttonConfig.slot() == null) {
+                logger.warn(AdventureUtil.serialize("Unable to add a dummy button to the transfer speed upgrade GUI due to an invalid slot."));
+                return;
+            }
+
+            ItemStackConfig itemStackConfig = buttonConfig.item();
+            ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
+            itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
+            Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+            optionalItemStack.ifPresent(itemStack -> {
+                GUIButton.Builder builder = new GUIButton.Builder();
+
+                builder.setItemStack(itemStack);
+
+                setButton(buttonConfig.slot(), builder.build());
+            });
+        });
     }
 
     /**

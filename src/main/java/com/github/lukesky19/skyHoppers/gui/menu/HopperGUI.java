@@ -18,11 +18,12 @@
 package com.github.lukesky19.skyHoppers.gui.menu;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.config.manager.GUIConfigManager;
-import com.github.lukesky19.skyHoppers.config.manager.LocaleManager;
-import com.github.lukesky19.skyHoppers.config.manager.SettingsManager;
-import com.github.lukesky19.skyHoppers.config.record.Locale;
-import com.github.lukesky19.skyHoppers.config.record.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.data.config.gui.ButtonConfig;
+import com.github.lukesky19.skyHoppers.manager.GUIConfigManager;
+import com.github.lukesky19.skyHoppers.manager.LocaleManager;
+import com.github.lukesky19.skyHoppers.manager.SettingsManager;
+import com.github.lukesky19.skyHoppers.data.config.Locale;
+import com.github.lukesky19.skyHoppers.data.config.gui.GUIConfig;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
 import com.github.lukesky19.skyHoppers.gui.menu.filter.InputFilterGUI;
 import com.github.lukesky19.skyHoppers.gui.menu.links.LinksGUI;
@@ -154,6 +155,9 @@ public class HopperGUI extends SkyHopperGUI {
         // Filler
         createFiller(guiSize);
 
+        // Dummy Buttons
+        createDummyButtons();
+
         // SkyHopper Status Enabled/Disabled Buttons
         if(skyHopper.isSkyHopperEnabled()) {
             createStatusEnabledButton();
@@ -277,7 +281,7 @@ public class HopperGUI extends SkyHopperGUI {
      */
     private void createStatusEnabledButton() {
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().hopperEnabled();
+        ButtonConfig buttonConfig = guiConfig.entries().hopperEnabled();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the status enabled button due to no slot configured."));
@@ -312,7 +316,7 @@ public class HopperGUI extends SkyHopperGUI {
      */
     private void createStatusDisabledButton() {
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().hopperDisabled();
+        ButtonConfig buttonConfig = guiConfig.entries().hopperDisabled();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the status disabled button due to no slot configured."));
@@ -347,7 +351,7 @@ public class HopperGUI extends SkyHopperGUI {
      */
     private void createParticlesEnabledButton() {
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().particlesEnabled();
+        ButtonConfig buttonConfig = guiConfig.entries().particlesEnabled();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the particles enabled button due to no slot configured."));
@@ -382,7 +386,7 @@ public class HopperGUI extends SkyHopperGUI {
      */
     private void createParticlesDisabledButton() {
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().particlesDisabled();
+        ButtonConfig buttonConfig = guiConfig.entries().particlesDisabled();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the particles disabled button due to no slot configured."));
@@ -419,7 +423,7 @@ public class HopperGUI extends SkyHopperGUI {
         Locale locale = localeManager.getLocale();
 
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().link();
+        ButtonConfig buttonConfig = guiConfig.entries().link();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the linked containers button due to no slot configured."));
@@ -471,7 +475,7 @@ public class HopperGUI extends SkyHopperGUI {
     private void createInputFilterButton() {
         Locale locale = localeManager.getLocale();
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().filter();
+        ButtonConfig buttonConfig = guiConfig.entries().filter();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the input filter button due to no slot configured."));
@@ -522,7 +526,7 @@ public class HopperGUI extends SkyHopperGUI {
         Locale locale = localeManager.getLocale();
 
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().upgrades();
+        ButtonConfig buttonConfig = guiConfig.entries().upgrades();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the upgrades button due to no slot configured."));
@@ -575,7 +579,7 @@ public class HopperGUI extends SkyHopperGUI {
         Locale locale = localeManager.getLocale();
 
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().members();
+        ButtonConfig buttonConfig = guiConfig.entries().members();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the members button due to no slot configured."));
@@ -626,7 +630,7 @@ public class HopperGUI extends SkyHopperGUI {
      */
     private void createVisualizeButton() {
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().visualize();
+        ButtonConfig buttonConfig = guiConfig.entries().visualize();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the members button due to no slot configured."));
@@ -657,7 +661,7 @@ public class HopperGUI extends SkyHopperGUI {
      */
     private void createExitButton() {
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().exit();
+        ButtonConfig buttonConfig = guiConfig.entries().exit();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the exit button due to no slot configured."));
@@ -689,7 +693,7 @@ public class HopperGUI extends SkyHopperGUI {
      */
     private void createInfoButton() {
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().info();
+        ButtonConfig buttonConfig = guiConfig.entries().info();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the info button due to no slot configured."));
@@ -725,5 +729,31 @@ public class HopperGUI extends SkyHopperGUI {
                 }
             }
         }
+    }
+
+    /**
+     * Create the dummy buttons for the GUI.
+     */
+    private void createDummyButtons() {
+        if(guiConfig == null) return;
+
+        guiConfig.entries().dummyButtons().forEach(buttonConfig -> {
+            if(buttonConfig.slot() == null) {
+                logger.warn(AdventureUtil.serialize("Unable to add a dummy button to the main hopper GUI due to an invalid slot."));
+                return;
+            }
+
+            ItemStackConfig itemStackConfig = buttonConfig.item();
+            ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
+            itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
+            Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+            optionalItemStack.ifPresent(itemStack -> {
+                GUIButton.Builder builder = new GUIButton.Builder();
+
+                builder.setItemStack(itemStack);
+
+                setButton(buttonConfig.slot(), builder.build());
+            });
+        });
     }
 }

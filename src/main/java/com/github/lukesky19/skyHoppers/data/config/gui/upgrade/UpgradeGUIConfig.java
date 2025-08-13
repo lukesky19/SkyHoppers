@@ -15,13 +15,16 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package com.github.lukesky19.skyHoppers.config.record.gui.upgrade;
+package com.github.lukesky19.skyHoppers.data.config.gui.upgrade;
 
+import com.github.lukesky19.skyHoppers.data.config.gui.ButtonConfig;
 import com.github.lukesky19.skylib.api.gui.GUIType;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 /**
  * he GUI configuration for only upgrade GUIs.
@@ -48,24 +51,18 @@ public record UpgradeGUIConfig(
      * @param upgradeMax The upgrade max item configuration.
      * @param decrease The decrease item configuration.
      * @param decreaseMin The decrease min item configuration.
+     * @param dummyButtons A {@link List} of {@link ButtonConfig}s to display in the GUI.
      */
     @ConfigSerializable
     public record Buttons(
             @NotNull ItemStackConfig filler,
-            @NotNull Button exit,
-            @NotNull Button increase,
-            @NotNull Button increaseMax,
-            @NotNull Button upgrade,
-            @NotNull Button upgradeMax,
-            @NotNull Button decrease,
-            @NotNull Button decreaseMin) {}
-
-    /**
-     * The generic item configuration for all other buttons.
-     * @param slot The slot for the button.
-     * @param item The item configuration
-     */
-    @ConfigSerializable
-    public record Button(@Nullable Integer slot, @NotNull ItemStackConfig item) {}
+            @NotNull ButtonConfig exit,
+            @NotNull ButtonConfig increase,
+            @NotNull ButtonConfig increaseMax,
+            @NotNull ButtonConfig upgrade,
+            @NotNull ButtonConfig upgradeMax,
+            @NotNull ButtonConfig decrease,
+            @NotNull ButtonConfig decreaseMin,
+            @NotNull List<ButtonConfig> dummyButtons) {}
 }
 

@@ -18,12 +18,13 @@
 package com.github.lukesky19.skyHoppers.gui.menu.upgrades;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.config.manager.GUIConfigManager;
-import com.github.lukesky19.skyHoppers.config.manager.LocaleManager;
-import com.github.lukesky19.skyHoppers.config.manager.SettingsManager;
-import com.github.lukesky19.skyHoppers.config.record.Locale;
-import com.github.lukesky19.skyHoppers.config.record.gui.GUIConfig;
-import com.github.lukesky19.skyHoppers.config.record.Settings;
+import com.github.lukesky19.skyHoppers.data.config.gui.ButtonConfig;
+import com.github.lukesky19.skyHoppers.manager.GUIConfigManager;
+import com.github.lukesky19.skyHoppers.manager.LocaleManager;
+import com.github.lukesky19.skyHoppers.manager.SettingsManager;
+import com.github.lukesky19.skyHoppers.data.config.Locale;
+import com.github.lukesky19.skyHoppers.data.config.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.data.config.Settings;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
 import com.github.lukesky19.skyHoppers.gui.menu.HopperGUI;
 import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
@@ -151,6 +152,9 @@ public class UpgradesGUI extends SkyHopperGUI {
         // Filler
         createFiller(guiSize);
 
+        // Dummy Buttons
+        createDummyButtons();
+
         // Suction Speed
         createSuctionSpeedButton();
 
@@ -268,7 +272,7 @@ public class UpgradesGUI extends SkyHopperGUI {
         Locale locale = localeManager.getLocale();
 
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().suctionSpeed();
+        ButtonConfig buttonConfig = guiConfig.entries().suctionSpeed();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the suction speed button due to no slot configured."));
@@ -321,7 +325,7 @@ public class UpgradesGUI extends SkyHopperGUI {
         Locale locale = localeManager.getLocale();
 
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().suctionAmount();
+        ButtonConfig buttonConfig = guiConfig.entries().suctionAmount();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the suction amount button due to no slot configured."));
@@ -374,7 +378,7 @@ public class UpgradesGUI extends SkyHopperGUI {
         Locale locale = localeManager.getLocale();
 
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().suctionRange();
+        ButtonConfig buttonConfig = guiConfig.entries().suctionRange();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the suction range button due to no slot configured."));
@@ -427,7 +431,7 @@ public class UpgradesGUI extends SkyHopperGUI {
         Locale locale = localeManager.getLocale();
 
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().maxLinks();
+        ButtonConfig buttonConfig = guiConfig.entries().maxLinks();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the max links button due to no slot configured."));
@@ -480,7 +484,7 @@ public class UpgradesGUI extends SkyHopperGUI {
         Locale locale = localeManager.getLocale();
 
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().transferSpeed();
+        ButtonConfig buttonConfig = guiConfig.entries().transferSpeed();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the transfer speed button due to no slot configured."));
@@ -533,7 +537,7 @@ public class UpgradesGUI extends SkyHopperGUI {
         Locale locale = localeManager.getLocale();
 
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().transferAmount();
+        ButtonConfig buttonConfig = guiConfig.entries().transferAmount();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the transfer amount button due to no slot configured."));
@@ -584,7 +588,7 @@ public class UpgradesGUI extends SkyHopperGUI {
      */
     private void createExitButton() {
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().exit();
+        ButtonConfig buttonConfig = guiConfig.entries().exit();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the exit button in the upgrades gui due to no slot configured."));
@@ -604,5 +608,31 @@ public class UpgradesGUI extends SkyHopperGUI {
 
             setButton(buttonConfig.slot(), builder.build());
         }
+    }
+
+    /**
+     * Create the dummy buttons for the GUI.
+     */
+    private void createDummyButtons() {
+        if(guiConfig == null) return;
+
+        guiConfig.entries().dummyButtons().forEach(buttonConfig -> {
+            if(buttonConfig.slot() == null) {
+                logger.warn(AdventureUtil.serialize("Unable to add a dummy button to the upgrades GUI due to an invalid slot."));
+                return;
+            }
+
+            ItemStackConfig itemStackConfig = buttonConfig.item();
+            ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
+            itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
+            Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+            optionalItemStack.ifPresent(itemStack -> {
+                GUIButton.Builder builder = new GUIButton.Builder();
+
+                builder.setItemStack(itemStack);
+
+                setButton(buttonConfig.slot(), builder.build());
+            });
+        });
     }
 }

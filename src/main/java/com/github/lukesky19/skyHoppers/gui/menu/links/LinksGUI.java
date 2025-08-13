@@ -18,10 +18,11 @@
 package com.github.lukesky19.skyHoppers.gui.menu.links;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.config.manager.GUIConfigManager;
-import com.github.lukesky19.skyHoppers.config.manager.LocaleManager;
-import com.github.lukesky19.skyHoppers.config.record.gui.GUIConfig;
-import com.github.lukesky19.skyHoppers.config.record.Locale;
+import com.github.lukesky19.skyHoppers.data.config.gui.ButtonConfig;
+import com.github.lukesky19.skyHoppers.manager.GUIConfigManager;
+import com.github.lukesky19.skyHoppers.manager.LocaleManager;
+import com.github.lukesky19.skyHoppers.data.config.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.data.config.Locale;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
 import com.github.lukesky19.skyHoppers.gui.menu.HopperGUI;
 import com.github.lukesky19.skyHoppers.gui.menu.filter.OutputFilterGUI;
@@ -159,6 +160,8 @@ public class LinksGUI extends SkyHopperGUI {
         int guiSize = inventoryView.getTopInventory().getSize();
 
         createFiller(guiSize);
+        // Dummy Buttons
+        createDummyButtons();
         createLinkedContainerButtons(guiSize);
         createNextPageButton(guiSize);
         createPreviousPageButton(guiSize);
@@ -271,7 +274,7 @@ public class LinksGUI extends SkyHopperGUI {
         Locale locale = localeManager.getLocale();
 
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().linkedItem();
+        ButtonConfig buttonConfig = guiConfig.entries().linkedItem();
 
         int maxLinkedContainers = skyHopper.getLinkedContainers().size() - 1;
 
@@ -380,7 +383,7 @@ public class LinksGUI extends SkyHopperGUI {
     private void createNextPageButton(int guiSize) {
         if(added > guiSize - 1) {
             assert guiConfig != null;
-            GUIConfig.Button buttonConfig = guiConfig.entries().nextPage();
+            ButtonConfig buttonConfig = guiConfig.entries().nextPage();
             if(buttonConfig.slot() == null) {
                 logger.warn(AdventureUtil.serialize("Unable to create the next page button in the links gui due to no slot configured."));
                 return;
@@ -411,7 +414,7 @@ public class LinksGUI extends SkyHopperGUI {
     private void createPreviousPageButton(int guiSize) {
         if(containerNum > guiSize) {
             assert guiConfig != null;
-            GUIConfig.Button buttonConfig = guiConfig.entries().previousPage();
+            ButtonConfig buttonConfig = guiConfig.entries().previousPage();
             if(buttonConfig.slot() == null) {
                 logger.warn(AdventureUtil.serialize("Unable to create the previous page button in the links gui due to no slot configured."));
                 return;
@@ -446,7 +449,7 @@ public class LinksGUI extends SkyHopperGUI {
         Locale locale = localeManager.getLocale();
 
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().link();
+        ButtonConfig buttonConfig = guiConfig.entries().link();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the link button in the links gui due to no slot configured."));
@@ -486,7 +489,7 @@ public class LinksGUI extends SkyHopperGUI {
      */
     private void createExitButton() {
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().exit();
+        ButtonConfig buttonConfig = guiConfig.entries().exit();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the exit button in the links gui due to no slot configured."));
@@ -506,5 +509,31 @@ public class LinksGUI extends SkyHopperGUI {
 
             setButton(buttonConfig.slot(), builder.build());
         }
+    }
+
+    /**
+     * Create the dummy buttons for the GUI.
+     */
+    private void createDummyButtons() {
+        if(guiConfig == null) return;
+
+        guiConfig.entries().dummyButtons().forEach(buttonConfig -> {
+            if(buttonConfig.slot() == null) {
+                logger.warn(AdventureUtil.serialize("Unable to add a dummy button to the links GUI due to an invalid slot."));
+                return;
+            }
+
+            ItemStackConfig itemStackConfig = buttonConfig.item();
+            ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
+            itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
+            Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+            optionalItemStack.ifPresent(itemStack -> {
+                GUIButton.Builder builder = new GUIButton.Builder();
+
+                builder.setItemStack(itemStack);
+
+                setButton(buttonConfig.slot(), builder.build());
+            });
+        });
     }
 }

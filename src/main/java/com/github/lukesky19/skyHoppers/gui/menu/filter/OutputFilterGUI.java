@@ -18,8 +18,9 @@
 package com.github.lukesky19.skyHoppers.gui.menu.filter;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.config.manager.GUIConfigManager;
-import com.github.lukesky19.skyHoppers.config.record.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.data.config.gui.ButtonConfig;
+import com.github.lukesky19.skyHoppers.manager.GUIConfigManager;
+import com.github.lukesky19.skyHoppers.data.config.gui.GUIConfig;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
 import com.github.lukesky19.skyHoppers.gui.menu.links.LinksGUI;
 import com.github.lukesky19.skyHoppers.hopper.*;
@@ -148,6 +149,8 @@ public class OutputFilterGUI extends SkyHopperGUI {
         int maxItems = skyContainer.getFilterItems().size() - 1;
 
         createFiller(guiSize);
+        // Dummy Buttons
+        createDummyButtons();
         createFilterItems(guiSize, maxItems);
         createNextPageButton(guiSize, maxItems);
         createPreviousPageButton(guiSize);
@@ -293,7 +296,7 @@ public class OutputFilterGUI extends SkyHopperGUI {
     private void createFilterItems(int guiSize, int maxItems) {
         if(guiSize - 10 >= 17) {
             assert guiConfig != null;
-            GUIConfig.Button buttonConfig = guiConfig.entries().filterItem();
+            ButtonConfig buttonConfig = guiConfig.entries().filterItem();
             List<Component> lore = buttonConfig.item().lore().stream().map(AdventureUtil::serialize).toList();
             List<ItemFlag> itemFlags = buttonConfig.item().itemFlags().stream().map(ItemFlag::valueOf).toList();
 
@@ -349,7 +352,7 @@ public class OutputFilterGUI extends SkyHopperGUI {
     private void createNextPageButton(int guiSize, int maxItems) {
         if(added > guiSize - 10 && (itemNum - 1) < maxItems) {
             assert guiConfig != null;
-            GUIConfig.Button buttonConfig = guiConfig.entries().nextPage();
+            ButtonConfig buttonConfig = guiConfig.entries().nextPage();
             if(buttonConfig.slot() == null) {
                 logger.warn(AdventureUtil.serialize("Unable to create the next page button in the output filter gui due to no slot configured."));
                 return;
@@ -380,7 +383,7 @@ public class OutputFilterGUI extends SkyHopperGUI {
     private void createPreviousPageButton(int guiSize) {
         if(itemNum > guiSize - 9) {
             assert guiConfig != null;
-            GUIConfig.Button buttonConfig = guiConfig.entries().previousPage();
+            ButtonConfig buttonConfig = guiConfig.entries().previousPage();
             if(buttonConfig.slot() == null) {
                 logger.warn(AdventureUtil.serialize("Unable to create the previous page button in the output filter gui due to no slot configured."));
                 return;
@@ -417,7 +420,7 @@ public class OutputFilterGUI extends SkyHopperGUI {
      */
     private void createFilterTypeButton() {
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().filter();
+        ButtonConfig buttonConfig = guiConfig.entries().filter();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the filter button in the output filter gui due to no slot configured."));
@@ -459,7 +462,7 @@ public class OutputFilterGUI extends SkyHopperGUI {
      */
     private void createExitButton() {
         assert guiConfig != null;
-        GUIConfig.Button buttonConfig = guiConfig.entries().exit();
+        ButtonConfig buttonConfig = guiConfig.entries().exit();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.serialize("Unable to create the exit button in the output filter gui due to no slot configured."));
@@ -479,6 +482,32 @@ public class OutputFilterGUI extends SkyHopperGUI {
 
             setButton(buttonConfig.slot(), builder.build());
         }
+    }
+
+    /**
+     * Create the dummy buttons for the GUI.
+     */
+    private void createDummyButtons() {
+        if(guiConfig == null) return;
+
+        guiConfig.entries().dummyButtons().forEach(buttonConfig -> {
+            if(buttonConfig.slot() == null) {
+                logger.warn(AdventureUtil.serialize("Unable to add a dummy button to the output filter GUI due to an invalid slot."));
+                return;
+            }
+
+            ItemStackConfig itemStackConfig = buttonConfig.item();
+            ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
+            itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
+            Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+            optionalItemStack.ifPresent(itemStack -> {
+                GUIButton.Builder builder = new GUIButton.Builder();
+
+                builder.setItemStack(itemStack);
+
+                setButton(buttonConfig.slot(), builder.build());
+            });
+        });
     }
 
     /**
