@@ -20,10 +20,13 @@ package com.github.lukesky19.skyHoppers.task;
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
 import com.github.lukesky19.skyHoppers.manager.HopperManager;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.*;
 import org.bukkit.block.Hopper;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,16 +39,18 @@ import static com.github.lukesky19.skyHoppers.util.RoseStackerUtils.*;
  * This Task handles the custom suctioning for SkyHoppers.
  */
 public class SuctionTask extends BukkitRunnable {
-    private final SkyHoppers plugin;
-    private final HopperManager hopperManager;
+    private final @NotNull SkyHoppers plugin;
+    private final @NotNull ComponentLogger logger;
+    private final @NotNull HopperManager hopperManager;
 
     /**
      * Constructor
      * @param plugin The SkyHoppers Plugin.
      * @param hopperManager A HopperManager instance.
      */
-    public SuctionTask(SkyHoppers plugin, HopperManager hopperManager) {
+    public SuctionTask(@NotNull SkyHoppers plugin, @NotNull HopperManager hopperManager) {
         this.plugin = plugin;
+        this.logger = plugin.getComponentLogger();
         this.hopperManager = hopperManager;
     }
 
@@ -58,57 +63,34 @@ public class SuctionTask extends BukkitRunnable {
 
         for(SkyHopper currentSkyHopper : hopperManager.getSkyHoppers()) {
             if(currentSkyHopper == null
-                    || currentSkyHopper.location() == null
-                    || currentSkyHopper.nextSuctionTime() > System.currentTimeMillis()
-                    || !currentSkyHopper.enabled()
-                    || !currentSkyHopper.location().isChunkLoaded()
-                    || !(currentSkyHopper.location().getBlock().getState(false) instanceof Hopper hopper))
+                    || currentSkyHopper.getLocation() == null
+                    || currentSkyHopper.getNextSuctionTime() > System.currentTimeMillis()
+                    || !currentSkyHopper.isSkyHopperEnabled()
+                    || !currentSkyHopper.getLocation().isChunkLoaded()
+                    || !(currentSkyHopper.getLocation().getBlock().getState(false) instanceof Hopper hopper))
                 continue;
 
-            final double suctionRange = currentSkyHopper.suctionRange() + 0.5;
-            Location centered = currentSkyHopper.location().clone().add(0.5, 0.5, 0.5);
+            final double suctionRange = currentSkyHopper.getSuctionRange() + 0.5;
+            Location centered = currentSkyHopper.getLocation().clone().add(0.5, 0.5, 0.5);
 
             List<Item> groundItems = centered.getNearbyEntities(suctionRange, suctionRange, suctionRange).stream().filter(entity -> entity instanceof Item).map(entity -> (Item) entity).toList();
             if(groundItems.isEmpty()) continue;
 
-            collect(currentSkyHopper, hopper, groundItems, currentSkyHopper.suctionAmount());
+            collect(currentSkyHopper, hopper, groundItems, currentSkyHopper.getSuctionAmount());
 
-            double suctionSpeed = currentSkyHopper.suctionSpeed();
+            double suctionSpeed = currentSkyHopper.getSuctionSpeed();
 
             long addMs = (long) (suctionSpeed * 1000);
             long time = System.currentTimeMillis() + addMs;
-
-            SkyHopper updatedSkyHopper = new SkyHopper(
-                    currentSkyHopper.enabled(),
-                    currentSkyHopper.particles(),
-                    currentSkyHopper.owner(),
-                    currentSkyHopper.members(),
-                    currentSkyHopper.location(),
-                    currentSkyHopper.containers(),
-                    currentSkyHopper.filterType(),
-                    currentSkyHopper.filterItems(),
-                    currentSkyHopper.transferSpeed(),
-                    currentSkyHopper.maxTransferSpeed(),
-                    currentSkyHopper.transferAmount(),
-                    currentSkyHopper.maxTransferAmount(),
-                    currentSkyHopper.suctionSpeed(),
-                    currentSkyHopper.maxSuctionSpeed(),
-                    currentSkyHopper.suctionAmount(),
-                    currentSkyHopper.maxSuctionAmount(),
-                    currentSkyHopper.suctionRange(),
-                    currentSkyHopper.maxSuctionRange(),
-                    currentSkyHopper.maxContainers(),
-                    time,
-                    currentSkyHopper.nextTransferTime());
-
-            hopperManager.cacheSkyHopper(updatedSkyHopper.location(), updatedSkyHopper);
+            
+            currentSkyHopper.setNextSuctionTime(time);
         }
     }
 
     /**
-     * The logic for taking an Item from the ground and adding it to the SkyHopper's Inventory.
-     * @param skyHopper The SkyHopper to add the Item to.
-     * @param hopper The SkyHopper's Hopper.
+     * The logic for taking an Item from the ground and adding it to the {@link SkyHopper}'s Inventory.
+     * @param skyHopper The {@link SkyHopper} to add the Item to.
+     * @param hopper The {@link SkyHopper}'s Hopper.
      * @param groundItems The List of Items around the SkyHopper.
      * @param suctionAmount The amount that should be transferred.
      */
@@ -120,14 +102,20 @@ public class SuctionTask extends BukkitRunnable {
 
             ItemStack suctionItem = groundItem.getItemStack().clone();
             suctionItem.setAmount(Math.min(groundItemAmount, suctionAmount));
+            
+            ItemType suctionItemType = suctionItem.getType().asItemType();
+            if(suctionItemType == null) {
+                logger.warn(AdventureUtil.serialize("Unable to suction an item due to a null ItemType. [Method: collect (SuctionTask)]"));
+                continue;
+            }
 
-            switch (skyHopper.filterType()) {
+            switch (skyHopper.getFilterType()) {
                 case NONE -> {
-                    int result = addGroundItemToInventory(groundItem, groundItemAmount, suctionItem, hopper.getInventory(), skyHopper.suctionAmount());
+                    int result = addGroundItemToInventory(groundItem, groundItemAmount, suctionItem, hopper.getInventory(), skyHopper.getSuctionAmount());
                     amountLeft -= result;
 
                     if(result > 0) {
-                        if(skyHopper.particles()) {
+                        if(skyHopper.isParticlesEnabled()) {
                             // Highlight hopper that sucked up the item
                             hopper.getWorld().spawnParticle(Particle.DUST, hopper.getLocation().clone(), 5, 0.5, 0.5, 0.5, 0.0, new Particle.DustOptions(Color.YELLOW, 1));
 
@@ -140,13 +128,13 @@ public class SuctionTask extends BukkitRunnable {
                 }
 
                 case BLACKLIST -> {
-                    List<Material> filterItems = skyHopper.filterItems();
-                    if (!filterItems.isEmpty() && !filterItems.contains(suctionItem.getType())) {
-                        int result = addGroundItemToInventory(groundItem, groundItemAmount, suctionItem, hopper.getInventory(), skyHopper.suctionAmount());
+                    List<ItemType> filterItems = skyHopper.getFilterItems();
+                    if (!filterItems.isEmpty() && !filterItems.contains(suctionItemType)) {
+                        int result = addGroundItemToInventory(groundItem, groundItemAmount, suctionItem, hopper.getInventory(), skyHopper.getSuctionAmount());
                         amountLeft -= result;
 
                         if(result > 0) {
-                            if(skyHopper.particles()) {
+                            if(skyHopper.isParticlesEnabled()) {
                                 // Highlight hopper that sucked up the item
                                 hopper.getWorld().spawnParticle(Particle.DUST, hopper.getLocation().clone(), 5, 0.5, 0.5, 0.5, 0.0, new Particle.DustOptions(Color.YELLOW, 1));
 
@@ -160,11 +148,11 @@ public class SuctionTask extends BukkitRunnable {
                 }
 
                 case DESTROY -> {
-                    List<Material> filterItems = skyHopper.filterItems();
-                    if (!filterItems.isEmpty() && filterItems.contains(suctionItem.getType())) {
+                    List<ItemType> filterItems = skyHopper.getFilterItems();
+                    if (!filterItems.isEmpty() && filterItems.contains(suctionItemType)) {
                         removeAmountFromGroundItem(groundItem, groundItemAmount, suctionAmount);
 
-                        if(skyHopper.particles()) {
+                        if(skyHopper.isParticlesEnabled()) {
                             // Highlight hopper that sucked up the item
                             hopper.getWorld().spawnParticle(Particle.DUST, hopper.getLocation().clone(), 5, 0.5, 0.5, 0.5, 0.0, new Particle.DustOptions(Color.YELLOW, 1));
 
@@ -175,11 +163,11 @@ public class SuctionTask extends BukkitRunnable {
                         return;
                     }
 
-                    int result = addGroundItemToInventory(groundItem, groundItemAmount, suctionItem, hopper.getInventory(), skyHopper.suctionAmount());
+                    int result = addGroundItemToInventory(groundItem, groundItemAmount, suctionItem, hopper.getInventory(), skyHopper.getSuctionAmount());
                     amountLeft -= result;
 
                     if(result > 0) {
-                        if(skyHopper.particles()) {
+                        if(skyHopper.isParticlesEnabled()) {
                             // Highlight hopper that sucked up the item
                             hopper.getWorld().spawnParticle(Particle.DUST, hopper.getLocation().clone(), 5, 0.5, 0.5, 0.5, 0.0, new Particle.DustOptions(Color.YELLOW, 1));
 
@@ -192,13 +180,13 @@ public class SuctionTask extends BukkitRunnable {
                 }
 
                 case WHITELIST -> {
-                    List<Material> filterItems = skyHopper.filterItems();
-                    if (!filterItems.isEmpty() && filterItems.contains(suctionItem.getType())) {
-                        int result = addGroundItemToInventory(groundItem, groundItemAmount, suctionItem, hopper.getInventory(), skyHopper.suctionAmount());
+                    List<ItemType> filterItems = skyHopper.getFilterItems();
+                    if (!filterItems.isEmpty() && filterItems.contains(suctionItemType)) {
+                        int result = addGroundItemToInventory(groundItem, groundItemAmount, suctionItem, hopper.getInventory(), skyHopper.getSuctionAmount());
                         amountLeft -= result;
 
                         if(result > 0) {
-                            if(skyHopper.particles()) {
+                            if(skyHopper.isParticlesEnabled()) {
                                 // Highlight hopper that sucked up the item
                                 hopper.getWorld().spawnParticle(Particle.DUST, hopper.getLocation().clone(), 5, 0.5, 0.5, 0.5, 0.0, new Particle.DustOptions(Color.YELLOW, 1));
 

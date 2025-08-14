@@ -73,108 +73,69 @@ public class HopperMoveItemListener implements Listener {
                 if(sourceSkyHopper != null && destinationSkyHopper != null) {
                     inventoryMoveItemEvent.setCancelled(true);
                     if(plugin.areSkyHoppersPaused()) return;
-                    if (!initiatorSkyHopper.enabled()
-                            || !sourceSkyHopper.enabled()
-                            || !destinationSkyHopper.enabled()) return;
+                    if (!initiatorSkyHopper.isSkyHopperEnabled()
+                            || !sourceSkyHopper.isSkyHopperEnabled()
+                            || !destinationSkyHopper.isSkyHopperEnabled()) return;
 
                     if(initiatorSkyHopper.equals(sourceSkyHopper)) {
-                        if(sourceSkyHopper.nextTransferTime() < System.currentTimeMillis()) {
-                            double transferSpeed = sourceSkyHopper.transferSpeed();
+                        if(sourceSkyHopper.getNextTransferTime() < System.currentTimeMillis()) {
+                            double transferSpeed = sourceSkyHopper.getTransferSpeed();
 
                             long addMs = (long) (transferSpeed * 1000);
                             long time = System.currentTimeMillis() + addMs;
 
-                            SkyHopper updatedSkyHopper = new SkyHopper(
-                                    true,
-                                    sourceSkyHopper.particles(),
-                                    sourceSkyHopper.owner(),
-                                    sourceSkyHopper.members(),
-                                    sourceSkyHopper.location(),
-                                    sourceSkyHopper.containers(),
-                                    sourceSkyHopper.filterType(),
-                                    sourceSkyHopper.filterItems(),
-                                    sourceSkyHopper.transferSpeed(),
-                                    sourceSkyHopper.maxTransferSpeed(),
-                                    sourceSkyHopper.transferAmount(),
-                                    sourceSkyHopper.maxTransferAmount(),
-                                    sourceSkyHopper.suctionSpeed(),
-                                    sourceSkyHopper.maxSuctionSpeed(),
-                                    sourceSkyHopper.suctionAmount(),
-                                    sourceSkyHopper.maxSuctionAmount(),
-                                    sourceSkyHopper.suctionRange(),
-                                    sourceSkyHopper.maxSuctionRange(),
-                                    sourceSkyHopper.maxContainers(),
-                                    sourceSkyHopper.nextSuctionTime(),
-                                    time);
+                            sourceSkyHopper.setNextTransferTime(time);
 
-                            hopperManager.cacheSkyHopper(updatedSkyHopper.location(), updatedSkyHopper);
+                            if(sourceSkyHopper.getLocation() == null) return;
 
-                            delayedTask.add(updatedSkyHopper.location().clone(), new DelayedEntry(source.getLocation(), destination.getLocation(), false, true));
+                            delayedTask.add(sourceSkyHopper.getLocation(), new DelayedEntry(source.getLocation(), destination.getLocation(), false, true));
                         }
                     } else if(initiatorSkyHopper.equals(destinationSkyHopper)) {
-                        if (destinationSkyHopper.nextSuctionTime() < System.currentTimeMillis()) {
-                            double suctionSpeed = destinationSkyHopper.suctionSpeed();
+                        if (destinationSkyHopper.getNextSuctionTime() < System.currentTimeMillis()) {
+                            double suctionSpeed = destinationSkyHopper.getSuctionSpeed();
 
                             long addMs = (long) (suctionSpeed * 1000);
                             long time = System.currentTimeMillis() + addMs;
 
-                            SkyHopper updatedSkyHopper = new SkyHopper(
-                                    true,
-                                    destinationSkyHopper.particles(),
-                                    destinationSkyHopper.owner(),
-                                    destinationSkyHopper.members(),
-                                    destinationSkyHopper.location(),
-                                    destinationSkyHopper.containers(),
-                                    destinationSkyHopper.filterType(),
-                                    destinationSkyHopper.filterItems(),
-                                    destinationSkyHopper.transferSpeed(),
-                                    destinationSkyHopper.maxTransferSpeed(),
-                                    destinationSkyHopper.transferAmount(),
-                                    destinationSkyHopper.maxTransferAmount(),
-                                    destinationSkyHopper.suctionSpeed(),
-                                    destinationSkyHopper.maxSuctionSpeed(),
-                                    destinationSkyHopper.suctionAmount(),
-                                    destinationSkyHopper.maxSuctionAmount(),
-                                    destinationSkyHopper.suctionRange(),
-                                    destinationSkyHopper.maxSuctionRange(),
-                                    destinationSkyHopper.maxContainers(),
-                                    time,
-                                    destinationSkyHopper.nextTransferTime());
+                            destinationSkyHopper.setNextSuctionTime(time);
 
-                            hopperManager.cacheSkyHopper(updatedSkyHopper.location(), updatedSkyHopper);
+                            if(destinationSkyHopper.getLocation() == null) return;
 
-                            delayedTask.add(updatedSkyHopper.location().clone(), new DelayedEntry(source.getLocation(), destination.getLocation(), false, false));
+                            delayedTask.add(destinationSkyHopper.getLocation(), new DelayedEntry(source.getLocation(), destination.getLocation(), false, false));
                         }
                     }
                 } else if(sourceSkyHopper != null) {
                     inventoryMoveItemEvent.setCancelled(true);
                     if(plugin.areSkyHoppersPaused()) return;
-                    if (!sourceSkyHopper.enabled()) return;
+                    if (!sourceSkyHopper.isSkyHopperEnabled()) return;
 
-                    if (sourceSkyHopper.nextTransferTime() < System.currentTimeMillis()) {
-                        delayedTask.add(sourceSkyHopper.location(), new DelayedEntry(source.getLocation(), destination.getLocation(), false, true));
+                    if (sourceSkyHopper.getNextTransferTime() < System.currentTimeMillis()) {
+                        if(sourceSkyHopper.getLocation() == null) return;
+                        delayedTask.add(sourceSkyHopper.getLocation(), new DelayedEntry(source.getLocation(), destination.getLocation(), false, true));
                     }
                 } else {
                     inventoryMoveItemEvent.setCancelled(true);
                     if(plugin.areSkyHoppersPaused()) return;
-                    if(!destinationSkyHopper.enabled()) return;
+                    if(!destinationSkyHopper.isSkyHopperEnabled()) return;
 
-                    if (destinationSkyHopper.nextSuctionTime() < System.currentTimeMillis()) {
-                        delayedTask.add(destinationSkyHopper.location().clone(), new DelayedEntry(source.getLocation(), destination.getLocation(), true, false));
+                    if (destinationSkyHopper.getNextSuctionTime() < System.currentTimeMillis()) {
+                        if(destinationSkyHopper.getLocation() == null) return;
+                        delayedTask.add(destinationSkyHopper.getLocation(), new DelayedEntry(source.getLocation(), destination.getLocation(), true, false));
                     }
                 }
             } else if(sourceInventory.getHolder(false) instanceof DoubleChest doubleChest) {
                 if(doubleChest.getLeftSide(false) instanceof Container leftContainer
                         && doubleChest.getRightSide(false) instanceof Container rightContainer) {
                     SkyHopper destinationSkyHopper = hopperManager.getSkyHopper(destination.getLocation());
-                    if (destinationSkyHopper == null) return;
+                    if(destinationSkyHopper == null) return;
 
                     inventoryMoveItemEvent.setCancelled(true);
                     if(plugin.areSkyHoppersPaused()) return;
-                    if (!destinationSkyHopper.enabled()) return;
+                    if (!destinationSkyHopper.isSkyHopperEnabled()) return;
 
-                    if(destinationSkyHopper.nextSuctionTime() < System.currentTimeMillis()) {
-                        Location skyHopperLocation = destinationSkyHopper.location().clone();
+                    if(destinationSkyHopper.getNextSuctionTime() < System.currentTimeMillis()) {
+                        Location skyHopperLocation = destinationSkyHopper.getLocation();
+                        if(skyHopperLocation == null) return;
                         Location containerLocation = new Location(skyHopperLocation.getWorld(), skyHopperLocation.x(), skyHopperLocation.y() + 1, skyHopperLocation.z());
 
                         if(containerLocation.equals(leftContainer.getLocation())) {

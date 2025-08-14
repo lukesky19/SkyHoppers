@@ -1,6 +1,6 @@
 /*
     SkyHoppers adds upgradable hoppers that can suction items, transfer items wirelessly to linked containers.
-    Copyright (C) 2025  lukeskywlker19
+    Copyright (C) 2025 lukeskywlker19
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published
@@ -18,14 +18,14 @@
 package com.github.lukesky19.skyHoppers.command;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.config.manager.LocaleManager;
-import com.github.lukesky19.skyHoppers.config.manager.SettingsManager;
-import com.github.lukesky19.skyHoppers.config.record.Locale;
-import com.github.lukesky19.skyHoppers.config.record.Settings;
+import com.github.lukesky19.skyHoppers.manager.LocaleManager;
+import com.github.lukesky19.skyHoppers.manager.SettingsManager;
+import com.github.lukesky19.skyHoppers.data.config.Locale;
+import com.github.lukesky19.skyHoppers.data.config.Settings;
 import com.github.lukesky19.skyHoppers.hopper.FilterType;
 import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
 import com.github.lukesky19.skyHoppers.manager.HopperManager;
-import com.github.lukesky19.skylib.format.FormatUtil;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
@@ -71,7 +71,6 @@ public class SkyHopperCommand {
      * Creates a command to be passed into the LifeCycleAPI.
      * @return A LiteralCommandNode of a CommandSourceStack.
      */
-    @SuppressWarnings("UnstableApiUsage")
     public LiteralCommandNode<CommandSourceStack> createCommand() {
         LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("skyhoppers")
                 .requires(ctx -> ctx.getSender().hasPermission("skyhoppers.commands.skyhoppers"));
@@ -83,7 +82,7 @@ public class SkyHopperCommand {
                 
                 plugin.reload();
                 
-                ctx.getSource().getSender().sendMessage(FormatUtil.format(locale.prefix() + locale.reload()));
+                ctx.getSource().getSender().sendMessage(AdventureUtil.serialize(locale.prefix() + locale.reload()));
                 
                 return 1;
             })
@@ -96,7 +95,7 @@ public class SkyHopperCommand {
                 CommandSender sender = ctx.getSource().getSender();
 
                 for (String msg : locale.help()) {
-                    sender.sendMessage(FormatUtil.format(msg));
+                    sender.sendMessage(AdventureUtil.serialize(msg));
                 }
                 
                 return 1;
@@ -158,13 +157,13 @@ public class SkyHopperCommand {
                                                 if(itemStack != null) {
                                                     target.getInventory().addItem(itemStack);
 
-                                                    target.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperGiven()));
+                                                    target.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperGiven()));
 
-                                                    sender.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperGivenTo(), List.of(Placeholder.parsed("player", target.getName()))));
+                                                    sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperGivenTo(), List.of(Placeholder.parsed("player", target.getName()))));
 
                                                     return 1;
                                                 } else {
-                                                    sender.sendMessage(FormatUtil.format(locale.prefix() + locale.skyhopperCreationFailed()));
+                                                    sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.skyhopperCreationFailed()));
 
                                                     return 0;
                                                 }
@@ -175,12 +174,12 @@ public class SkyHopperCommand {
 
                                             Settings settings = settingsManager.getSettings();
                                             if(settings == null) {
-                                                sender.sendMessage(FormatUtil.format(locale.prefix() + locale.skyhopperCreationFailed()));
-                                                sender.sendMessage(FormatUtil.format(locale.prefix() + locale.invalidSettings()));
+                                                sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.skyhopperCreationFailed()));
+                                                sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.invalidSettings()));
                                                 return 0;
                                             }
 
-                                            Settings.SkyHopper skyHopperSettings = settings.skyhopper();
+                                            Settings.SkyHopperConfig skyHopperConfigSettings = settings.skyHopperConfig();
 
                                             PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player name", PlayerSelectorArgumentResolver.class);
                                             Player target = targetResolver.resolve(ctx.getSource()).getFirst();
@@ -213,7 +212,7 @@ public class SkyHopperCommand {
                                                     suctionAmount,
                                                     suctionRange,
                                                     suctionRange,
-                                                    skyHopperSettings.startingMaxContainers(),
+                                                    skyHopperConfigSettings.startingMaxContainers(),
                                                     nextSuction,
                                                     nextTransfer);
 
@@ -222,13 +221,13 @@ public class SkyHopperCommand {
                                             if(itemStack != null) {
                                                 target.getInventory().addItem(itemStack);
 
-                                                target.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperGiven()));
+                                                target.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperGiven()));
 
-                                                sender.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperGivenTo(), List.of(Placeholder.parsed("player", target.getName()))));
+                                                sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperGivenTo(), List.of(Placeholder.parsed("player", target.getName()))));
 
                                                 return 1;
                                             } else {
-                                                sender.sendMessage(FormatUtil.format(locale.prefix() + locale.skyhopperCreationFailed()));
+                                                sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.skyhopperCreationFailed()));
 
                                                 return 0;
                                             }
@@ -239,12 +238,12 @@ public class SkyHopperCommand {
 
                                         Settings settings = settingsManager.getSettings();
                                         if(settings == null) {
-                                            sender.sendMessage(FormatUtil.format(locale.prefix() + locale.skyhopperCreationFailed()));
-                                            sender.sendMessage(FormatUtil.format(locale.prefix() + locale.invalidSettings()));
+                                            sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.skyhopperCreationFailed()));
+                                            sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.invalidSettings()));
 
                                             return 0;
                                         }
-                                        Settings.SkyHopper skyHopperSettings = settings.skyhopper();
+                                        Settings.SkyHopperConfig skyHopperConfigSettings = settings.skyHopperConfig();
 
                                         PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player name", PlayerSelectorArgumentResolver.class);
                                         Player target = targetResolver.resolve(ctx.getSource()).getFirst();
@@ -268,15 +267,15 @@ public class SkyHopperCommand {
                                                 new ArrayList<>(),
                                                 transferSpeed,
                                                 transferSpeed,
-                                                skyHopperSettings.startingTransferAmount(),
-                                                skyHopperSettings.startingTransferAmount(),
+                                                skyHopperConfigSettings.startingTransferAmount(),
+                                                skyHopperConfigSettings.startingTransferAmount(),
                                                 suctionSpeed,
                                                 suctionSpeed,
                                                 suctionAmount,
                                                 suctionAmount,
                                                 suctionRange,
                                                 suctionRange,
-                                                skyHopperSettings.startingMaxContainers(),
+                                                skyHopperConfigSettings.startingMaxContainers(),
                                                 nextSuction,
                                                 nextTransfer);
 
@@ -285,13 +284,13 @@ public class SkyHopperCommand {
                                         if(itemStack != null) {
                                             target.getInventory().addItem(itemStack);
 
-                                            target.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperGiven()));
+                                            target.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperGiven()));
 
-                                            sender.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperGivenTo(), List.of(Placeholder.parsed("player", target.getName()))));
+                                            sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperGivenTo(), List.of(Placeholder.parsed("player", target.getName()))));
 
                                             return 1;
                                         } else {
-                                            sender.sendMessage(FormatUtil.format(locale.prefix() + locale.skyhopperCreationFailed()));
+                                            sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.skyhopperCreationFailed()));
 
                                             return 0;
                                         }
@@ -302,12 +301,12 @@ public class SkyHopperCommand {
 
                                     Settings settings = settingsManager.getSettings();
                                     if(settings == null) {
-                                        sender.sendMessage(FormatUtil.format(locale.prefix() + locale.skyhopperCreationFailed()));
-                                        sender.sendMessage(FormatUtil.format(locale.prefix() + locale.invalidSettings()));
+                                        sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.skyhopperCreationFailed()));
+                                        sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.invalidSettings()));
 
                                         return 0;
                                     }
-                                    Settings.SkyHopper skyHopperSettings = settings.skyhopper();
+                                    Settings.SkyHopperConfig skyHopperConfigSettings = settings.skyHopperConfig();
 
                                     PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player name", PlayerSelectorArgumentResolver.class);
                                     Player target = targetResolver.resolve(ctx.getSource()).getFirst();
@@ -317,7 +316,7 @@ public class SkyHopperCommand {
                                     int suctionRange = ctx.getArgument("suction range", int.class);
 
                                     long nextSuction = (long) (System.currentTimeMillis() + (suctionSpeed * 1000));
-                                    long nextTransfer = (long) (System.currentTimeMillis() + (skyHopperSettings.startingTransferSpeed() * 1000));
+                                    long nextTransfer = (long) (System.currentTimeMillis() + (skyHopperConfigSettings.startingTransferSpeed() * 1000));
 
                                     SkyHopper skyHopper = new SkyHopper(
                                             true,
@@ -328,17 +327,17 @@ public class SkyHopperCommand {
                                             new ArrayList<>(),
                                             FilterType.NONE,
                                             new ArrayList<>(),
-                                            skyHopperSettings.startingTransferSpeed(),
-                                            skyHopperSettings.startingTransferSpeed(),
-                                            skyHopperSettings.startingTransferAmount(),
-                                            skyHopperSettings.startingTransferAmount(),
+                                            skyHopperConfigSettings.startingTransferSpeed(),
+                                            skyHopperConfigSettings.startingTransferSpeed(),
+                                            skyHopperConfigSettings.startingTransferAmount(),
+                                            skyHopperConfigSettings.startingTransferAmount(),
                                             suctionSpeed,
                                             suctionSpeed,
                                             suctionAmount,
                                             suctionAmount,
                                             suctionRange,
                                             suctionRange,
-                                            skyHopperSettings.startingMaxContainers(),
+                                            skyHopperConfigSettings.startingMaxContainers(),
                                             nextSuction,
                                             nextTransfer);
 
@@ -347,13 +346,13 @@ public class SkyHopperCommand {
                                     if(itemStack != null) {
                                         target.getInventory().addItem(itemStack);
 
-                                        target.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperGiven()));
+                                        target.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperGiven()));
 
-                                        sender.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperGivenTo(), List.of(Placeholder.parsed("player", target.getName()))));
+                                        sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperGivenTo(), List.of(Placeholder.parsed("player", target.getName()))));
 
                                         return 1;
                                     } else {
-                                        sender.sendMessage(FormatUtil.format(locale.prefix() + locale.skyhopperCreationFailed()));
+                                        sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.skyhopperCreationFailed()));
 
                                         return 0;
                                     }
@@ -364,12 +363,12 @@ public class SkyHopperCommand {
 
                                 Settings settings = settingsManager.getSettings();
                                 if(settings == null) {
-                                    sender.sendMessage(FormatUtil.format(locale.prefix() + locale.skyhopperCreationFailed()));
-                                    sender.sendMessage(FormatUtil.format(locale.prefix() + locale.invalidSettings()));
+                                    sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.skyhopperCreationFailed()));
+                                    sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.invalidSettings()));
 
                                     return 0;
                                 }
-                                Settings.SkyHopper skyHopperSettings = settings.skyhopper();
+                                Settings.SkyHopperConfig skyHopperConfigSettings = settings.skyHopperConfig();
 
                                 PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player name", PlayerSelectorArgumentResolver.class);
                                 Player target = targetResolver.resolve(ctx.getSource()).getFirst();
@@ -378,7 +377,7 @@ public class SkyHopperCommand {
                                 int suctionAmount = ctx.getArgument("suction amount", int.class);
 
                                 long nextSuction = (long) (System.currentTimeMillis() + (suctionSpeed * 1000));
-                                long nextTransfer = (long) (System.currentTimeMillis() + (skyHopperSettings.startingTransferSpeed() * 1000));
+                                long nextTransfer = (long) (System.currentTimeMillis() + (skyHopperConfigSettings.startingTransferSpeed() * 1000));
 
                                 SkyHopper skyHopper = new SkyHopper(
                                         true,
@@ -389,17 +388,17 @@ public class SkyHopperCommand {
                                         new ArrayList<>(),
                                         FilterType.NONE,
                                         new ArrayList<>(),
-                                        skyHopperSettings.startingTransferSpeed(),
-                                        skyHopperSettings.startingTransferSpeed(),
-                                        skyHopperSettings.startingTransferAmount(),
-                                        skyHopperSettings.startingTransferAmount(),
+                                        skyHopperConfigSettings.startingTransferSpeed(),
+                                        skyHopperConfigSettings.startingTransferSpeed(),
+                                        skyHopperConfigSettings.startingTransferAmount(),
+                                        skyHopperConfigSettings.startingTransferAmount(),
                                         suctionSpeed,
                                         suctionSpeed,
                                         suctionAmount,
                                         suctionAmount,
-                                        skyHopperSettings.startingSuctionRange(),
-                                        skyHopperSettings.startingSuctionRange(),
-                                        skyHopperSettings.startingMaxContainers(),
+                                        skyHopperConfigSettings.startingSuctionRange(),
+                                        skyHopperConfigSettings.startingSuctionRange(),
+                                        skyHopperConfigSettings.startingMaxContainers(),
                                         nextSuction,
                                         nextTransfer);
 
@@ -408,13 +407,13 @@ public class SkyHopperCommand {
                                 if(itemStack != null) {
                                     target.getInventory().addItem(itemStack);
 
-                                    target.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperGiven()));
+                                    target.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperGiven()));
 
-                                    sender.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperGivenTo(), List.of(Placeholder.parsed("player", target.getName()))));
+                                    sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperGivenTo(), List.of(Placeholder.parsed("player", target.getName()))));
 
                                     return 1;
                                 } else {
-                                    sender.sendMessage(FormatUtil.format(locale.prefix() + locale.skyhopperCreationFailed()));
+                                    sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.skyhopperCreationFailed()));
 
                                     return 0;
                                 }
@@ -425,12 +424,12 @@ public class SkyHopperCommand {
 
                             Settings settings = settingsManager.getSettings();
                             if(settings == null) {
-                                sender.sendMessage(FormatUtil.format(locale.prefix() + locale.skyhopperCreationFailed()));
-                                sender.sendMessage(FormatUtil.format(locale.prefix() + locale.invalidSettings()));
+                                sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.skyhopperCreationFailed()));
+                                sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.invalidSettings()));
 
                                 return 0;
                             }
-                            Settings.SkyHopper skyHopperSettings = settings.skyhopper();
+                            Settings.SkyHopperConfig skyHopperConfigSettings = settings.skyHopperConfig();
 
                             PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player name", PlayerSelectorArgumentResolver.class);
                             Player target = targetResolver.resolve(ctx.getSource()).getFirst();
@@ -438,7 +437,7 @@ public class SkyHopperCommand {
                             double suctionSpeed = ctx.getArgument("suction speed", double.class);
 
                             long nextSuction = (long) (System.currentTimeMillis() + (suctionSpeed * 1000));
-                            long nextTransfer = (long) (System.currentTimeMillis() + (skyHopperSettings.startingTransferSpeed() * 1000));
+                            long nextTransfer = (long) (System.currentTimeMillis() + (skyHopperConfigSettings.startingTransferSpeed() * 1000));
 
                             SkyHopper skyHopper = new SkyHopper(
                                     true,
@@ -449,17 +448,17 @@ public class SkyHopperCommand {
                                     new ArrayList<>(),
                                     FilterType.NONE,
                                     new ArrayList<>(),
-                                    skyHopperSettings.startingTransferSpeed(),
-                                    skyHopperSettings.startingTransferSpeed(),
-                                    skyHopperSettings.startingTransferAmount(),
-                                    skyHopperSettings.startingTransferAmount(),
+                                    skyHopperConfigSettings.startingTransferSpeed(),
+                                    skyHopperConfigSettings.startingTransferSpeed(),
+                                    skyHopperConfigSettings.startingTransferAmount(),
+                                    skyHopperConfigSettings.startingTransferAmount(),
                                     suctionSpeed,
                                     suctionSpeed,
-                                    skyHopperSettings.startingSuctionAmount(),
-                                    skyHopperSettings.startingSuctionAmount(),
-                                    skyHopperSettings.startingSuctionRange(),
-                                    skyHopperSettings.startingSuctionRange(),
-                                    skyHopperSettings.startingMaxContainers(),
+                                    skyHopperConfigSettings.startingSuctionAmount(),
+                                    skyHopperConfigSettings.startingSuctionAmount(),
+                                    skyHopperConfigSettings.startingSuctionRange(),
+                                    skyHopperConfigSettings.startingSuctionRange(),
+                                    skyHopperConfigSettings.startingMaxContainers(),
                                     nextSuction,
                                     nextTransfer);
 
@@ -468,13 +467,13 @@ public class SkyHopperCommand {
                             if(itemStack != null) {
                                 target.getInventory().addItem(itemStack);
 
-                                target.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperGiven()));
+                                target.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperGiven()));
 
-                                sender.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperGivenTo(), List.of(Placeholder.parsed("player", target.getName()))));
+                                sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperGivenTo(), List.of(Placeholder.parsed("player", target.getName()))));
 
                                 return 1;
                             } else {
-                                sender.sendMessage(FormatUtil.format(locale.prefix() + locale.skyhopperCreationFailed()));
+                                sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.skyhopperCreationFailed()));
 
                                 return 0;
                             }
@@ -485,19 +484,19 @@ public class SkyHopperCommand {
 
                         Settings settings = settingsManager.getSettings();
                         if(settings == null) {
-                            sender.sendMessage(FormatUtil.format(locale.prefix() + locale.skyhopperCreationFailed()));
-                            sender.sendMessage(FormatUtil.format(locale.prefix() + locale.invalidSettings()));
+                            sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.skyhopperCreationFailed()));
+                            sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.invalidSettings()));
 
                             return 0;
                         }
-                        Settings.SkyHopper skyHopperSettings = settings.skyhopper();
+                        Settings.SkyHopperConfig skyHopperConfigSettings = settings.skyHopperConfig();
 
                         PlayerSelectorArgumentResolver targetResolver = ctx.getArgument("player name", PlayerSelectorArgumentResolver.class);
                         Player target = targetResolver.resolve(ctx.getSource()).getFirst();
                         int amount = ctx.getArgument("amount",  int.class);
 
-                        long nextSuction = (long) (System.currentTimeMillis() + (skyHopperSettings.startingSuctionSpeed() * 1000));
-                        long nextTransfer = (long) (System.currentTimeMillis() + (skyHopperSettings.startingTransferSpeed() * 1000));
+                        long nextSuction = (long) (System.currentTimeMillis() + (skyHopperConfigSettings.startingSuctionSpeed() * 1000));
+                        long nextTransfer = (long) (System.currentTimeMillis() + (skyHopperConfigSettings.startingTransferSpeed() * 1000));
 
                         SkyHopper skyHopper = new SkyHopper(
                                 true,
@@ -508,17 +507,17 @@ public class SkyHopperCommand {
                                 new ArrayList<>(),
                                 FilterType.NONE,
                                 new ArrayList<>(),
-                                skyHopperSettings.startingTransferSpeed(),
-                                skyHopperSettings.startingTransferSpeed(),
-                                skyHopperSettings.startingTransferAmount(),
-                                skyHopperSettings.startingTransferAmount(),
-                                skyHopperSettings.startingSuctionSpeed(),
-                                skyHopperSettings.startingSuctionSpeed(),
-                                skyHopperSettings.startingSuctionAmount(),
-                                skyHopperSettings.startingSuctionAmount(),
-                                skyHopperSettings.startingSuctionRange(),
-                                skyHopperSettings.startingSuctionRange(),
-                                skyHopperSettings.startingMaxContainers(),
+                                skyHopperConfigSettings.startingTransferSpeed(),
+                                skyHopperConfigSettings.startingTransferSpeed(),
+                                skyHopperConfigSettings.startingTransferAmount(),
+                                skyHopperConfigSettings.startingTransferAmount(),
+                                skyHopperConfigSettings.startingSuctionSpeed(),
+                                skyHopperConfigSettings.startingSuctionSpeed(),
+                                skyHopperConfigSettings.startingSuctionAmount(),
+                                skyHopperConfigSettings.startingSuctionAmount(),
+                                skyHopperConfigSettings.startingSuctionRange(),
+                                skyHopperConfigSettings.startingSuctionRange(),
+                                skyHopperConfigSettings.startingMaxContainers(),
                                 nextSuction,
                                 nextTransfer);
 
@@ -527,13 +526,13 @@ public class SkyHopperCommand {
                         if(itemStack != null) {
                             target.getInventory().addItem(itemStack);
 
-                            target.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperGiven()));
+                            target.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperGiven()));
 
-                            sender.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperGivenTo(), List.of(Placeholder.parsed("player", target.getName()))));
+                            sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperGivenTo(), List.of(Placeholder.parsed("player", target.getName()))));
 
                             return 1;
                         } else {
-                            sender.sendMessage(FormatUtil.format(locale.prefix() + locale.skyhopperCreationFailed()));
+                            sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.skyhopperCreationFailed()));
 
                             return 0;
                         }
@@ -556,48 +555,36 @@ public class SkyHopperCommand {
                     Player newOwner = targetResolver.resolve(ctx.getSource()).getFirst();
 
                     if(!hopperManager.isItemStackSkyHopper(itemStack)) {
-                        player.sendMessage(FormatUtil.format(locale.prefix() + locale.itemNotSkyHopper()));
+                        player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.itemNotSkyHopper()));
                         return 0;
                     }
 
                     SkyHopper skyHopper = hopperManager.getSkyHopperFromPDC(null, itemStack.getItemMeta().getPersistentDataContainer());
                     if(skyHopper == null) return 0;
 
-                    if(!skyHopper.owner().equals(playerUUID)) {
-                        if(!skyHopper.members().contains(playerUUID)) {
-                            player.sendMessage(FormatUtil.format(locale.prefix() + locale.noAccessOwnerChange()));
+                    if(skyHopper.getOwner() != null) {
+                        if(skyHopper.getOwner().equals(playerUUID) || skyHopper.getMembers().contains(playerUUID) || player.hasPermission("skyhoppers.admin")) {
+                            ItemStack newStack = hopperManager.createItemStackFromSkyHopper(skyHopper, 1);
+                            player.getInventory().setItemInMainHand(newStack);
+
+                            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.newOwner(), List.of(Placeholder.parsed("player_name", newOwner.getName()))));
+                            return 1;
+                        } else {
+                            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.noAccessOwnerChange()));
+                            return 0;
+                        }
+                    } else {
+                        if(skyHopper.getMembers().contains(playerUUID) || player.hasPermission("skyhoppers.admin")) {
+                            ItemStack newStack = hopperManager.createItemStackFromSkyHopper(skyHopper, 1);
+                            player.getInventory().setItemInMainHand(newStack);
+
+                            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.newOwner(), List.of(Placeholder.parsed("player_name", newOwner.getName()))));
+                            return 1;
+                        } else {
+                            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.noAccessOwnerChange()));
                             return 0;
                         }
                     }
-
-                    SkyHopper updatedSkyHopper = new SkyHopper(
-                            skyHopper.enabled(),
-                            skyHopper.particles(),
-                            newOwner.getUniqueId(),
-                            skyHopper.members(),
-                            skyHopper.location(),
-                            skyHopper.containers(),
-                            skyHopper.filterType(),
-                            skyHopper.filterItems(),
-                            skyHopper.transferSpeed(),
-                            skyHopper.maxTransferSpeed(),
-                            skyHopper.transferAmount(),
-                            skyHopper.maxTransferAmount(),
-                            skyHopper.suctionSpeed(),
-                            skyHopper.maxSuctionSpeed(),
-                            skyHopper.suctionAmount(),
-                            skyHopper.maxSuctionAmount(),
-                            skyHopper.suctionRange(),
-                            skyHopper.maxSuctionRange(),
-                            skyHopper.maxContainers(),
-                            skyHopper.nextSuctionTime(),
-                            skyHopper.nextTransferTime());
-
-                    ItemStack newStack = hopperManager.createItemStackFromSkyHopper(updatedSkyHopper, 1);
-                    player.getInventory().setItemInMainHand(newStack);
-
-                    player.sendMessage(FormatUtil.format(locale.prefix() + locale.newOwner(), List.of(Placeholder.parsed("player_name", newOwner.getName()))));
-                    return 1;
             }))
         );
 
@@ -612,9 +599,9 @@ public class SkyHopperCommand {
                     hopperManager.loadSkyHoppers(force);
                     
                     if(force) {
-                        sender.sendMessage(FormatUtil.format(locale.prefix() + locale.skyhoppersForceLoaded()));
+                        sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.skyhoppersForceLoaded()));
                     } else {
-                        sender.sendMessage(FormatUtil.format(locale.prefix() + locale.skyhoppersLoaded()));
+                        sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.skyhoppersLoaded()));
                     }
 
                     return 1;
@@ -630,7 +617,7 @@ public class SkyHopperCommand {
                 
                 plugin.pauseSkyHoppers();
 
-                sender.sendMessage(FormatUtil.format(locale.prefix() + locale.skyHoppersPaused()));
+                sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.skyHoppersPaused()));
 
                 return 1;
             })
@@ -644,7 +631,7 @@ public class SkyHopperCommand {
                 
                   plugin.unPauseSkyHoppers();
 
-                  sender.sendMessage(FormatUtil.format(locale.prefix() + locale.skyhoppersUnpaused()));
+                  sender.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.skyhoppersUnpaused()));
 
                   return 1;
             })

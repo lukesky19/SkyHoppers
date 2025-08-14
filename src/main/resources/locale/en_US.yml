@@ -1,4 +1,4 @@
-config-version: 1.0.0
+config-version: 1.1.0.0
 prefix: "<#99ff99><bold>SkyHoppers</bold></#99ff99><gray> ▪ </gray>"
 help:
     - "<#99ff99>SkyHoppers is developed by <white><bold>lukeskywlker19</bold></white>.</#99ff99>"
@@ -45,3 +45,4 @@ failed-skyhopper-load: "<#ff4343>The plugin failed to load a SkyHopper's setting
 item-not-skyhopper: "<#ff4343>The item in your hand is not a SkyHopper.</#ff4343>"
 no-access-owner-change: "<red>You don't have access to this SkyHopper to change the owner.</#ff4343>"
 new-owner: "<#99ff99>This SkyHopper's owner is now <yellow><player_name></yellow>.</#99ff99>"
+gui-open-error: "<red>Unable to open this GUI because of a configuration error.</red>"

@@ -54,20 +54,23 @@ public class HopperViewTask extends BukkitRunnable {
     @Override
     public void run() {
         SkyHopper skyHopper = hopperManager.getSkyHopper(location);
-        if(skyHopper == null) return;
+        if(skyHopper == null) {
+            cancel();
+            return;
+        }
 
-        int suctionRange = skyHopper.suctionRange();
+        int suctionRange = skyHopper.getSuctionRange();
 
         double range = suctionRange + 0.5;
-        if (skyHopper.location() != null) {
-            var hopperCorner1 = skyHopper.location().clone();
+        if (skyHopper.getLocation() != null) {
+            var hopperCorner1 = skyHopper.getLocation().clone();
             var hopperCorner2 = hopperCorner1.clone().add(1, 1, 1);
             PluginUtils.getHollowCube(hopperCorner1, hopperCorner2, 0.5).stream()
                     .filter(loc -> loc.getWorld() != null)
                     .forEach(location -> player.spawnParticle(Particle.DUST, location.clone(), 1, 0.0, 0.0, 0.0, new Particle.DustOptions(Color.LIME, 1)));
 
-            for (SkyContainer skyContainer : skyHopper.containers()) {
-                Location corner1 = skyContainer.location().clone();
+            for(SkyContainer skyContainer : skyHopper.getLinkedContainers()) {
+                Location corner1 = skyContainer.getLocation().clone();
                 Location corner2 = corner1.clone().add(1, 1, 1);
                 PluginUtils.getHollowCube(corner1, corner2, 0.5).stream()
                         .filter(loc -> loc.getWorld() != null)
@@ -75,7 +78,7 @@ public class HopperViewTask extends BukkitRunnable {
             }
 
             // Visualize Suction Range
-            Location centered = skyHopper.location().clone().add(0.5, 0.5, 0.5);
+            Location centered = skyHopper.getLocation().clone().add(0.5, 0.5, 0.5);
             Location min = centered.clone().subtract(range, range, range);
             Location max = centered.clone().add(range, range, range);
 

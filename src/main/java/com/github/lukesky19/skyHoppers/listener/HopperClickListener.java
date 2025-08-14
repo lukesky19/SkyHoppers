@@ -18,17 +18,16 @@
 package com.github.lukesky19.skyHoppers.listener;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.config.manager.GUIManager;
-import com.github.lukesky19.skyHoppers.config.manager.LocaleManager;
-import com.github.lukesky19.skyHoppers.config.manager.SettingsManager;
-import com.github.lukesky19.skyHoppers.config.record.Locale;
-import com.github.lukesky19.skyHoppers.gui.HopperGUI;
-import com.github.lukesky19.skyHoppers.hopper.FilterType;
-import com.github.lukesky19.skyHoppers.hopper.SkyContainer;
-import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
+import com.github.lukesky19.skyHoppers.manager.GUIConfigManager;
+import com.github.lukesky19.skyHoppers.manager.LocaleManager;
+import com.github.lukesky19.skyHoppers.manager.SettingsManager;
+import com.github.lukesky19.skyHoppers.data.config.Locale;
+import com.github.lukesky19.skyHoppers.gui.menu.HopperGUI;
+import com.github.lukesky19.skyHoppers.hopper.*;
+import com.github.lukesky19.skyHoppers.manager.GUIManager;
 import com.github.lukesky19.skyHoppers.manager.HookManager;
 import com.github.lukesky19.skyHoppers.manager.HopperManager;
-import com.github.lukesky19.skylib.format.FormatUtil;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
@@ -47,37 +46,41 @@ import java.util.*;
  * This class listens to when a SkyHopper is clicked to open the SkyHopper settings GUI or a Container is clicked to link to.
  */
 public class HopperClickListener implements Listener {
-    private final SkyHoppers plugin;
-    private final SettingsManager settingsManager;
-    private final LocaleManager localeManager;
-    private final GUIManager guiManager;
-    private final HopperManager hopperManager;
-    private final HookManager hookManager;
+    private final @NotNull SkyHoppers skyHoppers;
+    private final @NotNull SettingsManager settingsManager;
+    private final @NotNull LocaleManager localeManager;
+    private final @NotNull GUIConfigManager guiConfigManager;
+    private final @NotNull HopperManager hopperManager;
+    private final @NotNull HookManager hookManager;
+    private final @NotNull GUIManager guiManager;
 
-    private final Map<UUID, Location> linkingPlayers = new HashMap<>();
+    private final @NotNull Map<UUID, Location> linkingPlayers = new HashMap<>();
 
     /**
      * Constructor
-     * @param plugin The SkyHoppers Plugin.
+     * @param skyHoppers The SkyHoppers Plugin.
      * @param settingsManager A SettingsManager instance.
      * @param localeManager A LocaleManager instance.
-     * @param guiManager A GUIManager instance.
+     * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param hopperManager A HopperManager instance.
      * @param hookManager A HookManager instance.
+     * @param guiManager A {@link GUIManager} instance.
      */
     public HopperClickListener(
-            SkyHoppers plugin,
-            SettingsManager settingsManager,
-            LocaleManager localeManager,
-            GUIManager guiManager,
-            HopperManager hopperManager,
-            HookManager hookManager) {
-        this.plugin = plugin;
+            @NotNull SkyHoppers skyHoppers,
+            @NotNull SettingsManager settingsManager,
+            @NotNull LocaleManager localeManager,
+            @NotNull GUIConfigManager guiConfigManager,
+            @NotNull HopperManager hopperManager,
+            @NotNull HookManager hookManager,
+            @NotNull GUIManager guiManager) {
+        this.skyHoppers = skyHoppers;
         this.settingsManager = settingsManager;
         this.localeManager = localeManager;
-        this.guiManager = guiManager;
+        this.guiConfigManager = guiConfigManager;
         this.hopperManager = hopperManager;
         this.hookManager = hookManager;
+        this.guiManager = guiManager;
     }
 
     /**
@@ -94,9 +97,34 @@ public class HopperClickListener implements Listener {
      * @param player The Player linking.
      * @param location The Location of the SkyHopper being linked to.
      */
-    public void addLinkingPlayer(Player player, Location location) {
+    public void addLinkingPlayer(@NotNull Player player, @NotNull Location location) {
         linkingPlayers.put(player.getUniqueId(), location);
     }
+
+    /**
+     * Disables any players in linking mode for a particular {@link Location}
+     * @param location The {@link Location} of the SkyHopper being linked to.
+     */
+    public void disableLinkingForLocation(@NotNull Location location) {
+        Locale locale = localeManager.getLocale();
+
+        Iterator<Map.Entry<UUID, Location>> iterator = linkingPlayers.entrySet().iterator();
+        while(iterator.hasNext()) {
+            Map.Entry<UUID, Location> entry = iterator.next();
+            UUID uuid = entry.getKey();
+            Location iteratorLocation = entry.getValue();
+
+            if(iteratorLocation.equals(location)) {
+                iterator.remove();
+
+                Player player = skyHoppers.getServer().getPlayer(uuid);
+                if(player != null && player.isOnline() && player.isConnected()) {
+                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.linkingDisabled()));
+                }
+            }
+        }
+    }
+
 
     /**
      * Handles when a SkyHopper is clicked to open the settings GUI or to link a container.
@@ -104,18 +132,27 @@ public class HopperClickListener implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onHopperClick(PlayerInteractEvent playerInteractEvent) {
-        final Locale locale = localeManager.getLocale();
-        final Player player = playerInteractEvent.getPlayer();
-        final UUID uuid = player.getUniqueId();
-        final Block block = playerInteractEvent.getClickedBlock();
+        Locale locale = localeManager.getLocale();
+        Player player = playerInteractEvent.getPlayer();
+        UUID uuid = player.getUniqueId();
+        Block block = playerInteractEvent.getClickedBlock();
 
-        if (!playerInteractEvent.hasBlock() || playerInteractEvent.getAction() != Action.LEFT_CLICK_BLOCK || block == null) return;
+        if(!playerInteractEvent.hasBlock() || block == null) return;
+
+        // Extra check if a Hopper is a SkyHopper and it wasn't loaded.
+        Location location = block.getLocation();
+        if(hopperManager.getSkyHopper(location) == null) {
+            // Chunk should already be loaded so performance costs aren't an issue
+            hopperManager.loadSkyHopperAtLocation(location);
+        }
+
+        if(playerInteractEvent.getAction() != Action.LEFT_CLICK_BLOCK) return;
 
         if(isPlayerLinking(uuid)) {
             if (!(block.getState(false) instanceof Container container)) return;
 
             if (hookManager.canNotOpen(player, container.getLocation())) {
-                player.sendMessage(FormatUtil.format(locale.prefix() + locale.containerNoAccess()));
+                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.containerNoAccess()));
 
                 playerInteractEvent.setCancelled(true);
 
@@ -123,9 +160,8 @@ public class HopperClickListener implements Listener {
             }
 
             SkyHopper linkingSkyHopper = hopperManager.getSkyHopper(linkingPlayers.get(uuid));
-            if (linkingSkyHopper == null) {
+            if(linkingSkyHopper == null) {
                 linkingPlayers.remove(player.getUniqueId());
-
                 return;
             }
 
@@ -133,101 +169,83 @@ public class HopperClickListener implements Listener {
 
             SkyHopper targetSkyHopper = hopperManager.getSkyHopper(container.getLocation());
             if(targetSkyHopper != null
-                    && targetSkyHopper.location() != null
-                    && linkingSkyHopper.location() != null
-                    && linkingSkyHopper.location().equals(targetSkyHopper.location())) {
+                    && targetSkyHopper.getLocation() != null
+                    && linkingSkyHopper.getLocation() != null
+                    && linkingSkyHopper.getLocation().equals(targetSkyHopper.getLocation())) {
                 linkingPlayers.remove(player.getUniqueId());
 
-                player.sendMessage(FormatUtil.format(locale.prefix() + locale.linkingDisabled()));
+                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.linkingDisabled()));
 
                 return;
             }
 
-            if(linkingSkyHopper.location() != null && linkingSkyHopper.location().getBlock().getState(false) instanceof Hopper hopper) {
-                List<SkyContainer> skyContainerList = linkingSkyHopper.containers();
+            if(linkingSkyHopper.getLocation() != null) {
+                Iterator<SkyContainer> iterator = linkingSkyHopper.getLinkedContainers().iterator();
+                while(iterator.hasNext()) {
+                    SkyContainer skyContainer = iterator.next();
 
-                Iterator<SkyContainer> skyContainerIterator = skyContainerList.iterator();
-                while(skyContainerIterator.hasNext()) {
-                    SkyContainer skyContainer = skyContainerIterator.next();
-                    if (skyContainer.location().equals(container.getLocation())) {
-                        skyContainerIterator.remove();
+                    if(skyContainer.getLocation().equals(container.getLocation())) {
+                        iterator.remove();
 
-                        SkyHopper updatedSkyHopper = getUpdatedSkyHopper(linkingSkyHopper, skyContainerList);
+                        hopperManager.saveSkyHopperToPDC(linkingSkyHopper);
 
-                        hopperManager.saveSkyHopperToBlockPDC(updatedSkyHopper, hopper);
+                        guiManager.refreshViewersGUI(location);
 
-                        hopperManager.cacheSkyHopper(updatedSkyHopper.location(), updatedSkyHopper);
-
-                        player.sendMessage(FormatUtil.format(locale.prefix() + locale.containerUnlinked()));
+                        player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.containerUnlinked()));
 
                         return;
                     }
                 }
+            }
 
-                if(linkingSkyHopper.containers().size() != linkingSkyHopper.maxContainers()) {
-                    skyContainerList.add(new SkyContainer(container.getLocation(), FilterType.NONE, new ArrayList<>()));
+            if(linkingSkyHopper.getLinkedContainers().size() != linkingSkyHopper.getMaxContainers()) {
+                linkingSkyHopper.addLinkedContainer(new SkyContainer(container.getLocation(), FilterType.NONE, new ArrayList<>()));
 
-                    SkyHopper updatedSkyHopper = getUpdatedSkyHopper(linkingSkyHopper, skyContainerList);
+                hopperManager.saveSkyHopperToPDC(linkingSkyHopper);
 
-                    hopperManager.saveSkyHopperToBlockPDC(updatedSkyHopper, hopper);
+                guiManager.refreshViewersGUI(location);
 
-                    hopperManager.cacheSkyHopper(updatedSkyHopper.location(), updatedSkyHopper);
-
-                    player.sendMessage(FormatUtil.format(locale.prefix() + locale.containerLinked()));
-                } else {
-                    player.sendMessage(FormatUtil.format(locale.prefix() + locale.containerLinksMaxed()));
-                }
+                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.containerLinked()));
+            } else {
+                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.containerLinksMaxed()));
             }
         } else {
             if (!(block.getState(false) instanceof Hopper hopperBlock)) return;
 
             SkyHopper skyHopper = hopperManager.getSkyHopper(hopperBlock.getLocation());
-            if (skyHopper == null || player.isSneaking()) return;
+            if(skyHopper == null || player.isSneaking()) return;
 
             playerInteractEvent.setCancelled(true);
 
-            if (hookManager.canNotOpen(player, hopperBlock.getLocation())) {
-                player.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperNoAccess()));
-
+            if(hookManager.canNotOpen(player, hopperBlock.getLocation())) {
+                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperNoAccess()));
                 return;
             }
 
-            if(player.hasPermission("skyhoppers.admin") || (skyHopper.owner() != null && skyHopper.owner().equals(player.getUniqueId())) || skyHopper.members().contains(player.getUniqueId())) {
-                new HopperGUI(plugin, settingsManager, localeManager, guiManager, hopperManager, this, hopperBlock.getLocation(), player).open(plugin, player);
+            if(player.hasPermission("skyhoppers.admin")
+                    || (skyHopper.getOwner() != null && skyHopper.getOwner().equals(player.getUniqueId()))
+                    || skyHopper.getMembers().contains(player.getUniqueId())) {
+                HopperGUI hopperGUI = new HopperGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, this);
+
+                boolean creationResult = hopperGUI.create();
+                if(!creationResult) {
+                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    return;
+                }
+
+                boolean updateResult = hopperGUI.update();
+                if(!updateResult) {
+                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    return;
+                }
+
+                boolean openResult = hopperGUI.open();
+                if(!openResult) {
+                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                }
             } else {
-                player.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperNoAccess()));
+                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperNoAccess()));
             }
         }
-    }
-
-    /**
-     * Updates the list of linked containers for the SkyHopper and returns the updated SkyHopper.
-     * @param currentSkyHopper The SkyHopper to update the list of Linked Containers for.
-     * @param containers The List of updated containers.
-     * @return The updated SkyHopper.
-     */
-    private SkyHopper getUpdatedSkyHopper(@NotNull SkyHopper currentSkyHopper, @NotNull List<SkyContainer> containers) {
-        return new SkyHopper(
-                currentSkyHopper.enabled(),
-                currentSkyHopper.particles(),
-                currentSkyHopper.owner(),
-                currentSkyHopper.members(),
-                currentSkyHopper.location(),
-                containers,
-                currentSkyHopper.filterType(),
-                currentSkyHopper.filterItems(),
-                currentSkyHopper.transferSpeed(),
-                currentSkyHopper.maxTransferSpeed(),
-                currentSkyHopper.transferAmount(),
-                currentSkyHopper.maxTransferAmount(),
-                currentSkyHopper.suctionSpeed(),
-                currentSkyHopper.maxSuctionSpeed(),
-                currentSkyHopper.suctionAmount(),
-                currentSkyHopper.maxSuctionAmount(),
-                currentSkyHopper.suctionRange(),
-                currentSkyHopper.maxSuctionRange(),
-                currentSkyHopper.maxContainers(),
-                currentSkyHopper.nextSuctionTime(),
-                currentSkyHopper.nextTransferTime());
     }
 }

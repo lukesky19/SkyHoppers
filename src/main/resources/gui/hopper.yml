@@ -1,16 +1,15 @@
-config-version: 1.0.0
+config-version: 1.1.0.0
 gui-type: CHEST_54
 name: "<#99ff99><bold>SkyHopper Settings</bold></#99ff99>"
 entries:
     filler:
-        item:
-            material: GRAY_STAINED_GLASS_PANE
-            name: " "
-            lore: [ ]
+        item-type: GRAY_STAINED_GLASS_PANE
+        name: " "
+        lore: [ ]
     exit:
         slot: 49
         item:
-            material: BARRIER
+            item-type: BARRIER
             name: "<white><bold>Exit SkyHopper Settings</bold></white>"
             lore:
                 - ' <white>|</white> <gray>Click to close</gray>'
@@ -18,7 +17,7 @@ entries:
     particles-enabled:
         slot: 0
         item:
-            material: LIME_DYE
+            item-type: LIME_DYE
             name: "<#99ff99><bold>Particles Enabled</bold></#99ff99>"
             lore:
                 - " <white>|</white> <gray>Click to toggle the suction particles.</gray>"
@@ -28,7 +27,7 @@ entries:
     particles-disabled:
         slot: 0
         item:
-            material: RED_DYE
+            item-type: RED_DYE
             name: "<#99ff99><bold>Particles Disabled</bold></#99ff99>"
             lore:
                 - " <white>|</white> <gray>Click to toggle the suction particles.</gray>"
@@ -38,7 +37,7 @@ entries:
     hopper-enabled:
         slot: 20
         item:
-            material: LIME_DYE
+            item-type: LIME_DYE
             name: "<#99ff99><bold>Hopper Enabled</bold></#99ff99>"
             lore:
                 - " <white>|</white> <gray>Click to toggle the SkyHoppers' status.</gray>"
@@ -48,7 +47,7 @@ entries:
     hopper-disabled:
         slot: 20
         item:
-            material: RED_DYE
+            item-type: RED_DYE
             name: "<red><bold>Hopper Disabled</bold></red>"
             lore:
                 - " <white>|</white> <gray>Click to toggle the SkyHoppers' status.</gray>"
@@ -58,7 +57,7 @@ entries:
     link:
         slot: 22
         item:
-            material: CHEST
+            item-type: CHEST
             name: "<#99ff99><bold>Linked Containers</bold></#99ff99>"
             lore:
                 - ' <white>|</white> <gray>Click to view the current</gray>'
@@ -66,14 +65,14 @@ entries:
     filter:
         slot: 24
         item:
-            material: PAPER
+            item-type: PAPER
             name: "<#99ff99><bold>Input Filter</bold></#99ff99>"
             lore:
                 - ' <white>|</white> <gray>Click to view the input filter.</gray>'
     upgrades:
         slot: 29
         item:
-            material: NETHERITE_UPGRADE_SMITHING_TEMPLATE
+            item-type: NETHERITE_UPGRADE_SMITHING_TEMPLATE
             name: "<#99ff99><bold>Upgrades</bold></#99ff99>"
             lore:
                 - " <white>|</white> <gray>Click to view the SkyHoppers' upgrades.</gray>"
@@ -84,7 +83,7 @@ entries:
     members:
         slot: 31
         item:
-            material: PLAYER_HEAD
+            item-type: PLAYER_HEAD
             name: "<#99ff99><bold>Members</bold></#99ff99>"
             lore:
                 - " <white>|</white> <gray>Click to manage the SkyHoppers' members.</gray>"
@@ -94,7 +93,7 @@ entries:
     visualize:
         slot: 33
         item:
-            material: SPYGLASS
+            item-type: SPYGLASS
             name: "<#99ff99><bold>Visualize</bold></#99ff99>"
             lore:
                 - ' <white>|</white> <gray>Click to view the radius</gray>'
@@ -103,14 +102,14 @@ entries:
     info:
         slot: 45
         item:
-            material: OAK_SIGN
+            item-type: OAK_SIGN
             name: "<#99ff99><bold>Hopper Info</bold></#99ff99>"
             lore:
                 - " <white>| <#99ff99><bold>Status</bold></#99ff99> <gray>:</gray> <white><status></white>"
                 - " <white>| <#99ff99><bold>Owner</bold></#99ff99> <gray>:</gray> <white><owner></white>"
                 - " <white>| <#99ff99><bold>Members</bold></#99ff99> <gray>:</gray> <white><member_count></white>"
                 - " <white>| <#99ff99><bold>Filter Type</bold></#99ff99> <gray>:</gray> <white><filter_type></white>"
-                - " <white>| <#99ff99><bold>Links</bold></#99ff99> <gray>:</gray> <white><links_count></white><#99ff99><bold>/</bold></#99ff99><white><links_amount>></white>"
+                - " <white>| <#99ff99><bold>Links</bold></#99ff99> <gray>:</gray> <white><links_count></white><#99ff99><bold>/</bold></#99ff99><white><links_amount></white>"
                 - " <white>| <#99ff99><bold>Transfer Speed</bold></#99ff99> <gray>:</gray> <white><transfer_amount></white> <#99ff99><bold>item(s) per</bold></#99ff99> <white><transfer_speed></white> <#99ff99><bold>second(s).</bold></#99ff99>"
                 - " <white>| <#99ff99><bold>Suction Speed</bold></#99ff99> <gray>:</gray> <white><suction_amount></white> <#99ff99><bold>item(s) per</bold></#99ff99> <white><suction_speed></white> <#99ff99><bold>second(s).</bold></#99ff99>"
                 - " <white>| <#99ff99><bold>Suction Range</bold></#99ff99> <gray>:</gray> <white><suction_range></white>"

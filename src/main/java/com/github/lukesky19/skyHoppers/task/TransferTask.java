@@ -21,16 +21,19 @@ import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.hopper.SkyContainer;
 import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
 import com.github.lukesky19.skyHoppers.manager.HopperManager;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Container;
 import org.bukkit.block.Hopper;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.List;
 
 import static com.github.lukesky19.skyHoppers.util.InventoryUtils.isInventoryFull;
 import static com.github.lukesky19.skyHoppers.util.InventoryUtils.transferInventoryToContainer;
@@ -39,16 +42,18 @@ import static com.github.lukesky19.skyHoppers.util.InventoryUtils.transferInvent
  * This Task handles the custom transfers for SkyHoppers.
  */
 public class TransferTask extends BukkitRunnable {
-    private final SkyHoppers plugin;
-    private final HopperManager hopperManager;
+    private final @NotNull SkyHoppers plugin;
+    private final @NotNull ComponentLogger logger;
+    private final @NotNull HopperManager hopperManager;
 
     /**
      * Constructor
      * @param plugin The SkyHoppers Plugin.
      * @param hopperManager A HopperManager instance.
      */
-    public TransferTask(SkyHoppers plugin, HopperManager hopperManager) {
+    public TransferTask(@NotNull SkyHoppers plugin, @NotNull HopperManager hopperManager) {
         this.plugin = plugin;
+        this.logger = plugin.getComponentLogger();
         this.hopperManager = hopperManager;
     }
 
@@ -59,77 +64,60 @@ public class TransferTask extends BukkitRunnable {
     public void run() {
         if(plugin.areSkyHoppersPaused()) return;
 
-        for (SkyHopper currentSkyHopper : hopperManager.getSkyHoppers()) {
-            if (currentSkyHopper == null
-                    || currentSkyHopper.location() == null
-                    || System.currentTimeMillis() < currentSkyHopper.nextTransferTime()
-                    || !currentSkyHopper.enabled()
-                    || !currentSkyHopper.location().isChunkLoaded()
-                    || !(currentSkyHopper.location().getBlock().getState(false) instanceof Hopper hopper)
+        for(SkyHopper currentSkyHopper : hopperManager.getSkyHoppers()) {
+            if(currentSkyHopper == null
+                    || currentSkyHopper.getLocation() == null
+                    || System.currentTimeMillis() < currentSkyHopper.getNextTransferTime()
+                    || !currentSkyHopper.isSkyHopperEnabled()
+                    || !currentSkyHopper.getLocation().isChunkLoaded()
+                    || !(currentSkyHopper.getLocation().getBlock().getState(false) instanceof Hopper hopper)
                     || hopper.getBlock().isBlockPowered()
-                    || currentSkyHopper.containers().isEmpty())
+                    || currentSkyHopper.getLinkedContainers().isEmpty())
                 continue;
 
-            transfer(currentSkyHopper, hopper, hopper.getInventory(), currentSkyHopper.transferAmount());
+            transfer(currentSkyHopper, hopper, hopper.getInventory(), currentSkyHopper.getTransferAmount());
 
-            long addMs = (long) (currentSkyHopper.transferSpeed() * 1000);
+            long addMs = (long) (currentSkyHopper.getTransferSpeed() * 1000);
             long time = System.currentTimeMillis() + addMs;
 
-            SkyHopper updatedSkyHopper = new SkyHopper(
-                    true,
-                    currentSkyHopper.particles(),
-                    currentSkyHopper.owner(),
-                    currentSkyHopper.members(),
-                    currentSkyHopper.location(),
-                    currentSkyHopper.containers(),
-                    currentSkyHopper.filterType(),
-                    currentSkyHopper.filterItems(),
-                    currentSkyHopper.transferSpeed(),
-                    currentSkyHopper.maxTransferSpeed(),
-                    currentSkyHopper.transferAmount(),
-                    currentSkyHopper.maxTransferAmount(),
-                    currentSkyHopper.suctionSpeed(),
-                    currentSkyHopper.maxSuctionSpeed(),
-                    currentSkyHopper.suctionAmount(),
-                    currentSkyHopper.maxSuctionAmount(),
-                    currentSkyHopper.suctionRange(),
-                    currentSkyHopper.maxSuctionRange(),
-                    currentSkyHopper.maxContainers(),
-                    currentSkyHopper.nextSuctionTime(),
-                    time);
-
-            hopperManager.cacheSkyHopper(updatedSkyHopper.location(), updatedSkyHopper);
+            currentSkyHopper.setNextTransferTime(time);
         }
     }
 
     /**
-     * The logic for taking an Item from a SkyHopper's Inventory and transferring it to a linked container.
-     * @param skyHopper The SkyHopper doing the transfer.
+     * The logic for taking an Item from a {@link SkyHopper}'s Inventory and transferring it to a linked container.
+     * @param skyHopper The {@link SkyHopper} doing the transfer.
      * @param hopper The SkyHopper's Hopper.
      * @param hopperInv The SkyHopper's/Hopper's Inventory.
      * @param amount The amount to transfer.
      */
-    private void transfer(SkyHopper skyHopper, @NotNull Hopper hopper, @NotNull Inventory hopperInv, int amount) {
+    private void transfer(@NotNull SkyHopper skyHopper, @NotNull Hopper hopper, @NotNull Inventory hopperInv, int amount) {
         for (int i = 0; i <= (hopperInv.getSize() - 1); i++) {
             ItemStack hopperItem = hopperInv.getItem(i);
 
             if(hopperItem != null && !hopperItem.isEmpty()) {
+                ItemType hopperItemType = hopperItem.getType().asItemType();
+                if(hopperItemType == null) {
+                    logger.warn(AdventureUtil.serialize("Unable to transfer an item due to a null ItemType. [Method: transfer (TransferTask)]"));
+                    continue;
+                }
+
                 int amountToAdd = Math.min(hopperItem.getAmount(), amount);
 
                 containerLoop:
-                for(SkyContainer skyContainer : skyHopper.containers()) {
-                    Location location = skyContainer.location().clone();
+                for(SkyContainer skyContainer : skyHopper.getLinkedContainers()) {
+                    Location location = skyContainer.getLocation().clone();
 
                     if(location.isChunkLoaded()) {
                         if(location.getBlock().getState(false) instanceof Container container) {
                             Inventory output = container.getInventory();
-                            List<Material> filterItems = skyContainer.filterItems();
+                            List<ItemType> filterItems = skyContainer.getFilterItems();
 
                             if(isInventoryFull(output)) continue;
 
-                            switch(skyContainer.filterType()) {
+                            switch(skyContainer.getFilterType()) {
                                 case NONE -> {
-                                    int result = transferInventoryToContainer(plugin, hopperItem, hopperInv, i, hopper, container, container.getInventory(), skyHopper.transferAmount());
+                                    int result = transferInventoryToContainer(plugin, hopperItem, hopperInv, i, hopper, container, container.getInventory(), skyHopper.getTransferAmount());
                                     amount -= result;
                                     amountToAdd -= result;
 
@@ -138,8 +126,8 @@ public class TransferTask extends BukkitRunnable {
                                 }
 
                                 case WHITELIST -> {
-                                    if (!filterItems.isEmpty() && filterItems.contains(hopperItem.getType())) {
-                                        int result = transferInventoryToContainer(plugin, hopperItem, hopperInv, i, hopper, container, container.getInventory(), skyHopper.transferAmount());
+                                    if (!filterItems.isEmpty() && filterItems.contains(hopperItemType)) {
+                                        int result = transferInventoryToContainer(plugin, hopperItem, hopperInv, i, hopper, container, container.getInventory(), skyHopper.getTransferAmount());
                                         amount -= result;
                                         amountToAdd -= result;
 
@@ -149,8 +137,8 @@ public class TransferTask extends BukkitRunnable {
                                 }
 
                                 case BLACKLIST -> {
-                                    if (!filterItems.isEmpty() && !filterItems.contains(hopperItem.getType())) {
-                                        int result = transferInventoryToContainer(plugin, hopperItem, hopperInv, i, hopper, container, container.getInventory(), skyHopper.transferAmount());
+                                    if (!filterItems.isEmpty() && !filterItems.contains(hopperItemType)) {
+                                        int result = transferInventoryToContainer(plugin, hopperItem, hopperInv, i, hopper, container, container.getInventory(), skyHopper.getTransferAmount());
                                         amount -= result;
                                         amountToAdd -= result;
 
@@ -160,13 +148,13 @@ public class TransferTask extends BukkitRunnable {
                                 }
 
                                 case DESTROY -> {
-                                    if (!filterItems.isEmpty() && filterItems.contains(hopperItem.getType())) {
+                                    if (!filterItems.isEmpty() && filterItems.contains(hopperItemType)) {
                                         hopperInv.setItem(i, new ItemStack(Material.AIR));
 
                                         return;
                                     }
 
-                                    int result = transferInventoryToContainer(plugin, hopperItem, hopperInv, i, hopper, container, container.getInventory(), skyHopper.transferAmount());
+                                    int result = transferInventoryToContainer(plugin, hopperItem, hopperInv, i, hopper, container, container.getInventory(), skyHopper.getTransferAmount());
                                     amount -= result;
                                     amountToAdd -= result;
 

@@ -36,12 +36,12 @@
 - `skyhoppers.commands.skyhoppers.unpause` - The permission to access /skyhoppers unpause.
 ## Issues, Bugs, or Suggestions
 * Please create a new [Github Issue](https://github.com/lukesky19/SkyHoppers/issues) with your issue, bug, or suggestion.
-* If an issue or bug, please post any relevant logs containing errors related to SkyShop and your configuration files.
+* If an issue or bug, please post any relevant logs containing errors related to SkyHoppers and your configuration files.
 * I will attempt to solve any issues or implement features to the best of my ability.
 ## FAQ
 Q: What versions does this plugin support?
 
-A: 1.21.0, 1.21.1, 1.21.2, 1.21.3, and 1.21.4.
+A: 1.21.4, 1.21.5, 1.21.6, 1.21.7, and 1.21.8.
 
 Q: Are there any plans to support any other versions?
 

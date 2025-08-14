@@ -18,10 +18,14 @@
 package com.github.lukesky19.skyHoppers.util;
 
 import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Material;
 import org.bukkit.inventory.BrewerInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
+import org.jetbrains.annotations.NotNull;
 
 import static com.github.lukesky19.skyHoppers.util.InventoryUtils.*;
 
@@ -38,12 +42,17 @@ public class BrewingStandUtils {
      * @param amount The amount to transfer.
      * @return The amount transferred.
      */
-    public static int transferItemToBrewingStand(ItemStack sourceItem, Inventory sourceInventory, BrewerInventory destinationInventory, int sourceSlot, int amount) {
+    public static int transferItemToBrewingStand(@NotNull ComponentLogger logger, @NotNull ItemStack sourceItem, @NotNull Inventory sourceInventory, @NotNull BrewerInventory destinationInventory, int sourceSlot, int amount) {
         int amountTransferred = 0;
         int sourceAmount = sourceItem.getAmount();
 
-        Material type = sourceItem.getType();
-        if(type == Material.BLAZE_POWDER) {
+        ItemType sourceItemType = sourceItem.getType().asItemType();
+        if(sourceItemType == null) {
+            logger.warn(AdventureUtil.serialize("Unable to transfer to a brewing stand as the source item's ItemType is null. [Method: transferItemToBrewingStand]"));
+            return 0;
+        }
+
+        if(sourceItemType == ItemType.BLAZE_POWDER) {
             int fuelAmountToAdd = Math.min(sourceAmount, amount);
 
             int fuelTransferred = transferItemToBrewingStandFuel(sourceItem, sourceInventory, destinationInventory, sourceSlot, fuelAmountToAdd);
@@ -63,14 +72,14 @@ public class BrewingStandUtils {
 
             if(sourceAmount <= 0) return amountTransferred;
             if(amount <= 0) return amountTransferred;
-        } else if(isMaterialBrewingStandIngredient(type)) {
+        } else if(isItemTypeBrewingStandIngredient(sourceItemType)) {
             int ingredientTransferred = transferItemToBrewingStandIngredient(sourceItem, sourceInventory, destinationInventory, sourceSlot, amount);
             amount -= ingredientTransferred;
             amountTransferred += ingredientTransferred;
 
             if(amount <= 0) return amountTransferred;
         } else {
-            if(isMaterialPotion(type)) {
+            if(isItemTypePotion(sourceItemType)) {
                 int amountToAdd = Math.min(sourceItem.getAmount(), amount);
 
                 int bottlesTransferred = transferItemToBrewingStandOutput(sourceItem, sourceInventory, destinationInventory, sourceSlot, amountToAdd);
@@ -220,18 +229,25 @@ public class BrewingStandUtils {
 
     /**
      * Transfers items from the brewing stand's output bottle slot(s) to a SkyHopper.
-     * @param skyHopper The SkyHopper involved in the transfer.
-     * @param sourceInventory The inventory containing the item being transferred.
-     * @param destinationInventory The SkyHopper's Inventory to transfer to.
+     * @param logger The {@link ComponentLogger} of the plugin.
+     * @param skyHopper The {@link SkyHopper} involved in the transfer.
+     * @param sourceInventory The {@link BrewerInventory} to transfer from.
+     * @param destinationInventory The {@link SkyHopper}'s Inventory to transfer to.
      * @param amount The amount to transfer.
      */
-    public static void transferBrewingStandOutputToSkyHopper(SkyHopper skyHopper, BrewerInventory sourceInventory, Inventory destinationInventory, int amount) {
+    public static void transferBrewingStandOutputToSkyHopper(@NotNull ComponentLogger logger, @NotNull SkyHopper skyHopper, @NotNull BrewerInventory sourceInventory, @NotNull Inventory destinationInventory, int amount) {
         ItemStack bottle1 = sourceInventory.getItem(0);
         ItemStack bottle2 = sourceInventory.getItem(1);
         ItemStack bottle3 = sourceInventory.getItem(2);
 
         if(bottle1 != null && !bottle1.isEmpty()) {
-            switch(skyHopper.filterType()) {
+            ItemType bottleType = bottle1.getType().asItemType();
+            if(bottleType == null) {
+                logger.warn(AdventureUtil.serialize("Unable to transfer bottle 1 to a SkyHopper as the ItemType is null. [Method: transferBrewingStandOutputToSkyHopper]"));
+                return;
+            }
+
+            switch(skyHopper.getFilterType()) {
                 case NONE -> {
                     int transferred = transferInventoryToInventory(sourceInventory, destinationInventory, 0, amount);
                     amount -= transferred;
@@ -240,7 +256,7 @@ public class BrewingStandUtils {
                 }
 
                 case WHITELIST -> {
-                    if(skyHopper.filterItems().contains(bottle1.getType())) {
+                    if(skyHopper.getFilterItems().contains(bottleType)) {
                         int transferred = transferInventoryToInventory(sourceInventory, destinationInventory,0, amount);
                         amount -= transferred;
 
@@ -249,7 +265,7 @@ public class BrewingStandUtils {
                 }
 
                 case BLACKLIST -> {
-                    if(!skyHopper.filterItems().contains(bottle1.getType())) {
+                    if(!skyHopper.getFilterItems().contains(bottleType)) {
                         int transferred = transferInventoryToInventory(sourceInventory, destinationInventory, 0, amount);
                         amount -= transferred;
 
@@ -258,7 +274,7 @@ public class BrewingStandUtils {
                 }
 
                 case DESTROY -> {
-                    if(skyHopper.filterItems().contains(bottle1.getType())) {
+                    if(skyHopper.getFilterItems().contains(bottleType)) {
                         final int destroyResult = bottle1.getAmount() - amount;
                         if(destroyResult <= 0) {
                             amount -= bottle1.getAmount();
@@ -281,7 +297,13 @@ public class BrewingStandUtils {
         }
 
         if(bottle2 != null && !bottle2.isEmpty()) {
-            switch(skyHopper.filterType()) {
+            ItemType bottleType = bottle2.getType().asItemType();
+            if(bottleType == null) {
+                logger.warn(AdventureUtil.serialize("Unable to transfer bottle 2 to a SkyHopper as the ItemType is null. [Method: transferBrewingStandOutputToSkyHopper]"));
+                return;
+            }
+
+            switch(skyHopper.getFilterType()) {
                 case NONE -> {
                     int transferred = transferInventoryToInventory(sourceInventory, destinationInventory, 1, amount);
                     amount -= transferred;
@@ -290,7 +312,7 @@ public class BrewingStandUtils {
                 }
 
                 case WHITELIST -> {
-                    if(skyHopper.filterItems().contains(bottle2.getType())) {
+                    if(skyHopper.getFilterItems().contains(bottleType)) {
                         int transferred = transferInventoryToInventory(sourceInventory, destinationInventory, 1, amount);
                         amount -= transferred;
 
@@ -299,7 +321,7 @@ public class BrewingStandUtils {
                 }
 
                 case BLACKLIST -> {
-                    if(!skyHopper.filterItems().contains(bottle2.getType())) {
+                    if(!skyHopper.getFilterItems().contains(bottleType)) {
                         int transferred = transferInventoryToInventory(sourceInventory, destinationInventory, 1, amount);
                         amount -= transferred;
 
@@ -308,7 +330,7 @@ public class BrewingStandUtils {
                 }
 
                 case DESTROY -> {
-                    if(skyHopper.filterItems().contains(bottle2.getType())) {
+                    if(skyHopper.getFilterItems().contains(bottleType)) {
                         final int destroyResult = bottle2.getAmount() - amount;
                         if(destroyResult <= 0) {
                             amount -= bottle2.getAmount();
@@ -331,23 +353,29 @@ public class BrewingStandUtils {
         }
 
         if(bottle3 != null && !bottle3.isEmpty()) {
-            switch(skyHopper.filterType()) {
+            ItemType bottleType = bottle3.getType().asItemType();
+            if(bottleType == null) {
+                logger.warn(AdventureUtil.serialize("Unable to transfer bottle 3 to a SkyHopper as the ItemType is null. [Method: transferBrewingStandOutputToSkyHopper]"));
+                return;
+            }
+
+            switch(skyHopper.getFilterType()) {
                 case NONE -> transferInventoryToInventory(sourceInventory, destinationInventory, 2, amount);
 
                 case WHITELIST -> {
-                    if(skyHopper.filterItems().contains(bottle3.getType())) {
+                    if(skyHopper.getFilterItems().contains(bottleType)) {
                         transferInventoryToInventory(sourceInventory, destinationInventory, 2, amount);
                     }
                 }
 
                 case BLACKLIST -> {
-                    if(!skyHopper.filterItems().contains(bottle3.getType())) {
+                    if(!skyHopper.getFilterItems().contains(bottleType)) {
                         transferInventoryToInventory(sourceInventory, destinationInventory, 2, amount);
                     }
                 }
 
                 case DESTROY -> {
-                    if(skyHopper.filterItems().contains(bottle3.getType())) {
+                    if(skyHopper.getFilterItems().contains(bottleType)) {
                         final int destroyResult = bottle3.getAmount() - amount;
                         if(destroyResult <= 0) {
                             amount -= bottle3.getAmount();
@@ -366,37 +394,37 @@ public class BrewingStandUtils {
     }
 
     /**
-     * Checks if a Material is a potion ingredient.
-     * @param material The Material to check.
-     * @return true if the Material is an ingredient, false if not.
+     * Checks if a {@link ItemType} is a potion ingredient.
+     * @param itemType The {@link ItemType} to check.
+     * @return true if the {@link ItemType} is an ingredient, false if not.
      */
-    private static boolean isMaterialBrewingStandIngredient(Material material) {
-        return material == Material.BLAZE_POWDER
-                || material == Material.NETHER_WART
-                || material == Material.GLISTERING_MELON_SLICE
-                || material == Material.GHAST_TEAR
-                || material == Material.RABBIT_FOOT
-                || material == Material.SPIDER_EYE
-                || material == Material.SUGAR
-                || material == Material.MAGMA_CREAM
-                || material == Material.GLOWSTONE_DUST
-                || material == Material.REDSTONE
-                || material == Material.GUNPOWDER
-                || material == Material.FERMENTED_SPIDER_EYE
-                || material == Material.GOLDEN_CARROT
-                || material == Material.PUFFERFISH
-                || material == Material.PHANTOM_MEMBRANE
-                || material == Material.TURTLE_HELMET;
+    private static boolean isItemTypeBrewingStandIngredient(@NotNull ItemType itemType) {
+        return itemType == ItemType.BLAZE_POWDER
+                || itemType == ItemType.NETHER_WART
+                || itemType == ItemType.GLISTERING_MELON_SLICE
+                || itemType == ItemType.GHAST_TEAR
+                || itemType == ItemType.RABBIT_FOOT
+                || itemType == ItemType.SPIDER_EYE
+                || itemType == ItemType.SUGAR
+                || itemType == ItemType.MAGMA_CREAM
+                || itemType == ItemType.GLOWSTONE_DUST
+                || itemType == ItemType.REDSTONE
+                || itemType == ItemType.GUNPOWDER
+                || itemType == ItemType.FERMENTED_SPIDER_EYE
+                || itemType == ItemType.GOLDEN_CARROT
+                || itemType == ItemType.PUFFERFISH
+                || itemType == ItemType.PHANTOM_MEMBRANE
+                || itemType == ItemType.TURTLE_HELMET;
     }
 
     /**
-     * Checks if a Material is a potion.
-     * @param material The Material to check.
-     * @return true if the Material is a potion, false if not.
+     * Checks if a {@link ItemType} is an {@link ItemType#POTION}, {@link ItemType#SPLASH_POTION}, or {@link ItemType#LINGERING_POTION}.
+     * @param itemType The {@link ItemType} to check.
+     * @return true if the {@link ItemType} {@link ItemType#POTION}, {@link ItemType#SPLASH_POTION}, or {@link ItemType#LINGERING_POTION}. Otherwise, false.
      */
-    private static boolean isMaterialPotion(Material material) {
-        return material == Material.POTION
-                || material == Material.SPLASH_POTION
-                || material == Material.LINGERING_POTION;
+    private static boolean isItemTypePotion(@NotNull ItemType itemType) {
+        return itemType.equals(ItemType.POTION)
+                || itemType.equals(ItemType.SPLASH_POTION)
+                || itemType.equals(ItemType.LINGERING_POTION);
     }
 }

@@ -1,16 +1,15 @@
-config-version: 1.0.0
+config-version: 1.1.0.0
 gui-type: CHEST_54
 name: "<#99ff99><bold>Number of Links</bold></#99ff99>"
 entries:
     filler:
-        item:
-            material: GRAY_STAINED_GLASS_PANE
-            name: " "
-            lore: [ ]
+        item-type: GRAY_STAINED_GLASS_PANE
+        name: " "
+        lore: [ ]
     exit:
         slot: 49
         item:
-            material: BARRIER
+            item-type: BARRIER
             name: "<white><bold>Return to SkyHopper Upgrades</bold></white>"
             lore:
                 - " <white>|</white> <gray>Click to go back to the</gray>"
@@ -18,7 +17,7 @@ entries:
     upgrade:
         slot: 22
         item:
-            material: CHEST
+            item-type: CHEST
             name: "<#99ff99><bold>+1 Linked Container</bold></#99ff99>"
             lore:
                 - " <white>|</white> <gray>Click to upgrade the maximum linked containers.</gray>"
@@ -32,7 +31,7 @@ entries:
     upgrade-max:
         slot: 22
         item:
-            material: BEDROCK
+            item-type: BEDROCK
             name: "<#99ff99><bold>Linked Containers</bold></#99ff99>"
             lore:
                 - " <white>|</white> <gray>The number of linked containers upgrade is maxed out.</gray>"

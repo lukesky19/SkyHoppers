@@ -17,12 +17,12 @@
 */
 package com.github.lukesky19.skyHoppers.listener;
 
-import com.github.lukesky19.skyHoppers.config.manager.LocaleManager;
-import com.github.lukesky19.skyHoppers.config.record.Locale;
+import com.github.lukesky19.skyHoppers.manager.LocaleManager;
+import com.github.lukesky19.skyHoppers.data.config.Locale;
 import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
 import com.github.lukesky19.skyHoppers.manager.HookManager;
 import com.github.lukesky19.skyHoppers.manager.HopperManager;
-import com.github.lukesky19.skylib.format.FormatUtil;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -51,7 +51,7 @@ public class HopperPlaceListener implements Listener {
     }
 
     /**
-     * Listens to when a SkyHopper is placed.
+     * Listens to when a SkyHopperConfig is placed.
      * @param blockPlaceEvent A BlockPlaceEvent
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -66,44 +66,23 @@ public class HopperPlaceListener implements Listener {
         if (!result) return;
 
         if (hookManager.canNotBuild(player, hopper.getLocation())) {
-            player.sendMessage(FormatUtil.format(locale.prefix() + locale.noBuild()));
+            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.noBuild()));
 
             blockPlaceEvent.setCancelled(true);
 
             return;
         }
 
-        SkyHopper currentSkyHopper = hopperManager.getSkyHopperFromPDC(null, itemInHand.getItemMeta().getPersistentDataContainer());
+        SkyHopper skyHopper = hopperManager.getSkyHopperFromPDC(null, itemInHand.getItemMeta().getPersistentDataContainer());
+        if(skyHopper == null) return;
 
-        if(currentSkyHopper != null) {
-            SkyHopper updatedSkyHopper = new SkyHopper(
-                    currentSkyHopper.enabled(),
-                    currentSkyHopper.particles(),
-                    player.getUniqueId(),
-                    currentSkyHopper.members(),
-                    hopper.getLocation(),
-                    currentSkyHopper.containers(),
-                    currentSkyHopper.filterType(),
-                    currentSkyHopper.filterItems(),
-                    currentSkyHopper.transferSpeed(),
-                    currentSkyHopper.maxTransferSpeed(),
-                    currentSkyHopper.transferAmount(),
-                    currentSkyHopper.maxTransferAmount(),
-                    currentSkyHopper.suctionSpeed(),
-                    currentSkyHopper.maxSuctionSpeed(),
-                    currentSkyHopper.suctionAmount(),
-                    currentSkyHopper.maxSuctionAmount(),
-                    currentSkyHopper.suctionRange(),
-                    currentSkyHopper.maxSuctionRange(),
-                    currentSkyHopper.maxContainers(),
-                    currentSkyHopper.nextSuctionTime(),
-                    currentSkyHopper.nextTransferTime());
+        skyHopper.setOwner(player.getUniqueId());
+        skyHopper.setLocation(hopper.getLocation());
 
-            hopperManager.saveSkyHopperToBlockPDC(updatedSkyHopper, hopper);
+        hopperManager.saveSkyHopperToPDC(skyHopper);
 
-            hopperManager.cacheSkyHopper(hopper.getLocation(), updatedSkyHopper);
+        hopperManager.cacheSkyHopper(hopper.getLocation(), skyHopper);
 
-            player.sendMessage(FormatUtil.format(locale.prefix() + locale.hopperPlaced()));
-        }
+        player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperPlaced()));
     }
 }

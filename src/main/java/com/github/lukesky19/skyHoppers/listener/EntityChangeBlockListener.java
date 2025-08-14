@@ -9,36 +9,37 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Listens for when an Entity changes a block.
  */
 public class EntityChangeBlockListener implements Listener {
-    private final HopperManager hopperManager;
+    private final @NotNull HopperManager hopperManager;
 
     /**
      * Constructor
      * @param hopperManager A HopperManager instance.
      */
-    public EntityChangeBlockListener(HopperManager hopperManager) {
+    public EntityChangeBlockListener(@NotNull HopperManager hopperManager) {
         this.hopperManager = hopperManager;
     }
 
     /**
-     * Handles when an entity changes a block and checks if a block is a SkyHopper to properly remove it and drop the item.
-     * @param entityChangeBlockEvent An EntityChangeBlockEvent
+     * Handles when an entity changes a block and checks if a block is a {@link SkyHopper} to properly remove it and drop the item.
+     * @param entityChangeBlockEvent An {@link EntityChangeBlockEvent}
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityBlockChange(EntityChangeBlockEvent entityChangeBlockEvent) {
         Block block = entityChangeBlockEvent.getBlock();
 
         SkyHopper skyHopper = hopperManager.getSkyHopper(block.getLocation());
-        if (skyHopper != null) {
+        if(skyHopper != null) {
             entityChangeBlockEvent.setCancelled(true);
 
             block.setType(Material.AIR);
 
-            hopperManager.removeSkyHopper(skyHopper.location().clone());
+            if(skyHopper.getLocation() != null) hopperManager.removeSkyHopper(skyHopper.getLocation());
 
             ItemStack skyHopperItem = hopperManager.createItemStackFromSkyHopper(skyHopper, 1);
             if(skyHopperItem != null) {
