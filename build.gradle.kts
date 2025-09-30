@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.github.lukesky19"
-version = "1.1.0.0"
+version = "1.1.1.0"
 
 repositories {
     mavenCentral()
@@ -27,15 +27,15 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
-    compileOnly("com.github.lukesky19:SkyLib:1.3.0.0")
+    compileOnly("io.papermc.paper:paper-api:1.21.9-R0.1-SNAPSHOT")
+    compileOnly("com.github.lukesky19:SkyLib:1.3.1.0")
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
 
     // Hooks
-    compileOnly("dev.rosewood:rosestacker:1.5.32")
+    compileOnly("dev.rosewood:rosestacker:1.5.36")
     compileOnly("world.bentobox:bentobox:2.7.0-SNAPSHOT")
-    compileOnly("com.ghostchu:quickshop-bukkit:6.2.0.8")
-    compileOnly("com.ghostchu:quickshop-api:6.2.0.8")
+    compileOnly("com.ghostchu:quickshop-bukkit:6.2.0.10")
+    compileOnly("com.ghostchu:quickshop-api:6.2.0.10")
     compileOnly("com.ghostchu:simplereloadlib:1.1.2")
 }
 
