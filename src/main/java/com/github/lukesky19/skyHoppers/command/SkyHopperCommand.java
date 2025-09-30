@@ -637,6 +637,33 @@ public class SkyHopperCommand {
             })
          );
 
-        return builder.build();
+          builder.then(Commands.literal("removeowner")
+                  .requires(ctx -> ctx.getSender().hasPermission("skyhoppers.commands.skyhoppers.removeowner") && ctx.getSender() instanceof Player)
+                  .executes(ctx -> {
+                      Locale locale = localeManager.getLocale();
+                      Player player = (Player) ctx.getSource().getSender();
+                      ItemStack itemStack = player.getInventory().getItemInMainHand();
+
+                      if(!hopperManager.isItemStackSkyHopper(itemStack)) {
+                          player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.itemNotSkyHopper()));
+                          return 0;
+                      }
+
+                      SkyHopper skyHopper = hopperManager.getSkyHopperFromPDC(null, itemStack.getItemMeta().getPersistentDataContainer());
+                      if(skyHopper == null) {
+                          player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.itemNotSkyHopper()));
+                          return 0;
+                      }
+
+                      skyHopper.setOwner(null);
+
+                      ItemStack newStack = hopperManager.createItemStackFromSkyHopper(skyHopper, 1);
+
+                      player.getInventory().setItemInMainHand(newStack);
+
+                      return 1;
+                }));
+
+          return builder.build();
     }
 }
