@@ -56,8 +56,6 @@ public class SuctionAmountUpgradeGUI extends SkyHopperGUI {
     private final @NotNull LocaleManager localeManager;
     private final @NotNull HopperManager hopperManager;
 
-    private final @NotNull UpgradesGUI upgradesGUI;
-
     private final @NotNull SkyHopper skyHopper;
 
     private final @Nullable UpgradeGUIConfig guiConfig;
@@ -86,15 +84,13 @@ public class SuctionAmountUpgradeGUI extends SkyHopperGUI {
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull HopperManager hopperManager,
             @NotNull UpgradesGUI upgradesGUI) {
-        super(skyHoppers, guiManager, player, location);
+        super(skyHoppers, guiManager, player, location, upgradesGUI);
 
         this.settingsManager = settingsManager;
         this.localeManager = localeManager;
         this.hopperManager = hopperManager;
 
         this.skyHopper = skyHopper;
-
-        this.upgradesGUI = upgradesGUI;
 
         guiConfig = guiConfigManager.getUpgradeConfig("suction_amount.yml");
     }
@@ -171,18 +167,6 @@ public class SuctionAmountUpgradeGUI extends SkyHopperGUI {
     }
 
     /**
-     * Close the current GUI and open the {@link UpgradesGUI} that the player came from.
-     */
-    @Override
-    public void close() {
-        super.close();
-
-        upgradesGUI.update();
-
-        upgradesGUI.open();
-    }
-
-    /**
      * Handles when the player closes the GUI.
      * @param inventoryCloseEvent An InventoryCloseEvent
      */
@@ -194,9 +178,11 @@ public class SuctionAmountUpgradeGUI extends SkyHopperGUI {
 
         isOpen = false;
 
-        upgradesGUI.update();
+        if(previousGUI != null) {
+            previousGUI.update();
 
-        upgradesGUI.open();
+            previousGUI.open();
+        }
     }
 
     /**

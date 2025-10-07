@@ -52,14 +52,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * This class lets Players manage the output filter items and filter type.
  */
 public class OutputFilterGUI extends SkyHopperGUI {
     private final @NotNull HopperManager hopperManager;
-    private final @NotNull LinksGUI linksGUI;
 
     private final @NotNull SkyHopper skyHopper;
     private final @NotNull SkyContainer skyContainer;
@@ -91,10 +89,9 @@ public class OutputFilterGUI extends SkyHopperGUI {
             @NotNull HopperManager hopperManager,
             @NotNull SkyContainer skyContainer,
             @NotNull LinksGUI linksGUI) {
-        super(skyHoppers, guiManager, player, location);
+        super(skyHoppers, guiManager, player, location, linksGUI);
 
         this.hopperManager = hopperManager;
-        this.linksGUI = linksGUI;
 
         this.skyHopper = skyHopper;
         this.skyContainer = skyContainer;
@@ -172,18 +169,6 @@ public class OutputFilterGUI extends SkyHopperGUI {
     }
 
     /**
-     * Close the current GUI and open the {@link LinksGUI} that the player came from.
-     */
-    @Override
-    public void close() {
-        super.close();
-
-        linksGUI.update();
-
-        linksGUI.open();
-    }
-
-    /**
      * Handles when the player closes the GUI.
      * @param inventoryCloseEvent An InventoryCloseEvent
      */
@@ -191,16 +176,15 @@ public class OutputFilterGUI extends SkyHopperGUI {
     public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
         if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
 
-        Player player = (Player) inventoryCloseEvent.getPlayer();
-        UUID uuid = player.getUniqueId();
-
         guiManager.removeViewer(location, uuid);
 
         this.isOpen = false;
 
-        linksGUI.update();
+        if(previousGUI != null) {
+            previousGUI.update();
 
-        linksGUI.open();
+            previousGUI.open();
+        }
     }
 
     /**

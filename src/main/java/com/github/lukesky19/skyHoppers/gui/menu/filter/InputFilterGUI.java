@@ -60,8 +60,6 @@ import java.util.Optional;
 public class InputFilterGUI extends SkyHopperGUI {
     private final @NotNull HopperManager hopperManager;
 
-    private final @NotNull HopperGUI hopperGUI;
-
     private final @NotNull SkyHopper skyHopper;
 
     private final @Nullable GUIConfig guiConfig;
@@ -89,10 +87,9 @@ public class InputFilterGUI extends SkyHopperGUI {
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull HopperManager hopperManager,
             @NotNull HopperGUI hopperGUI) {
-        super(skyHoppers, guiManager, player, location);
+        super(skyHoppers, guiManager, player, location, hopperGUI);
 
         this.hopperManager = hopperManager;
-        this.hopperGUI = hopperGUI;
 
         this.skyHopper = skyHopper;
 
@@ -169,18 +166,6 @@ public class InputFilterGUI extends SkyHopperGUI {
     }
 
     /**
-     * Close the current GUI and open the {@link HopperGUI} that the player came from.
-     */
-    @Override
-    public void close() {
-        super.close();
-
-        hopperGUI.update();
-
-        hopperGUI.open();
-    }
-
-    /**
      * Handles when the player closes the GUI.
      * @param inventoryCloseEvent An InventoryCloseEvent
      */
@@ -192,9 +177,11 @@ public class InputFilterGUI extends SkyHopperGUI {
 
         isOpen = false;
 
-        hopperGUI.update();
+        if(previousGUI != null) {
+            previousGUI.update();
 
-        hopperGUI.open();
+            previousGUI.open();
+        }
     }
 
     /**
