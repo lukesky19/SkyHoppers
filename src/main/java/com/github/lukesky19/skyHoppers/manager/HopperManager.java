@@ -26,7 +26,9 @@ import com.github.lukesky19.skyHoppers.util.PluginUtils;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
+import com.github.lukesky19.skylib.api.registry.RegistryUtil;
 import com.github.lukesky19.skylib.libs.morepersistentdatatypes.DataType;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Chunk;
@@ -45,7 +47,6 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * This class manages {@link SkyHopper}s including storage, creation, and saving.
@@ -338,6 +339,7 @@ public class HopperManager {
      */
     public @Nullable SkyHopper getSkyHopperFromPDC(@Nullable Location location, @NotNull PersistentDataContainer pdc) {
         Locale locale = localeManager.getLocale();
+        ComponentLogger logger = skyHoppers.getComponentLogger();
 
         // Get the skyHoppers's settings
         @Nullable Settings settings = settingsManager.getSettings();
@@ -389,10 +391,14 @@ public class HopperManager {
         // Get the input filter items
         // First handle the modern storage of the filter items.
         if(pdc.has(HopperKeys.FILTER_ITEMS.getKey(), PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING))) {
-            List<String> modernMaterialNames = pdc.get(HopperKeys.FILTER_ITEMS.getKey(),
+            List<String> modernItemTypeNames = pdc.get(HopperKeys.FILTER_ITEMS.getKey(),
                     PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING));
-            if(modernMaterialNames != null) {
-                modernMaterialNames.stream().map(Material::getMaterial).filter(Objects::nonNull).map(Material::asItemType).filter(Objects::nonNull).forEach(filterItems::add);
+            if(modernItemTypeNames != null) {
+                modernItemTypeNames.stream()
+                        .map(itemTypeName -> RegistryUtil.getItemType(logger, itemTypeName))
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .forEach(filterItems::add);
             }
         }
 
@@ -568,11 +574,11 @@ public class HopperManager {
         // Save the input filter type
         pdc.set(HopperKeys.FILTER_TYPE.getKey(), PersistentDataType.STRING, skyHopper.getFilterType().name());
 
+        // Get a list of the input filter ItemType's NamespacedKeys as a String to save.
+        List<String> inputFilterItemNames = skyHopper.getFilterItems().stream().map(itemType -> itemType.getKey().toString()).toList();
         // Save the input filter items
         pdc.set(HopperKeys.FILTER_ITEMS.getKey(),
-                PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING),
-                skyHopper.getFilterItems().stream().map(ItemType::toString).filter(Objects::nonNull)
-                        .collect(Collectors.toList()));
+                PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING), inputFilterItemNames);
 
         // Save the linked containers
         List<PersistentDataContainer> pdcList = new ArrayList<>();
@@ -584,10 +590,12 @@ public class HopperManager {
             PersistentDataContainer persistentDataContainer = pdc.getAdapterContext().newPersistentDataContainer();
             persistentDataContainer.set(HopperKeys.LOCATION.getKey(), DataType.LOCATION, linkedLocation);
             persistentDataContainer.set(HopperKeys.FILTER_TYPE.getKey(), PersistentDataType.STRING, filterType.name());
+
+            // Get a list of the output filter ItemType's NamespacedKeys as a String to save.
+            List<String> containerFilterItemNames = skyContainer.getFilterItems().stream().map(itemType -> itemType.getKey().toString()).toList();
+            // Save the output filter items
             persistentDataContainer.set(HopperKeys.FILTER_ITEMS.getKey(),
-                    PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING),
-                    Objects.requireNonNull(skyContainer.getFilterItems()).stream().map(ItemType::toString).filter(Objects::nonNull)
-                            .collect(Collectors.toList()));
+                    PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING), containerFilterItemNames);
 
             pdcList.add(persistentDataContainer);
         }
@@ -651,5 +659,4 @@ public class HopperManager {
             });
         });
     }
-
 }
