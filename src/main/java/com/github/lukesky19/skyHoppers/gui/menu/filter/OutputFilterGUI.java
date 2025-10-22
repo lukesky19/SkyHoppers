@@ -226,9 +226,6 @@ public class OutputFilterGUI extends SkyHopperGUI {
             return;
         }
 
-        // Check if the item is already filtered
-        if(!skyContainer.getFilterItems().contains(itemType)) return;
-
         // Add the ItemType to the filter
         skyContainer.addFilterItem(itemType);
 
