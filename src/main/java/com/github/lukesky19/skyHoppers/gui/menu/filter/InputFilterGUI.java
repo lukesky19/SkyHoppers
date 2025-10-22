@@ -208,25 +208,32 @@ public class InputFilterGUI extends SkyHopperGUI {
     public void handleBottomClick(@NotNull InventoryClickEvent inventoryClickEvent) {
         inventoryClickEvent.setCancelled(true);
 
-        ItemStack item = inventoryClickEvent.getCurrentItem();
-        if(item != null && item.getType() != Material.AIR) {
-            ItemType itemType = item.getType().asItemType();
-            if(itemType == null) {
-                logger.warn(AdventureUtil.serialize("Unable to add an item to the filter as there is no ItemType for Material " + FormatUtil.formatMaterialName(item.getType())));
-                return;
-            }
+        // Get the clicked ItemStack
+        ItemStack clickedItemStack = inventoryClickEvent.getCurrentItem();
+        if(clickedItemStack == null) return;
 
-            skyHopper.addFilterItem(itemType);
+        // Check if the Material is AIR
+        Material material = clickedItemStack.getType();
+        if(material.equals(Material.AIR)) return;
 
-            hopperManager.saveSkyHopperToPDC(skyHopper);
-
-            guiManager.refreshViewersGUI(location);
-
-            added = 0;
-            itemNum = 0;
-
-            update();
+        // Get the ItemType
+        ItemType itemType = material.asItemType();
+        if(itemType == null) {
+            logger.warn(AdventureUtil.serialize("Unable to add an item to the filter as there is no ItemType for Material " + FormatUtil.formatMaterialName(material)));
+            return;
         }
+
+        // Add the ItemType to the filter
+        skyHopper.addFilterItem(itemType);
+
+        hopperManager.saveSkyHopperToPDC(skyHopper);
+
+        guiManager.refreshViewersGUI(location);
+
+        added = 0;
+        itemNum = 0;
+
+        update();
     }
 
     /**
