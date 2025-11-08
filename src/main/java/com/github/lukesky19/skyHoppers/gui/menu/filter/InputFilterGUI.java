@@ -60,8 +60,6 @@ import java.util.Optional;
 public class InputFilterGUI extends SkyHopperGUI {
     private final @NotNull HopperManager hopperManager;
 
-    private final @NotNull HopperGUI hopperGUI;
-
     private final @NotNull SkyHopper skyHopper;
 
     private final @Nullable GUIConfig guiConfig;
@@ -89,10 +87,9 @@ public class InputFilterGUI extends SkyHopperGUI {
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull HopperManager hopperManager,
             @NotNull HopperGUI hopperGUI) {
-        super(skyHoppers, guiManager, player, location);
+        super(skyHoppers, guiManager, player, location, hopperGUI);
 
         this.hopperManager = hopperManager;
-        this.hopperGUI = hopperGUI;
 
         this.skyHopper = skyHopper;
 
@@ -169,18 +166,6 @@ public class InputFilterGUI extends SkyHopperGUI {
     }
 
     /**
-     * Close the current GUI and open the {@link HopperGUI} that the player came from.
-     */
-    @Override
-    public void close() {
-        super.close();
-
-        hopperGUI.update();
-
-        hopperGUI.open();
-    }
-
-    /**
      * Handles when the player closes the GUI.
      * @param inventoryCloseEvent An InventoryCloseEvent
      */
@@ -192,9 +177,11 @@ public class InputFilterGUI extends SkyHopperGUI {
 
         isOpen = false;
 
-        hopperGUI.update();
+        if(previousGUI != null) {
+            previousGUI.update();
 
-        hopperGUI.open();
+            previousGUI.open();
+        }
     }
 
     /**
@@ -221,25 +208,32 @@ public class InputFilterGUI extends SkyHopperGUI {
     public void handleBottomClick(@NotNull InventoryClickEvent inventoryClickEvent) {
         inventoryClickEvent.setCancelled(true);
 
-        ItemStack item = inventoryClickEvent.getCurrentItem();
-        if(item != null && item.getType() != Material.AIR) {
-            ItemType itemType = item.getType().asItemType();
-            if(itemType == null) {
-                logger.warn(AdventureUtil.serialize("Unable to add an item to the filter as there is no ItemType for Material " + FormatUtil.formatMaterialName(item.getType())));
-                return;
-            }
+        // Get the clicked ItemStack
+        ItemStack clickedItemStack = inventoryClickEvent.getCurrentItem();
+        if(clickedItemStack == null) return;
 
-            skyHopper.addFilterItem(itemType);
+        // Check if the Material is AIR
+        Material material = clickedItemStack.getType();
+        if(material.equals(Material.AIR)) return;
 
-            hopperManager.saveSkyHopperToPDC(skyHopper);
-
-            guiManager.refreshViewersGUI(location);
-
-            added = 0;
-            itemNum = 0;
-
-            update();
+        // Get the ItemType
+        ItemType itemType = material.asItemType();
+        if(itemType == null) {
+            logger.warn(AdventureUtil.serialize("Unable to add an item to the filter as there is no ItemType for Material " + FormatUtil.formatMaterialName(material)));
+            return;
         }
+
+        // Add the ItemType to the filter
+        skyHopper.addFilterItem(itemType);
+
+        hopperManager.saveSkyHopperToPDC(skyHopper);
+
+        guiManager.refreshViewersGUI(location);
+
+        added = 0;
+        itemNum = 0;
+
+        update();
     }
 
     /**

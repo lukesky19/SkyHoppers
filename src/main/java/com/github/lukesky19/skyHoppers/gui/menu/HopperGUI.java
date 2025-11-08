@@ -94,7 +94,8 @@ public class HopperGUI extends SkyHopperGUI {
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull HopperManager hopperManager,
             @NotNull HopperClickListener hopperClickListener) {
-        super(skyHoppers, guiManager, player, location);
+        super(skyHoppers, guiManager, player, location, null);
+
         this.settingsManager = settingsManager;
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
@@ -677,12 +678,8 @@ public class HopperGUI extends SkyHopperGUI {
 
             builder.setItemStack(optionalItemStack.get());
 
-            builder.setAction(event -> {
-                skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
-                        player.closeInventory(InventoryCloseEvent.Reason.UNLOADED), 1L);
-
-                guiManager.removeViewer(location, player.getUniqueId());
-            });
+            builder.setAction(event ->
+                    skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, this::close, 1L));
 
             setButton(buttonConfig.slot(), builder.build());
         }

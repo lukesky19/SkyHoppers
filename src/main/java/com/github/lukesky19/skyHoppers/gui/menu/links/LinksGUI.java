@@ -66,8 +66,6 @@ public class LinksGUI extends SkyHopperGUI {
     private final @NotNull HopperManager hopperManager;
     private final @NotNull HopperClickListener hopperClickListener;
 
-    private final @NotNull HopperGUI hopperGUI;
-
     private final @NotNull SkyHopper skyHopper;
 
     private final @Nullable GUIConfig guiConfig;
@@ -99,14 +97,12 @@ public class LinksGUI extends SkyHopperGUI {
             @NotNull HopperManager hopperManager,
             @NotNull HopperClickListener hopperClickListener,
             @NotNull HopperGUI hopperGUI) {
-        super(skyHoppers, guiManager, player, location);
+        super(skyHoppers, guiManager, player, location, hopperGUI);
 
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
         this.hopperManager = hopperManager;
         this.hopperClickListener = hopperClickListener;
-
-        this.hopperGUI = hopperGUI;
 
         this.skyHopper = skyHopper;
 
@@ -183,18 +179,6 @@ public class LinksGUI extends SkyHopperGUI {
     }
 
     /**
-     * Closes the current GUI and opens the {@link HopperGUI} the player came from.
-     */
-    @Override
-    public void close() {
-        super.close();
-
-        hopperGUI.update();
-
-        hopperGUI.open();
-    }
-
-    /**
      * Handles when the player closes the GUI.
      * @param inventoryCloseEvent An InventoryCloseEvent
      */
@@ -206,9 +190,11 @@ public class LinksGUI extends SkyHopperGUI {
 
         isOpen = false;
 
-        hopperGUI.update();
+        if(previousGUI != null) {
+            previousGUI.update();
 
-        hopperGUI.open();
+            previousGUI.open();
+        }
     }
 
     /**

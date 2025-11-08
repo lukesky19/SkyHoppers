@@ -82,6 +82,10 @@ public abstract class SkyHopperGUI implements ButtonGUI {
      * Is the GUI currently open?
      */
     protected boolean isOpen = false;
+    /**
+     * The {@link SkyHopperGUI} previously opened.
+     */
+    protected final @Nullable SkyHopperGUI previousGUI;
 
     /**
      * Constructor.
@@ -89,14 +93,21 @@ public abstract class SkyHopperGUI implements ButtonGUI {
      * @param guiManager The {@link GUIManager} that is used to track open GUIs.
      * @param player The {@link Player} associated with the created GUI.
      * @param location The {@link Location} of the SkyHopper the GUI is for.
+     * @param previousGUI The previous {@link SkyHopperGUI} opened before opening this one.
      */
-    public SkyHopperGUI(@NotNull SkyHoppers skyHoppers, @NotNull GUIManager guiManager, @NotNull Player player, @NotNull Location location) {
+    public SkyHopperGUI(
+            @NotNull SkyHoppers skyHoppers,
+            @NotNull GUIManager guiManager,
+            @NotNull Player player,
+            @NotNull Location location,
+            @Nullable SkyHopperGUI previousGUI) {
         this.skyHoppers = skyHoppers;
         this.logger = skyHoppers.getComponentLogger();
         this.guiManager = guiManager;
         this.player = player;
         this.uuid = player.getUniqueId();
         this.location = location;
+        this.previousGUI = previousGUI;
     }
 
     /**
@@ -151,37 +162,40 @@ public abstract class SkyHopperGUI implements ButtonGUI {
             return false;
         }
 
-        // Close the current Inventory the player has open (if any)
-        skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
-            player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
-
-            guiManager.removeViewer(location, uuid);
-        }, 1L);
-
-        // Then 1 tick later, open the GUI and track that it is open for the player.
+        // 1 tick later, open the GUI and track that it is open for the player.
         skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
             inventoryView.open();
 
             guiManager.addViewer(location, uuid, this);
-        }, 2L);
 
-        isOpen = true;
+            this.isOpen = true;
+        }, 1L);
 
         return true;
     }
 
     /**
-     * Close the GUI with an UNLOADED {@link InventoryCloseEvent.Reason}.
+     * If the previous GUI is not null, close the GUI with {@link InventoryCloseEvent.Reason#OPEN_NEW}.
+     * Otherwise, close the GUI with {@link InventoryCloseEvent.Reason#UNLOADED}.
      * You should use {@link #unload(boolean)} if the plugin is being disabled, and you are trying to close open GUIs.
      */
     @Override
     public void close() {
-        skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
-                player.closeInventory(InventoryCloseEvent.Reason.UNLOADED), 1L);
+        skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
+            guiManager.removeViewer(location, uuid);
 
-        guiManager.removeViewer(location, uuid);
+            this.isOpen = false;
 
-        this.isOpen = false;
+            if(previousGUI != null) {
+                player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
+
+                previousGUI.update();
+
+                previousGUI.open();
+            } else {
+                player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
+            }
+        }, 1L);
     }
 
     /**
