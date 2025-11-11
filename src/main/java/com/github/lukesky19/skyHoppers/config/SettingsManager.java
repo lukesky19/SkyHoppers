@@ -21,16 +21,19 @@ import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.config.data.Settings;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
+import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.CommentedConfigurationNode;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Objects;
 import java.util.TreeMap;
 
 /**
@@ -166,6 +169,36 @@ public class SettingsManager {
             }
 
             case "1.1.0.0" -> {
+                Settings.SkyHopperConfig oldSkyHopperConfig = settings.skyHopperConfig();
+                ItemStackConfig oldItemStackConfig = oldSkyHopperConfig.item();
+
+                ItemStackConfig newItemStackConfig = new ItemStackConfig(
+                        Objects.requireNonNullElse(oldItemStackConfig.itemType(), ItemType.HOPPER.getKey().toString()),
+                        oldItemStackConfig.amount(),
+                        oldItemStackConfig.maxStackSize(),
+                        oldItemStackConfig.name(),
+                        oldItemStackConfig.lore(),
+                        oldItemStackConfig.entityType(),
+                        oldItemStackConfig.instrument(),
+                        oldItemStackConfig.enchantments(),
+                        oldItemStackConfig.potionConfig(),
+                        oldItemStackConfig.color(),
+                        oldItemStackConfig.modelName(),
+                        oldItemStackConfig.itemFlags(),
+                        oldItemStackConfig.decoratedPot(),
+                        oldItemStackConfig.armorTrim(),
+                        oldItemStackConfig.attributes(),
+                        oldItemStackConfig.options());
+                Settings.SkyHopperConfig newSkyHopperConfig = new Settings.SkyHopperConfig(
+                        oldSkyHopperConfig.startingTransferSpeed(),
+                        oldSkyHopperConfig.startingTransferAmount(),
+                        oldSkyHopperConfig.startingSuctionSpeed(),
+                        oldSkyHopperConfig.startingSuctionAmount(),
+                        oldSkyHopperConfig.startingSuctionRange(),
+                        oldSkyHopperConfig.startingMaxContainers(),
+                        newItemStackConfig,
+                        oldSkyHopperConfig.placeholders());
+
                 settings = new Settings(
                         "1.2.0.0",
                         settings.locale(),
@@ -173,7 +206,7 @@ public class SettingsManager {
                         10,
                         4,
                         settings.disabledHooks(),
-                        settings.skyHopperConfig(),
+                        newSkyHopperConfig,
                         settings.upgrades());
 
                 saveSettings();

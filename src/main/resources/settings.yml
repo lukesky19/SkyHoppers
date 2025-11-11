@@ -23,6 +23,7 @@ sky-hopper-config:
     starting-max-containers: 1
     # The SkyHopper item's name and lore.
     item:
+        item-type: minecraft:hopper
         name: '<#99ff99><bold>SkyHopper</bold></#99ff99>'
         lore:
             - '<gray>An upgradable hopper that can suction and transfer items'
