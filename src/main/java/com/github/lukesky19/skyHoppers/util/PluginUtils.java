@@ -17,15 +17,20 @@
 */
 package com.github.lukesky19.skyHoppers.util;
 
-import com.github.lukesky19.skyHoppers.hopper.FilterItems;
+import com.github.lukesky19.skyHoppers.skyhopper.data.legacy.FilterItems;
 import com.google.gson.Gson;
-import org.bukkit.*;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -33,13 +38,23 @@ import java.util.stream.Collectors;
  */
 public class PluginUtils {
     /**
+     * Default Constructor. All methods in this class are static.
+     * @deprecated All methods in this class are static.
+     * @throws RuntimeException if this method is used.
+     */
+    @Deprecated
+    public PluginUtils() {
+        throw new RuntimeException("The use of the default constructor is not allowed.");
+    }
+
+    /**
      * Gets a list of Locations to spawn particles at to create a hollow cube.
      * @param corner1 The corner of the first location.
      * @param corner2 The corner of the second location.
      * @param particleDistance The distance between particles.
      * @return A List of Locations
      */
-    public static List<Location> getHollowCube(@NotNull Location corner1, @NotNull Location corner2, double particleDistance) {
+    public static @NotNull List<Location> getHollowCube(@NotNull Location corner1, @NotNull Location corner2, double particleDistance) {
         final List<Location> particleLocations = new ArrayList<>();
 
         // If the corners are not in the same world or the world is null, return an empty list.
@@ -90,7 +105,7 @@ public class PluginUtils {
      * @param serialized The String containing the serialized Material list.
      * @return The List of Materials or an empty list if deserialization failed.
      */
-    public static List<Material> deserializeMaterials(final String serialized) {
+    public static @NotNull List<Material> deserializeMaterials(final String serialized) {
         if (serialized == null)
             return new ArrayList<>();
 
@@ -107,7 +122,7 @@ public class PluginUtils {
      * @param serialized The String containing the serialized location.
      * @return The Location or null if the deserialization failed.
      */
-    public static Location deserializeLocation(final String serialized) {
+    public static @Nullable Location deserializeLocation(final String serialized) {
         if (serialized == null)
             return null;
 

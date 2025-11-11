@@ -19,13 +19,13 @@ package com.github.lukesky19.skyHoppers.gui.menu.member;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.data.config.gui.ButtonConfig;
-import com.github.lukesky19.skyHoppers.manager.GUIConfigManager;
-import com.github.lukesky19.skyHoppers.data.config.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.config.GUIConfigManager;
+import com.github.lukesky19.skyHoppers.config.data.gui.ButtonConfig;
+import com.github.lukesky19.skyHoppers.config.data.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
-import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
-import com.github.lukesky19.skyHoppers.manager.GUIManager;
-import com.github.lukesky19.skyHoppers.manager.HopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
@@ -57,7 +57,7 @@ import java.util.UUID;
  * This class lets Players add an Online Player to the SkyHopper's member list.
  */
 public class SelectPlayerGUI extends SkyHopperGUI {
-    private final @NotNull HopperManager hopperManager;
+    private final @NotNull SkyHopperManager hopperManager;
 
     private final @NotNull SkyHopper skyHopper;
 
@@ -74,7 +74,7 @@ public class SelectPlayerGUI extends SkyHopperGUI {
      * @param skyHopper The {@link SkyHopper} the GUI is associated with.
      * @param player The {@link Player} viewing the GUI.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param hopperManager A {@link HopperManager} instance.
+     * @param hopperManager A {@link SkyHopperManager} instance.
      * @param membersGUI The {@link MembersGUI} the player came from.
      */
     public SelectPlayerGUI(
@@ -84,7 +84,7 @@ public class SelectPlayerGUI extends SkyHopperGUI {
             @NotNull SkyHopper skyHopper,
             @NotNull Player player,
             @NotNull GUIConfigManager guiConfigManager,
-            @NotNull HopperManager hopperManager,
+            @NotNull SkyHopperManager hopperManager,
             @NotNull MembersGUI membersGUI) {
         super(skyHoppers, guiManager, player, location, membersGUI);
 
@@ -302,7 +302,7 @@ public class SelectPlayerGUI extends SkyHopperGUI {
                         buttonBuilder.setAction(inventoryClickEvent -> {
                             skyHopper.addMember(onlinePlayerId);
 
-                            hopperManager.saveSkyHopperToPDC(skyHopper);
+                            hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                             guiManager.refreshViewersGUI(location);
 

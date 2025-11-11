@@ -18,17 +18,19 @@
 package com.github.lukesky19.skyHoppers.gui.menu.upgrades;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.data.config.gui.ButtonConfig;
-import com.github.lukesky19.skyHoppers.manager.GUIConfigManager;
-import com.github.lukesky19.skyHoppers.manager.LocaleManager;
-import com.github.lukesky19.skyHoppers.manager.SettingsManager;
-import com.github.lukesky19.skyHoppers.data.config.Locale;
-import com.github.lukesky19.skyHoppers.data.config.Settings;
-import com.github.lukesky19.skyHoppers.data.config.gui.upgrade.UpgradeGUIConfig;
+import com.github.lukesky19.skyHoppers.config.GUIConfigManager;
+import com.github.lukesky19.skyHoppers.config.LocaleManager;
+import com.github.lukesky19.skyHoppers.config.SettingsManager;
+import com.github.lukesky19.skyHoppers.config.data.Locale;
+import com.github.lukesky19.skyHoppers.config.data.Settings;
+import com.github.lukesky19.skyHoppers.config.data.gui.ButtonConfig;
+import com.github.lukesky19.skyHoppers.config.data.gui.UpgradeGUIConfig;
+import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
-import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
-import com.github.lukesky19.skyHoppers.manager.GUIManager;
-import com.github.lukesky19.skyHoppers.manager.HopperManager;
+import com.github.lukesky19.skyHoppers.hook.HookManager;
+import com.github.lukesky19.skyHoppers.hook.impl.vault.EconomyHook;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
@@ -46,7 +48,10 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
 
 /**
  * This class lets Players upgrade the number of linked containers the SkyHopper can have.
@@ -54,7 +59,8 @@ import java.util.*;
 public class LinksUpgradeGUI extends SkyHopperGUI {
     private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
-    private final @NotNull HopperManager hopperManager;
+    private final @NotNull SkyHopperManager hopperManager;
+    private final @NotNull HookManager hookManager;
 
     private final @NotNull SkyHopper skyHopper;
 
@@ -70,7 +76,8 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
      * @param settingsManager A {@link SettingsManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param hopperManager A {@link HopperManager} instance.
+     * @param hopperManager A {@link SkyHopperManager} instance.
+     * @param hookManager A {@link HookManager} instance.
      * @param upgradesGUI The {@link UpgradesGUI} the player cane from.
      */
     public LinksUpgradeGUI(
@@ -82,13 +89,15 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
             @NotNull SettingsManager settingsManager,
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
-            @NotNull HopperManager hopperManager,
+            @NotNull SkyHopperManager hopperManager,
+            @NotNull HookManager hookManager,
             @NotNull UpgradesGUI upgradesGUI) {
         super(skyHoppers, guiManager, player, location, upgradesGUI);
 
         this.settingsManager = settingsManager;
         this.localeManager = localeManager;
         this.hopperManager = hopperManager;
+        this.hookManager = hookManager;
 
         this.skyHopper = skyHopper;
 
@@ -301,8 +310,10 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
                 buttonBuilder.setAction(inventoryClickEvent -> {
                     Locale locale = localeManager.getLocale();
 
-                    if(skyHoppers.getEconomy().getBalance(player) >= upgradePrice) {
-                        skyHoppers.getEconomy().withdrawPlayer(player, upgradePrice);
+                    EconomyHook economyHook = hookManager.getHook(EconomyHook.class);
+
+                    if(economyHook.getBalance(player) >= upgradePrice) {
+                        economyHook.removeFromBalance(player, upgradePrice);
 
                         skyHopper.setMaxContainers(upgradeAmount);
                         skyHopper.setMaxContainers(upgradeAmount);
@@ -313,7 +324,7 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
 
                         player.sendMessage(AdventureUtil.serialize(player, locale.prefix() + locale.maxLinksUpgrade(), messagePlaceholders));
 
-                        hopperManager.saveSkyHopperToPDC(skyHopper);
+                        hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                         guiManager.refreshViewersGUI(location);
 

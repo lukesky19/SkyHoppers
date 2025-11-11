@@ -18,18 +18,19 @@
 package com.github.lukesky19.skyHoppers.gui.menu.upgrades;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.data.config.gui.ButtonConfig;
-import com.github.lukesky19.skyHoppers.manager.GUIConfigManager;
-import com.github.lukesky19.skyHoppers.manager.LocaleManager;
-import com.github.lukesky19.skyHoppers.manager.SettingsManager;
-import com.github.lukesky19.skyHoppers.data.config.Locale;
-import com.github.lukesky19.skyHoppers.data.config.gui.GUIConfig;
-import com.github.lukesky19.skyHoppers.data.config.Settings;
+import com.github.lukesky19.skyHoppers.config.GUIConfigManager;
+import com.github.lukesky19.skyHoppers.config.LocaleManager;
+import com.github.lukesky19.skyHoppers.config.SettingsManager;
+import com.github.lukesky19.skyHoppers.config.data.Locale;
+import com.github.lukesky19.skyHoppers.config.data.Settings;
+import com.github.lukesky19.skyHoppers.config.data.gui.ButtonConfig;
+import com.github.lukesky19.skyHoppers.config.data.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
 import com.github.lukesky19.skyHoppers.gui.menu.HopperGUI;
-import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
-import com.github.lukesky19.skyHoppers.manager.GUIManager;
-import com.github.lukesky19.skyHoppers.manager.HopperManager;
+import com.github.lukesky19.skyHoppers.hook.HookManager;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
@@ -45,7 +46,8 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Lets players manage the SkyHoppers upgrades.
@@ -54,7 +56,8 @@ public class UpgradesGUI extends SkyHopperGUI {
     private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
-    private final @NotNull HopperManager hopperManager;
+    private final @NotNull SkyHopperManager hopperManager;
+    private final @NotNull HookManager hookManager;
 
     private final @NotNull SkyHopper skyHopper;
 
@@ -70,7 +73,8 @@ public class UpgradesGUI extends SkyHopperGUI {
      * @param settingsManager A {@link SettingsManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param hopperManager A {@link HopperManager} instance.
+     * @param hopperManager A {@link SkyHopperManager} instance.
+     * @param hookManager A {@link HookManager} instance.
      * @param hopperGUI The {@link HopperGUI} the Player came from.
      */
     public UpgradesGUI(
@@ -82,7 +86,8 @@ public class UpgradesGUI extends SkyHopperGUI {
             @NotNull SettingsManager settingsManager,
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
-            @NotNull HopperManager hopperManager,
+            @NotNull SkyHopperManager hopperManager,
+            @NotNull HookManager hookManager,
             @NotNull HopperGUI hopperGUI) {
         super(skyHoppers, guiManager, player, location, hopperGUI);
 
@@ -90,6 +95,7 @@ public class UpgradesGUI extends SkyHopperGUI {
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
         this.hopperManager = hopperManager;
+        this.hookManager = hookManager;
 
         this.skyHopper = skyHopper;
 
@@ -280,7 +286,7 @@ public class UpgradesGUI extends SkyHopperGUI {
 
                 guiManager.removeViewer(location, player.getUniqueId());
 
-                SuctionSpeedUpgradeGUI suctionSpeedUpgradeGUI = new SuctionSpeedUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, this);
+                SuctionSpeedUpgradeGUI suctionSpeedUpgradeGUI = new SuctionSpeedUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager, this);
 
                 boolean creationResult = suctionSpeedUpgradeGUI.create();
                 if(!creationResult) {
@@ -333,7 +339,7 @@ public class UpgradesGUI extends SkyHopperGUI {
 
                 guiManager.removeViewer(location, player.getUniqueId());
 
-                SuctionAmountUpgradeGUI suctionAmountUpgradeGUI = new SuctionAmountUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, this);
+                SuctionAmountUpgradeGUI suctionAmountUpgradeGUI = new SuctionAmountUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager, this);
 
                 boolean creationResult = suctionAmountUpgradeGUI.create();
                 if(!creationResult) {
@@ -386,7 +392,7 @@ public class UpgradesGUI extends SkyHopperGUI {
 
                 guiManager.removeViewer(location, player.getUniqueId());
 
-                SuctionRangeUpgradeGUI suctionRangeUpgradeGUI = new SuctionRangeUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, this);
+                SuctionRangeUpgradeGUI suctionRangeUpgradeGUI = new SuctionRangeUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager, this);
 
                 boolean creationResult = suctionRangeUpgradeGUI.create();
                 if(!creationResult) {
@@ -439,7 +445,7 @@ public class UpgradesGUI extends SkyHopperGUI {
 
                 guiManager.removeViewer(location, player.getUniqueId());
 
-                LinksUpgradeGUI linksUpgradeGUI = new LinksUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, this);
+                LinksUpgradeGUI linksUpgradeGUI = new LinksUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager, this);
 
                 boolean creationResult = linksUpgradeGUI.create();
                 if(!creationResult) {
@@ -492,7 +498,7 @@ public class UpgradesGUI extends SkyHopperGUI {
 
                 guiManager.removeViewer(location, player.getUniqueId());
 
-                TransferSpeedUpgradeGUI transferSpeedUpgradeGUI = new TransferSpeedUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, this);
+                TransferSpeedUpgradeGUI transferSpeedUpgradeGUI = new TransferSpeedUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager, this);
 
                 boolean creationResult = transferSpeedUpgradeGUI.create();
                 if(!creationResult) {
@@ -545,7 +551,7 @@ public class UpgradesGUI extends SkyHopperGUI {
 
                 guiManager.removeViewer(location, player.getUniqueId());
 
-                TransferAmountUpgradeGUI transferAmountUpgradeGUI = new TransferAmountUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, this);
+                TransferAmountUpgradeGUI transferAmountUpgradeGUI = new TransferAmountUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager, this);
 
                 boolean creationResult = transferAmountUpgradeGUI.create();
                 if(!creationResult) {

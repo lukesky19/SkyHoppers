@@ -18,19 +18,19 @@
 package com.github.lukesky19.skyHoppers.gui.menu.links;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.data.config.gui.ButtonConfig;
-import com.github.lukesky19.skyHoppers.manager.GUIConfigManager;
-import com.github.lukesky19.skyHoppers.manager.LocaleManager;
-import com.github.lukesky19.skyHoppers.data.config.gui.GUIConfig;
-import com.github.lukesky19.skyHoppers.data.config.Locale;
+import com.github.lukesky19.skyHoppers.config.GUIConfigManager;
+import com.github.lukesky19.skyHoppers.config.LocaleManager;
+import com.github.lukesky19.skyHoppers.config.data.Locale;
+import com.github.lukesky19.skyHoppers.config.data.gui.ButtonConfig;
+import com.github.lukesky19.skyHoppers.config.data.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
 import com.github.lukesky19.skyHoppers.gui.menu.HopperGUI;
-import com.github.lukesky19.skyHoppers.gui.menu.filter.OutputFilterGUI;
-import com.github.lukesky19.skyHoppers.hopper.SkyContainer;
-import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
+import com.github.lukesky19.skyHoppers.gui.menu.filter.SkyContainerFilterGUI;
 import com.github.lukesky19.skyHoppers.listener.HopperClickListener;
-import com.github.lukesky19.skyHoppers.manager.GUIManager;
-import com.github.lukesky19.skyHoppers.manager.HopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
+import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.format.FormatUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
@@ -63,7 +63,7 @@ public class LinksGUI extends SkyHopperGUI {
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
 
-    private final @NotNull HopperManager hopperManager;
+    private final @NotNull SkyHopperManager hopperManager;
     private final @NotNull HopperClickListener hopperClickListener;
 
     private final @NotNull SkyHopper skyHopper;
@@ -82,7 +82,7 @@ public class LinksGUI extends SkyHopperGUI {
      * @param player The {@link Player} viewing the GUI.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param hopperManager A {@link HopperManager} instance.
+     * @param hopperManager A {@link SkyHopperManager} instance.
      * @param hopperClickListener A {@link HopperClickListener} instance.
      * @param hopperGUI The {@link HopperGUI} the Player came from.
      */
@@ -94,7 +94,7 @@ public class LinksGUI extends SkyHopperGUI {
             @NotNull Player player,
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
-            @NotNull HopperManager hopperManager,
+            @NotNull SkyHopperManager hopperManager,
             @NotNull HopperClickListener hopperClickListener,
             @NotNull HopperGUI hopperGUI) {
         super(skyHoppers, guiManager, player, location, hopperGUI);
@@ -316,7 +316,7 @@ public class LinksGUI extends SkyHopperGUI {
 
                                     guiManager.removeViewer(location, uuid);
 
-                                    OutputFilterGUI outputFilterGUI = new OutputFilterGUI(skyHoppers, guiManager, location, skyHopper, player, guiConfigManager, hopperManager, skyContainer, this);
+                                    SkyContainerFilterGUI outputFilterGUI = new SkyContainerFilterGUI(skyHoppers, guiManager, location, skyHopper, player, guiConfigManager, hopperManager, skyContainer, this);
 
                                     boolean creationResult = outputFilterGUI.create();
                                     if(!creationResult) {
@@ -339,7 +339,7 @@ public class LinksGUI extends SkyHopperGUI {
                                 case RIGHT, SHIFT_RIGHT -> {
                                     skyHopper.removeLinkedContainer(skyContainer);
 
-                                    hopperManager.saveSkyHopperToPDC(skyHopper);
+                                    hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                                     guiManager.closeOutputFilterGUIs(location);
 

@@ -17,8 +17,10 @@
 */
 package com.github.lukesky19.skyHoppers;
 
-import com.github.lukesky19.skyHoppers.hopper.*;
-import com.github.lukesky19.skyHoppers.manager.HopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.data.Filterable.FilterType;
+import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
+import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
@@ -32,13 +34,13 @@ import java.util.UUID;
  * This class contains methods to interface with the SkyHoppers plugin.
  */
 public class SkyHoppersAPI {
-    private final @NotNull HopperManager hopperManager;
+    private final @NotNull SkyHopperManager hopperManager;
 
     /**
      * Constructor
-     * @param hopperManager A {@link HopperManager} instance.
+     * @param hopperManager A {@link SkyHopperManager} instance.
      */
-    public SkyHoppersAPI(@NotNull HopperManager hopperManager) {
+    public SkyHoppersAPI(@NotNull SkyHopperManager hopperManager) {
         this.hopperManager = hopperManager;
     }
 
@@ -49,15 +51,16 @@ public class SkyHoppersAPI {
      * @return An {@link ItemStack} or null.
      */
     public @Nullable ItemStack createItemStackFromSkyHopper(@NotNull SkyHopper skyHopper, int amount) {
-        return hopperManager.createItemStackFromSkyHopper(skyHopper, amount);
+        return hopperManager.getSkyHopperCreator().createSkyHopperItemStack(skyHopper, amount);
     }
 
     /**
      * Creates a {@link SkyHopper}.
      * @param enabled Is the SkyHopper enabled?
      * @param particles Is particles enabled for the SkyHopper?
-     * @param owner The {@link UUID} of the player who owns the SkyHopper.
+     * @param owner The {@link UUID} of the player who owns the SkyHopper. May be null.
      * @param members A {@link List} of {@link UUID}s that can also access the SkyHopper.
+     * @param location The {@link Location} of the SkyHopper. May be null.
      * @param linkedContainers A {@link List} of {@link SkyContainer}s that are linked to the SkyHopper.
      * @param filterType The {@link FilterType} of the SkyHopper.
      * @param filterItems A {@link List} of {@link ItemType}s to filter.
@@ -95,6 +98,7 @@ public class SkyHoppersAPI {
             int maxSuctionRange,
             int maxContainers) {
         return new SkyHopper(
+                1,
                 enabled,
                 particles,
                 owner,
@@ -162,6 +166,7 @@ public class SkyHoppersAPI {
             int maxContainers,
             int amount) {
         SkyHopper skyHopper = new SkyHopper(
+                1,
                 enabled,
                 particles,
                 owner,
@@ -184,7 +189,7 @@ public class SkyHoppersAPI {
                 System.currentTimeMillis(),
                 System.currentTimeMillis());
 
-        return hopperManager.createItemStackFromSkyHopper(skyHopper, amount);
+        return hopperManager.getSkyHopperCreator().createSkyHopperItemStack(skyHopper, amount);
     }
 
     /**

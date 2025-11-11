@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.github.lukesky19"
-version = "1.1.1.1"
+version = "1.2.0.0"
 
 repositories {
     mavenCentral()
@@ -29,9 +29,9 @@ repositories {
 dependencies {
     compileOnly("io.papermc.paper:paper-api:1.21.10-R0.1-SNAPSHOT")
     compileOnly("com.github.lukesky19:SkyLib:1.3.1.0")
-    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
 
     // Hooks
+    compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
     compileOnly("dev.rosewood:rosestacker:1.5.36")
     compileOnly("world.bentobox:bentobox:2.7.0-SNAPSHOT")
     compileOnly("com.ghostchu:quickshop-bukkit:6.2.0.10")
@@ -53,6 +53,11 @@ tasks {
         }
     }
 
+    // This allows usage of @apiNode in javadocs
+    javadoc {
+        (options as StandardJavadocDocletOptions).tags("apiNote:a:API Note:")
+    }
+
     jar {
         manifest {
             attributes["paperweight-mappings-namespace"] = "mojang"
@@ -63,6 +68,7 @@ tasks {
 
     build {
         dependsOn(publishToMavenLocal)
+        dependsOn(javadoc)
     }
 }
 

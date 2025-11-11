@@ -28,7 +28,7 @@ import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.jetbrains.annotations.NotNull;
 
-import java.sql.*;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -40,12 +40,13 @@ public class HoppersTable {
     private final @NotNull SkyHoppers skyHoppers;
     private final @NotNull ComponentLogger logger;
     private final @NotNull QueueManager queueManager;
+    private final @NotNull VersionsTable versionsTable;
     private final @NotNull String tableName = "skyhoppers_hoppers";
 
     /**
      * Default Constructor.
-     * You should use {@link #HoppersTable(SkyHoppers, QueueManager)} instead.
-     * @deprecated You should use {@link #HoppersTable(SkyHoppers, QueueManager)} instead.
+     * You should use {@link #HoppersTable(SkyHoppers, QueueManager, VersionsTable)} instead.
+     * @deprecated You should use {@link #HoppersTable(SkyHoppers, QueueManager, VersionsTable)} instead.
      */
     @Deprecated
     public HoppersTable() {
@@ -56,24 +57,72 @@ public class HoppersTable {
      * Constructor
      * @param skyHoppers A {@link SkyHoppers} instance.
      * @param queueManager A {@link QueueManager} instance.
+     * @param versionsTable A {@link VersionsTable} instance.
      */
-    public HoppersTable(@NotNull SkyHoppers skyHoppers, @NotNull QueueManager queueManager) {
+    public HoppersTable(
+            @NotNull SkyHoppers skyHoppers,
+            @NotNull QueueManager queueManager,
+            @NotNull VersionsTable versionsTable) {
         this.skyHoppers = skyHoppers;
         this.logger = skyHoppers.getComponentLogger();
         this.queueManager = queueManager;
+        this.versionsTable = versionsTable;
     }
 
     /**
      * Creates the table in the database if it doesn't exist.
      */
     public void createTable() {
-        String tableCreationSql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
-                "world VARCHAR(50) NOT NULL, " +
-                "x INTEGER NOT NULL, " +
-                "y INTEGER NOT NULL, " +
-                "z INTEGER NOT NULL)";
+        versionsTable.getTableVersion(tableName).thenAccept(version -> {
+            // If -1, assume outdated format and data needs migrated
+            if(version == -1) {
+                String temporaryTableName = "skyhoppers_hoppers_temp";
+                String temporaryTableCreationSql = "CREATE TABLE IF NOT EXISTS " + temporaryTableName + " (" +
+                        "world TEXT NOT NULL, " +
+                        "x INTEGER NOT NULL, " +
+                        "y INTEGER NOT NULL, " +
+                        "z INTEGER NOT NULL, " +
+                        "UNIQUE (world, x, y, z))";
 
-        queueManager.queueWriteTransaction(tableCreationSql);
+                queueManager.queueWriteTransaction(temporaryTableCreationSql)
+                        .thenAccept(v1 ->
+                                getSkyHopperLocations().thenAccept(list -> {
+                                    List<CompletableFuture<Void>> futureList = new ArrayList<>();
+
+                                    list.forEach(location -> {
+                                        String updateSql = "INSERT INTO " + temporaryTableName + " (world, x, y, z) VALUES (?, ?, ?, ?) ON CONFLICT (world, x, y, z) DO NOTHING";
+
+                                        StringParameter worldParameter = new StringParameter(location.getWorld().getName());
+                                        IntegerParameter xParameter = new IntegerParameter(location.getBlockX());
+                                        IntegerParameter yParameter = new IntegerParameter(location.getBlockY());
+                                        IntegerParameter zParameter = new IntegerParameter(location.getBlockZ());
+
+                                        futureList.add(queueManager.queueWriteTransaction(updateSql, List.of(worldParameter, xParameter, yParameter, zParameter)).thenAccept(result -> {}));
+                                    });
+
+                                    CompletableFuture<Void> allFutures = CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0]));
+                                    allFutures.thenAccept(v2 -> {
+                                        String dropTableSql = "DROP TABLE " + tableName;
+                                        queueManager.queueWriteTransaction(dropTableSql).thenAccept(v3 -> {
+                                            String alterSql = "ALTER TABLE " + temporaryTableName + " RENAME TO " + tableName;
+
+                                            queueManager.queueWriteTransaction(alterSql).thenAccept(v5 ->
+                                                    versionsTable.updateVersion(tableName, 1));
+                                        });
+                                    });
+                                }));
+            } else {
+                String tableCreationSql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
+                        "world TEXT NOT NULL, " +
+                        "x INTEGER NOT NULL, " +
+                        "y INTEGER NOT NULL, " +
+                        "z INTEGER NOT NULL, " +
+                        "UNIQUE (world, x, y, z))";
+
+                queueManager.queueWriteTransaction(tableCreationSql).thenAccept(v ->
+                        versionsTable.updateVersion(tableName, 1));
+            }
+        });
     }
 
     /**
@@ -115,7 +164,7 @@ public class HoppersTable {
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
     public @NotNull CompletableFuture<Void> addSkyHopperLocation(@NotNull Location location) {
-        String updateSql = "INSERT INTO " + tableName + " (world, x, y, z) VALUES (?, ?, ?, ?, ?) ON CONFLICT (x, y, z) DO NOTHING";
+        String updateSql = "INSERT INTO " + tableName + " (world, x, y, z) VALUES (?, ?, ?, ?) ON CONFLICT (world, x, y, z) DO NOTHING";
 
         StringParameter worldParameter = new StringParameter(location.getWorld().getName());
         IntegerParameter xParameter = new IntegerParameter(location.getBlockX());

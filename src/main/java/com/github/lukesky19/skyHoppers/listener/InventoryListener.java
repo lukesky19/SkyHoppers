@@ -17,12 +17,14 @@
 */
 package com.github.lukesky19.skyHoppers.listener;
 
+import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
-import com.github.lukesky19.skyHoppers.manager.GUIManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.*;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.NotNull;
@@ -66,7 +68,7 @@ public class InventoryListener implements Listener {
 
     /**
      * Passes the InventoryDragEvent to the player's open GUI.
-     * @param inventoryDragEvent An InventoryDragEvent.
+     * @param inventoryDragEvent An {@link InventoryDragEvent}.
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onDrag(InventoryDragEvent inventoryDragEvent) {
@@ -87,7 +89,7 @@ public class InventoryListener implements Listener {
 
     /**
      * Passes the InventoryCloseEvent to the player's open GUI.
-     * @param inventoryCloseEvent An InventoryCloseEvent.
+     * @param inventoryCloseEvent An {@link InventoryCloseEvent}.
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onClose(InventoryCloseEvent inventoryCloseEvent) {

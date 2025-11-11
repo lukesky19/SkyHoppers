@@ -19,16 +19,16 @@ package com.github.lukesky19.skyHoppers.gui.menu.member;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.data.config.gui.ButtonConfig;
-import com.github.lukesky19.skyHoppers.manager.GUIConfigManager;
-import com.github.lukesky19.skyHoppers.manager.LocaleManager;
-import com.github.lukesky19.skyHoppers.data.config.Locale;
-import com.github.lukesky19.skyHoppers.data.config.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.config.GUIConfigManager;
+import com.github.lukesky19.skyHoppers.config.LocaleManager;
+import com.github.lukesky19.skyHoppers.config.data.Locale;
+import com.github.lukesky19.skyHoppers.config.data.gui.ButtonConfig;
+import com.github.lukesky19.skyHoppers.config.data.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
 import com.github.lukesky19.skyHoppers.gui.menu.HopperGUI;
-import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
-import com.github.lukesky19.skyHoppers.manager.GUIManager;
-import com.github.lukesky19.skyHoppers.manager.HopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
@@ -61,7 +61,7 @@ import java.util.UUID;
 public class MembersGUI extends SkyHopperGUI {
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
-    private final @NotNull HopperManager hopperManager;
+    private final @NotNull SkyHopperManager hopperManager;
 
     private final @NotNull SkyHopper skyHopper;
 
@@ -79,7 +79,7 @@ public class MembersGUI extends SkyHopperGUI {
      * @param player The {@link Player} viewing the GUI.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param hopperManager A {@link HopperManager} instance.
+     * @param hopperManager A {@link SkyHopperManager} instance.
      * @param hopperGUI The {@link HopperGUI} the player came from.
      */
     public MembersGUI(
@@ -90,7 +90,7 @@ public class MembersGUI extends SkyHopperGUI {
             @NotNull Player player,
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
-            @NotNull HopperManager hopperManager,
+            @NotNull SkyHopperManager hopperManager,
             @NotNull HopperGUI hopperGUI) {
         super(skyHoppers, guiManager, player, location, hopperGUI);
 
@@ -303,7 +303,7 @@ public class MembersGUI extends SkyHopperGUI {
                         buttonBuilder.setAction(inventoryClickEvent -> {
                             skyHopper.removeMember(memberId);
 
-                            hopperManager.saveSkyHopperToPDC(skyHopper);
+                            hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                             guiManager.refreshViewersGUI(location);
 

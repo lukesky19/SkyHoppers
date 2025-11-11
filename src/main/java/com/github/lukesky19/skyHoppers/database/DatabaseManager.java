@@ -19,6 +19,7 @@ package com.github.lukesky19.skyHoppers.database;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.database.table.HoppersTable;
+import com.github.lukesky19.skyHoppers.database.table.VersionsTable;
 import com.github.lukesky19.skylib.api.database.AbstractDatabaseManager;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -51,7 +52,10 @@ public class DatabaseManager extends AbstractDatabaseManager {
         super(connectionManager, queueManager);
         this.skyHoppers = skyHoppers;
 
-        hoppersTable = new HoppersTable(skyHoppers, queueManager);
+        @NotNull VersionsTable versionsTable = new VersionsTable(queueManager);
+        versionsTable.createTable();
+
+        hoppersTable = new HoppersTable(skyHoppers, queueManager, versionsTable);
         hoppersTable.createTable();
     }
 

@@ -18,12 +18,12 @@
 package com.github.lukesky19.skyHoppers.listener;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
-import com.github.lukesky19.skyHoppers.manager.HopperManager;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
+import com.github.lukesky19.skyHoppers.hook.HookManager;
+import com.github.lukesky19.skyHoppers.hook.impl.rosestacker.RoseStackerHook;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.transfer.impl.entity.ItemEntityToInventoryTransfer;
 import org.bukkit.Color;
-import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.block.Hopper;
 import org.bukkit.entity.Item;
@@ -31,39 +31,36 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryPickupItemEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
-
-import static com.github.lukesky19.skyHoppers.util.InventoryUtils.addGroundItemToInventory;
-import static com.github.lukesky19.skyHoppers.util.RoseStackerUtils.getItemAmount;
-import static com.github.lukesky19.skyHoppers.util.RoseStackerUtils.removeAmountFromGroundItem;
 
 /**
  * This class listens to when a SkyHopper picks up an ItemStack
  */
 public class HopperPickupItemListener implements Listener {
     private final @NotNull SkyHoppers plugin;
-    private final @NotNull ComponentLogger logger;
-    private final @NotNull HopperManager hopperManager;
+    private final @NotNull SkyHopperManager hopperManager;
+    private final @NotNull HookManager hookManager;
 
     /**
      * Constructor
      * @param plugin The {@link SkyHoppers} instance.
-     * @param hopperManager A {@link HopperManager} instance.
+     * @param hopperManager A {@link SkyHopperManager} instance.
+     * @param hookManager A {@link HookManager} instance.
      */
-    public HopperPickupItemListener(@NotNull SkyHoppers plugin, @NotNull HopperManager hopperManager) {
+    public HopperPickupItemListener(
+            @NotNull SkyHoppers plugin,
+            @NotNull SkyHopperManager hopperManager,
+            @NotNull HookManager hookManager) {
         this.plugin = plugin;
-        this.logger = plugin.getComponentLogger();
         this.hopperManager = hopperManager;
+        this.hookManager = hookManager;
     }
 
     /**
      * Listens to when a SkyHopper picks up an item using the vanilla method, i.e., an ItemStack directly on-top of the Hopper.
-     * @param inventoryPickupItemEvent An InventoryPickupItemEvent
+     * @param inventoryPickupItemEvent An {@link InventoryPickupItemEvent}
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onHopperPickup(InventoryPickupItemEvent inventoryPickupItemEvent) {
@@ -72,7 +69,7 @@ public class HopperPickupItemListener implements Listener {
         if(inventoryPickupItemEvent.getInventory().getLocation() == null) return;
 
         // Get the SkyHopper for the given location
-        SkyHopper skyHopper = hopperManager.getSkyHopper(inventoryPickupItemEvent.getInventory().getLocation());
+        SkyHopper skyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(inventoryPickupItemEvent.getInventory().getLocation());
         // If no SkyHopper exists at that location, do nothing
         if(skyHopper == null || skyHopper.getLocation() == null) return;
 
@@ -85,114 +82,28 @@ public class HopperPickupItemListener implements Listener {
         // If the next suction time hasn't been reached, do nothing
         if(skyHopper.getNextSuctionTime() > System.currentTimeMillis()) return;
 
+        // Get the RoseStacker hook
+        RoseStackerHook roseStackerHook = hookManager.getHook(RoseStackerHook.class);
+
         // Get the item entity and item amount
-        Item item = inventoryPickupItemEvent.getItem();
-        int itemAmount = getItemAmount(item);
+        Item groundItem = inventoryPickupItemEvent.getItem();
+        int groundItemAmount = roseStackerHook.getItemAmount(groundItem);
+        ItemStack groundStack = groundItem.getItemStack();
+        ItemType groundType = groundStack.getType().asItemType();
+        if(groundType == null) return;
 
-        // Clone the item entity's ItemStack
-        ItemStack suctionItem = item.getItemStack();
-        
-        ItemType suctionItemType = suctionItem.getType().asItemType();
-        if(suctionItemType == null) {
-            logger.warn(AdventureUtil.serialize("Unable to pick up an item and add it to a SkyHopper as the ItemType is null. [Method: onHopperPickup]"));
-            return;
-        }
+        int result = ItemEntityToInventoryTransfer.transfer(roseStackerHook, groundItem, groundStack, groundType, groundItemAmount, skyHopper, hopper.getInventory(), skyHopper.getSuctionAmount());
 
-        // Get the SkyHopper's location
-        Location location = skyHopper.getLocation();
-        // Get the Hopper's Inventory
-        Inventory hopperInv = hopper.getSnapshotInventory();
+        if(result > 0) {
+            if(skyHopper.isParticlesEnabled()) {
+                // Highlight hopper that sucked up the item
+                hopper.getWorld().spawnParticle(Particle.DUST, hopper.getLocation().clone(), 5, 0.5, 0.5, 0.5, 0.0, new Particle.DustOptions(Color.YELLOW, 1));
 
-        switch(skyHopper.getFilterType()) {
-            case NONE -> {
-                int result = addGroundItemToInventory(item, itemAmount, suctionItem, hopperInv, skyHopper.getSuctionAmount());
-
-                if(result > 0) {
-                    if(skyHopper.isParticlesEnabled()) {
-                        // Highlight hopper that sucked up the item
-                        hopper.getWorld().spawnParticle(Particle.DUST, location, 5, 0.0, 0.0, 0.0, 0.0, new Particle.DustOptions(Color.YELLOW, 1));
-
-                        // Highlight the item that was sucked up
-                        item.getWorld().spawnParticle(Particle.WITCH, item.getLocation(), 3, 0.0, 0.0, 0.0, 0.0);
-                    }
-
-                    updateSuctionTime(skyHopper);
-                }
+                // Highlight the item that was sucked up
+                groundItem.getWorld().spawnParticle(Particle.WITCH, hopper.getLocation().clone(), 3, 0.0, 0.0, 0.0, 0.0);
             }
 
-            case WHITELIST -> {
-                List<ItemType> filterItems = skyHopper.getFilterItems();
-                if (!filterItems.isEmpty() && filterItems.contains(suctionItemType)) {
-                    int result = addGroundItemToInventory(item, itemAmount, suctionItem, hopperInv, skyHopper.getSuctionAmount());
-
-                    if(result > 0) {
-                        if (skyHopper.isParticlesEnabled()) {
-                            // Highlight hopper that sucked up the item
-                            hopper.getWorld().spawnParticle(Particle.DUST, location, 5, 0.0, 0.0, 0.0, 0.0, new Particle.DustOptions(Color.YELLOW, 1));
-
-                            // Highlight the item that was sucked up
-                            item.getWorld().spawnParticle(Particle.WITCH, item.getLocation(), 3, 0.0, 0.0, 0.0, 0.0);
-                        }
-
-                        updateSuctionTime(skyHopper);
-                    }
-                }
-            }
-
-            case BLACKLIST -> {
-                List<ItemType> filterItems = skyHopper.getFilterItems();
-
-                if(!filterItems.isEmpty() && !filterItems.contains(suctionItemType)) {
-                    int result = addGroundItemToInventory(item, itemAmount, suctionItem, hopperInv, skyHopper.getSuctionAmount());
-
-                    if(result > 0) {
-                        if (skyHopper.isParticlesEnabled()) {
-                            // Highlight hopper that sucked up the item
-                            hopper.getWorld().spawnParticle(Particle.DUST, location, 5, 0.0, 0.0, 0.0, 0.0, new Particle.DustOptions(Color.YELLOW, 1));
-
-                            // Highlight the item that was sucked up
-                            item.getWorld().spawnParticle(Particle.WITCH, item.getLocation(), 3, 0.0, 0.0, 0.0, 0.0);
-                        }
-
-                        updateSuctionTime(skyHopper);
-                    }
-                }
-            }
-
-            case DESTROY -> {
-                List<ItemType> filterItems = skyHopper.getFilterItems();
-                if(!filterItems.isEmpty() && filterItems.contains(suctionItemType)) {
-                    // Get the amount to be destroyed
-                    int destroyAmount = Math.min(itemAmount, skyHopper.getSuctionAmount());
-                    removeAmountFromGroundItem(item, itemAmount, destroyAmount);
-
-                    if(skyHopper.isParticlesEnabled()) {
-                        // Highlight hopper that sucked up the item
-                        hopper.getWorld().spawnParticle(Particle.DUST, location, 5, 0.0, 0.0, 0.0, 0.0, new Particle.DustOptions(Color.YELLOW, 1));
-
-                        // Highlight the item that was sucked up
-                        item.getWorld().spawnParticle(Particle.WITCH, item.getLocation(), 3, 0.0, 0.0, 0.0, 0.0);
-                    }
-
-                    updateSuctionTime(skyHopper);
-
-                    return;
-                }
-
-                int result = addGroundItemToInventory(item, itemAmount, suctionItem, hopperInv, skyHopper.getSuctionAmount());
-
-                if(result > 0) {
-                    if (skyHopper.isParticlesEnabled()) {
-                        // Highlight hopper that sucked up the item
-                        hopper.getWorld().spawnParticle(Particle.DUST, location, 5, 0.0, 0.0, 0.0, 0.0, new Particle.DustOptions(Color.YELLOW, 1));
-
-                        // Highlight the item that was sucked up
-                        item.getWorld().spawnParticle(Particle.WITCH, item.getLocation(), 3, 0.0, 0.0, 0.0, 0.0);
-                    }
-
-                    updateSuctionTime(skyHopper);
-                }
-            }
+            updateSuctionTime(skyHopper);
         }
     }
 

@@ -18,25 +18,26 @@
 package com.github.lukesky19.skyHoppers.gui.menu;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.data.config.gui.ButtonConfig;
-import com.github.lukesky19.skyHoppers.manager.GUIConfigManager;
-import com.github.lukesky19.skyHoppers.manager.LocaleManager;
-import com.github.lukesky19.skyHoppers.manager.SettingsManager;
-import com.github.lukesky19.skyHoppers.data.config.Locale;
-import com.github.lukesky19.skyHoppers.data.config.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.config.GUIConfigManager;
+import com.github.lukesky19.skyHoppers.config.LocaleManager;
+import com.github.lukesky19.skyHoppers.config.SettingsManager;
+import com.github.lukesky19.skyHoppers.config.data.Locale;
+import com.github.lukesky19.skyHoppers.config.data.gui.ButtonConfig;
+import com.github.lukesky19.skyHoppers.config.data.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
-import com.github.lukesky19.skyHoppers.gui.menu.filter.InputFilterGUI;
+import com.github.lukesky19.skyHoppers.gui.menu.filter.SkyHopperFilterGUI;
 import com.github.lukesky19.skyHoppers.gui.menu.links.LinksGUI;
 import com.github.lukesky19.skyHoppers.gui.menu.member.MembersGUI;
 import com.github.lukesky19.skyHoppers.gui.menu.upgrades.UpgradesGUI;
-import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
+import com.github.lukesky19.skyHoppers.hook.HookManager;
 import com.github.lukesky19.skyHoppers.listener.HopperClickListener;
-import com.github.lukesky19.skyHoppers.manager.GUIManager;
-import com.github.lukesky19.skyHoppers.manager.HopperManager;
-import com.github.lukesky19.skyHoppers.task.HopperViewTask;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.task.tasks.HopperViewTask;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.gui.GUIType;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
+import com.github.lukesky19.skylib.api.gui.GUIType;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -63,7 +64,8 @@ public class HopperGUI extends SkyHopperGUI {
     private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
-    private final @NotNull HopperManager hopperManager;
+    private final @NotNull SkyHopperManager hopperManager;
+    private final @NotNull HookManager hookManager;
     private final @NotNull HopperClickListener hopperClickListener;
 
     private final @NotNull SkyHopper skyHopper;
@@ -80,7 +82,8 @@ public class HopperGUI extends SkyHopperGUI {
      * @param settingsManager A {@link SettingsManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
-     * @param hopperManager A {@link HopperManager} instance.
+     * @param hopperManager A {@link SkyHopperManager} instance.
+     * @param hookManager A {@link HookManager} instance.
      * @param hopperClickListener A {@link HopperClickListener} instance.
      */
     public HopperGUI(
@@ -92,7 +95,8 @@ public class HopperGUI extends SkyHopperGUI {
             @NotNull SettingsManager settingsManager,
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
-            @NotNull HopperManager hopperManager,
+            @NotNull SkyHopperManager hopperManager,
+            @NotNull HookManager hookManager,
             @NotNull HopperClickListener hopperClickListener) {
         super(skyHoppers, guiManager, player, location, null);
 
@@ -100,6 +104,7 @@ public class HopperGUI extends SkyHopperGUI {
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
         this.hopperManager = hopperManager;
+        this.hookManager = hookManager;
         this.hopperClickListener = hopperClickListener;
 
         this.skyHopper = skyHopper;
@@ -301,7 +306,7 @@ public class HopperGUI extends SkyHopperGUI {
             builder.setAction(event -> {
                 skyHopper.toggleEnabled();
 
-                hopperManager.saveSkyHopperToPDC(skyHopper);
+                hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                 guiManager.refreshViewersGUI(location);
 
@@ -336,7 +341,7 @@ public class HopperGUI extends SkyHopperGUI {
             builder.setAction(event -> {
                 skyHopper.toggleEnabled();
 
-                hopperManager.saveSkyHopperToPDC(skyHopper);
+                hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                 guiManager.refreshViewersGUI(location);
 
@@ -371,7 +376,7 @@ public class HopperGUI extends SkyHopperGUI {
             builder.setAction(event -> {
                 skyHopper.toggleParticles();
 
-                hopperManager.saveSkyHopperToPDC(skyHopper);
+                hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                 guiManager.refreshViewersGUI(location);
 
@@ -406,7 +411,7 @@ public class HopperGUI extends SkyHopperGUI {
             builder.setAction(event -> {
                 skyHopper.toggleParticles();
 
-                hopperManager.saveSkyHopperToPDC(skyHopper);
+                hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                 guiManager.refreshViewersGUI(location);
 
@@ -496,7 +501,7 @@ public class HopperGUI extends SkyHopperGUI {
                 skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
                         player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
 
-                InputFilterGUI inputFilterGUI = new InputFilterGUI(skyHoppers, guiManager, location, skyHopper, player, guiConfigManager, hopperManager, this);
+                SkyHopperFilterGUI inputFilterGUI = new SkyHopperFilterGUI(skyHoppers, guiManager, location, skyHopper, player, guiConfigManager, hopperManager, this);
 
                 boolean creationResult = inputFilterGUI.create();
                 if(!creationResult) {
@@ -549,7 +554,7 @@ public class HopperGUI extends SkyHopperGUI {
 
                 guiManager.removeViewer(location, player.getUniqueId());
 
-                UpgradesGUI upgradesGUI = new UpgradesGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, this);
+                UpgradesGUI upgradesGUI = new UpgradesGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager,this);
 
                 boolean creationResult = upgradesGUI.create();
                 if(!creationResult) {

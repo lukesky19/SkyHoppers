@@ -18,13 +18,14 @@
 package com.github.lukesky19.skyHoppers.listener;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.manager.LocaleManager;
-import com.github.lukesky19.skyHoppers.manager.SettingsManager;
-import com.github.lukesky19.skyHoppers.data.config.Locale;
-import com.github.lukesky19.skyHoppers.data.config.Settings;
-import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
-import com.github.lukesky19.skyHoppers.manager.HookManager;
-import com.github.lukesky19.skyHoppers.manager.HopperManager;
+import com.github.lukesky19.skyHoppers.config.LocaleManager;
+import com.github.lukesky19.skyHoppers.config.SettingsManager;
+import com.github.lukesky19.skyHoppers.config.data.Locale;
+import com.github.lukesky19.skyHoppers.config.data.Settings;
+import com.github.lukesky19.skyHoppers.hook.HookManager;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperDataManager;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.player.PlayerUtil;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
@@ -48,7 +49,7 @@ public class BlockBreakListener implements Listener {
     private final @NotNull ComponentLogger logger;
     private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
-    private final @NotNull HopperManager hopperManager;
+    private final @NotNull SkyHopperManager hopperManager;
     private final @NotNull HookManager hookManager;
     private final @NotNull HopperClickListener hopperClickListener;
 
@@ -57,11 +58,11 @@ public class BlockBreakListener implements Listener {
      * @param skyHoppers A {@link SkyHoppers} instance.
      * @param settingsManager A {@link SettingsManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
-     * @param hopperManager A {@link HopperManager} instance.
+     * @param hopperManager A {@link SkyHopperDataManager} instance.
      * @param hookManager A {@link HookManager} instance.
      * @param hopperClickListener A {@link HopperClickListener} instance.
      */
-    public BlockBreakListener(@NotNull SkyHoppers skyHoppers, @NotNull SettingsManager settingsManager, @NotNull LocaleManager localeManager, @NotNull HopperManager hopperManager, @NotNull HookManager hookManager, @NotNull HopperClickListener hopperClickListener) {
+    public BlockBreakListener(@NotNull SkyHoppers skyHoppers, @NotNull SettingsManager settingsManager, @NotNull LocaleManager localeManager, @NotNull SkyHopperManager hopperManager, @NotNull HookManager hookManager, @NotNull HopperClickListener hopperClickListener) {
         this.logger = skyHoppers.getComponentLogger();
         this.settingsManager = settingsManager;
         this.localeManager = localeManager;
@@ -72,7 +73,7 @@ public class BlockBreakListener implements Listener {
 
     /**
      * Listens for when a Hopper is broken and checks if it is a SkyHopper and that is can be broken by the Player.
-     * @param blockBreakEvent A BlockBreakEvent
+     * @param blockBreakEvent A {@link BlockBreakEvent}
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onHopperBreak(BlockBreakEvent blockBreakEvent) {
@@ -86,8 +87,15 @@ public class BlockBreakListener implements Listener {
 
         Location hopperLocation = hopper.getLocation().clone();
 
-        SkyHopper skyHopper = hopperManager.getSkyHopper(hopperLocation);
-        if(skyHopper == null) return;
+        SkyHopper skyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(hopperLocation);
+        if(skyHopper == null) {
+            if(hopperManager.isLocationSkyHopper(hopperLocation)) {
+                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperNotLoaded()));
+                blockBreakEvent.setCancelled(true);
+            }
+
+            return;
+        }
 
         if(hookManager.canNotBuild(player, hopperLocation)) {
             player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.noBuild()));
@@ -97,7 +105,7 @@ public class BlockBreakListener implements Listener {
 
         if(player.hasPermission("skyhoppers.admin") || (skyHopper.getOwner() != null && skyHopper.getOwner().equals(player.getUniqueId())) || skyHopper.getMembers().contains(player.getUniqueId())) {
             // Delete the hopper's data
-            hopperManager.removeSkyHopper(hopperLocation);
+            hopperManager.getSkyHopperDataManager().removeSkyHopper(hopperLocation);
 
             player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperBroken()));
 
@@ -124,7 +132,7 @@ public class BlockBreakListener implements Listener {
                 }
             }
 
-            ItemStack skyHopperItem = hopperManager.createItemStackFromSkyHopper(skyHopper, 1);
+            ItemStack skyHopperItem = hopperManager.getSkyHopperCreator().createSkyHopperItemStack(skyHopper, 1);
             if(skyHopperItem != null) {
                 if(dropToInventory) {
                     PlayerUtil.giveItem(player.getInventory(), skyHopperItem, skyHopperItem.getAmount(), player.getLocation());
@@ -143,6 +151,7 @@ public class BlockBreakListener implements Listener {
     /**
      * Handles when a {@link Container} is broken and checks if that container is a linked container.
      * For the purposes of refreshing GUIs.
+     * @param blockBreakEvent A {@link BlockBreakEvent}.
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onLinkedContainerBreak(BlockBreakEvent blockBreakEvent) {
@@ -150,6 +159,6 @@ public class BlockBreakListener implements Listener {
             return;
         }
 
-        hopperManager.handleContainerBroken(container);
+        hopperManager.getSkyHopperDataManager().handleContainerBroken(container);
     }
 }

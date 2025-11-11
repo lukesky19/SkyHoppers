@@ -1,7 +1,8 @@
 package com.github.lukesky19.skyHoppers.listener;
 
-import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
-import com.github.lukesky19.skyHoppers.manager.HopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -15,13 +16,13 @@ import org.jetbrains.annotations.NotNull;
  * Listens for when an Entity changes a block.
  */
 public class EntityChangeBlockListener implements Listener {
-    private final @NotNull HopperManager hopperManager;
+    private final @NotNull SkyHopperManager hopperManager;
 
     /**
      * Constructor
-     * @param hopperManager A HopperManager instance.
+     * @param hopperManager A {@link SkyHopperManager} instance.
      */
-    public EntityChangeBlockListener(@NotNull HopperManager hopperManager) {
+    public EntityChangeBlockListener(@NotNull SkyHopperManager hopperManager) {
         this.hopperManager = hopperManager;
     }
 
@@ -32,19 +33,26 @@ public class EntityChangeBlockListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityBlockChange(EntityChangeBlockEvent entityChangeBlockEvent) {
         Block block = entityChangeBlockEvent.getBlock();
+        Location location = block.getLocation();
 
-        SkyHopper skyHopper = hopperManager.getSkyHopper(block.getLocation());
-        if(skyHopper != null) {
-            entityChangeBlockEvent.setCancelled(true);
-
-            block.setType(Material.AIR);
-
-            if(skyHopper.getLocation() != null) hopperManager.removeSkyHopper(skyHopper.getLocation());
-
-            ItemStack skyHopperItem = hopperManager.createItemStackFromSkyHopper(skyHopper, 1);
-            if(skyHopperItem != null) {
-                block.getWorld().dropItem(block.getLocation(), skyHopperItem);
+        SkyHopper skyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(location);
+        if(skyHopper == null) {
+            if(hopperManager.isLocationSkyHopper(location)) {
+                entityChangeBlockEvent.setCancelled(true);
             }
+
+            return;
+        }
+
+        entityChangeBlockEvent.setCancelled(true);
+
+        block.setType(Material.AIR);
+
+        if(skyHopper.getLocation() != null) hopperManager.getSkyHopperDataManager().removeSkyHopper(skyHopper.getLocation());
+
+        ItemStack skyHopperItem = hopperManager.getSkyHopperCreator().createSkyHopperItemStack(skyHopper, 1);
+        if(skyHopperItem != null) {
+            block.getWorld().dropItem(block.getLocation(), skyHopperItem);
         }
     }
 }

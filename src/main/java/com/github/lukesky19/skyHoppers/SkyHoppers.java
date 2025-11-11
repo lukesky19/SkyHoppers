@@ -17,41 +17,37 @@
 */
 package com.github.lukesky19.skyHoppers;
 
-import com.ghostchu.quickshop.QuickShop;
-import com.ghostchu.quickshop.QuickShopBukkit;
-import com.ghostchu.quickshop.api.QuickShopAPI;
 import com.github.lukesky19.skyHoppers.command.SkyHopperCommand;
+import com.github.lukesky19.skyHoppers.config.GUIConfigManager;
+import com.github.lukesky19.skyHoppers.config.LocaleManager;
+import com.github.lukesky19.skyHoppers.config.SettingsManager;
 import com.github.lukesky19.skyHoppers.database.ConnectionManager;
 import com.github.lukesky19.skyHoppers.database.DatabaseManager;
 import com.github.lukesky19.skyHoppers.database.QueueManager;
+import com.github.lukesky19.skyHoppers.gui.GUIManager;
+import com.github.lukesky19.skyHoppers.hook.HookManager;
 import com.github.lukesky19.skyHoppers.listener.*;
-import com.github.lukesky19.skyHoppers.manager.*;
-import com.github.lukesky19.skyHoppers.task.DelayedTask;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
+import com.github.lukesky19.skyHoppers.task.TaskManager;
 import com.github.lukesky19.skylib.libs.bstats.bukkit.Metrics;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.plugin.PluginManager;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 /**
  * The main plugin's class
  */
 public final class SkyHoppers extends JavaPlugin {
-    private HopperManager hopperManager;
+    private SkyHopperManager hopperManager;
     private HookManager hookManager;
     private SettingsManager settingsManager;
     private LocaleManager localeManager;
     private GUIConfigManager guiConfigManager;
     private TaskManager taskManager;
     private GUIManager guiManager;
-    private Economy economy;
-    private QuickShop quickShop;
     private boolean pauseSkyHoppers = true;
 
     /**
@@ -77,21 +73,9 @@ public final class SkyHoppers extends JavaPlugin {
     }
 
     /**
-     * Get the Economy instance
-     * @return The Economy from vault
+     * Default Constructor
      */
-    public Economy getEconomy() {
-        return this.economy;
-    }
-
-    /**
-     * Get the QuickShop plugin if loaded, or null
-     * @return Gets the QuickShop plugin if loaded or returns null
-     */
-    @Nullable
-    public QuickShop getQuickShop() {
-        return quickShop;
-    }
+    public SkyHoppers() {}
 
     /**
      * Plugin's startup logic
@@ -100,15 +84,6 @@ public final class SkyHoppers extends JavaPlugin {
     public void onEnable() {
         // Setup dependencies
         setupBStats();
-        boolean result = setupEconomy();
-        if(!result) {
-            this.getServer().getPluginManager().disablePlugin(this);
-            return;
-        }
-
-        if(this.getServer().getPluginManager().isPluginEnabled("QuickShop-Hikari")) {
-            quickShop = ((QuickShopBukkit) QuickShopAPI.getPluginInstance()).getQuickShop();
-        }
 
         ConnectionManager connectionManager = new ConnectionManager(this);
         QueueManager queueManager = new QueueManager(connectionManager);
@@ -119,9 +94,10 @@ public final class SkyHoppers extends JavaPlugin {
         guiConfigManager = new GUIConfigManager(this);
         guiManager = new GUIManager(this);
         hookManager = new HookManager(this, settingsManager);
-        hopperManager = new HopperManager(this, settingsManager, localeManager, databaseManager, guiManager);
-        taskManager = new TaskManager(this, hopperManager);
-        SkyHopperCommand skyHopperCommand = new SkyHopperCommand(this, localeManager, hopperManager, settingsManager);
+
+        hopperManager = new SkyHopperManager(this, settingsManager, localeManager, databaseManager, guiManager);
+        taskManager = new TaskManager(this, settingsManager, hopperManager, hookManager);
+        SkyHopperCommand skyHopperCommand = new SkyHopperCommand(this, settingsManager, localeManager, hopperManager);
 
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands ->
                 commands.registrar().register(skyHopperCommand.createCommand(),
@@ -136,13 +112,10 @@ public final class SkyHoppers extends JavaPlugin {
 
         pluginManager.registerEvents(new BlockBreakListener(this, settingsManager, localeManager, hopperManager, hookManager, hopperClickListener), this);
         pluginManager.registerEvents(new HopperPlaceListener(localeManager, hopperManager, hookManager), this);
-        pluginManager.registerEvents(new HopperPickupItemListener(this, hopperManager), this);
-        pluginManager.registerEvents(new ChunkLoadListener(hopperManager), this);
+        pluginManager.registerEvents(new HopperPickupItemListener(this, hopperManager, hookManager), this);
+        pluginManager.registerEvents(new ChunkListener(hopperManager), this);
 
-        DelayedTask delayedTask = new DelayedTask(this, hopperManager);
-        delayedTask.runTaskTimer(this, 0L, 1L);
-
-        pluginManager.registerEvents(new HopperMoveItemListener(this, hopperManager, delayedTask), this);
+        pluginManager.registerEvents(new HopperMoveItemListener(this, hopperManager), this);
         pluginManager.registerEvents(hopperClickListener, this);
         pluginManager.registerEvents(new InventoryListener(guiManager), this);
 
@@ -176,31 +149,14 @@ public final class SkyHoppers extends JavaPlugin {
         guiConfigManager.reload();
         hookManager.reload();
         hopperManager.reload();
-        taskManager.stopTransferTask();
+
         taskManager.startTransferTask();
-        taskManager.stopSuctionTask();
         taskManager.startSuctionTask();
+        taskManager.startQueuedTransferTask();
+        taskManager.startSkyHopperLoadTask();
+        taskManager.startSkyHopperUnloadTask();
 
-        // Unpause SkyHoppers once all data is loaded
         this.unPauseSkyHoppers();
-    }
-
-    /**
-     * Set up the Vault/Economy dependency
-     * @return true if setup successfully, false if not
-     */
-    private boolean setupEconomy() {
-        if (getServer().getPluginManager().getPlugin("Vault") != null) {
-            RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
-            if (rsp != null) {
-                this.economy = rsp.getProvider();
-                return true;
-            }
-        } else {
-            getComponentLogger().error(MiniMessage.miniMessage().deserialize("<red>SkyHoppers has been disabled due to no Vault dependency found!</red>"));
-        }
-
-        return false;
     }
 
     /**

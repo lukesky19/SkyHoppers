@@ -17,11 +17,11 @@
 */
 package com.github.lukesky19.skyHoppers.listener;
 
-import com.github.lukesky19.skyHoppers.manager.LocaleManager;
-import com.github.lukesky19.skyHoppers.data.config.Locale;
-import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
-import com.github.lukesky19.skyHoppers.manager.HookManager;
-import com.github.lukesky19.skyHoppers.manager.HopperManager;
+import com.github.lukesky19.skyHoppers.config.LocaleManager;
+import com.github.lukesky19.skyHoppers.config.data.Locale;
+import com.github.lukesky19.skyHoppers.hook.HookManager;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -29,22 +29,26 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This class listens for when a SkyHopper is placed.
  */
 public class HopperPlaceListener implements Listener {
-    private final LocaleManager localeManager;
-    private final HopperManager hopperManager;
-    private final HookManager hookManager;
+    private final @NotNull LocaleManager localeManager;
+    private final @NotNull SkyHopperManager hopperManager;
+    private final @NotNull HookManager hookManager;
 
     /**
      * Constructor
-     * @param localeManager A LocaleManager instance.
-     * @param hopperManager A HopperManager instance.
-     * @param hookManager A HookManager instance.
+     * @param localeManager A {@link LocaleManager} instance.
+     * @param hopperManager A {@link SkyHopperManager} instance.
+     * @param hookManager A {@link HookManager} instance.
      */
-    public HopperPlaceListener(LocaleManager localeManager, HopperManager hopperManager, HookManager hookManager) {
+    public HopperPlaceListener(
+            @NotNull LocaleManager localeManager,
+            @NotNull SkyHopperManager hopperManager,
+            @NotNull HookManager hookManager) {
         this.localeManager = localeManager;
         this.hopperManager = hopperManager;
         this.hookManager = hookManager;
@@ -52,7 +56,7 @@ public class HopperPlaceListener implements Listener {
 
     /**
      * Listens to when a SkyHopperConfig is placed.
-     * @param blockPlaceEvent A BlockPlaceEvent
+     * @param blockPlaceEvent A {@link BlockPlaceEvent}.
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onHopperPlace(BlockPlaceEvent blockPlaceEvent) {
@@ -73,15 +77,15 @@ public class HopperPlaceListener implements Listener {
             return;
         }
 
-        SkyHopper skyHopper = hopperManager.getSkyHopperFromPDC(null, itemInHand.getItemMeta().getPersistentDataContainer());
+        SkyHopper skyHopper = hopperManager.getSkyHopperProcessor().loadSkyHopper(null, itemInHand.getItemMeta().getPersistentDataContainer());
         if(skyHopper == null) return;
 
         skyHopper.setOwner(player.getUniqueId());
         skyHopper.setLocation(hopper.getLocation());
 
-        hopperManager.saveSkyHopperToPDC(skyHopper);
+        hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
-        hopperManager.cacheSkyHopper(hopper.getLocation(), skyHopper);
+        hopperManager.getSkyHopperDataManager().cacheSkyHopper(hopper.getLocation(), skyHopper);
 
         player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperPlaced()));
     }

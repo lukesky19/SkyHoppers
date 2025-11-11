@@ -17,8 +17,9 @@
 */
 package com.github.lukesky19.skyHoppers.listener;
 
-import com.github.lukesky19.skyHoppers.hopper.SkyHopper;
-import com.github.lukesky19.skyHoppers.manager.HopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
@@ -26,6 +27,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 
@@ -33,38 +35,45 @@ import java.util.Iterator;
  * Listens for when an entity explodes to check whether SkyHoppers should be destroyed or not.
  */
 public class EntityExplodeListener implements Listener {
-    private final HopperManager hopperManager;
+    private final @NotNull SkyHopperManager hopperManager;
 
     /**
      * Constructor
-     * @param hopperManager A HopperManager instance.
+     * @param hopperManager A {@link SkyHopperManager} instance.
      */
-    public EntityExplodeListener(HopperManager hopperManager) {
+    public EntityExplodeListener(@NotNull SkyHopperManager hopperManager) {
         this.hopperManager = hopperManager;
     }
 
     /**
      * Handles when an entity explodes and checks if a block is a SkyHopper to properly remove it and drop the item.
-     * @param entityExplodeEvent An EntityExplodeEvent
+     * @param entityExplodeEvent An {@link EntityExplodeEvent}
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityExplode(EntityExplodeEvent entityExplodeEvent) {
         Iterator<Block> iterator = entityExplodeEvent.blockList().iterator();
         while(iterator.hasNext()) {
             Block block = iterator.next();
+            Location location = block.getLocation();
 
-            SkyHopper skyHopper = hopperManager.getSkyHopper(block.getLocation());
-            if(skyHopper != null) {
-                iterator.remove();
-
-                block.setType(Material.AIR);
-
-                if(skyHopper.getLocation() != null) hopperManager.removeSkyHopper(skyHopper.getLocation());
-
-                ItemStack skyHopperItem = hopperManager.createItemStackFromSkyHopper(skyHopper, 1);
-                if(skyHopperItem != null) {
-                    block.getWorld().dropItem(block.getLocation(), skyHopperItem);
+            SkyHopper skyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(location);
+            if(skyHopper == null) {
+                if(hopperManager.isLocationSkyHopper(location)) {
+                    iterator.remove();
                 }
+
+                continue;
+            }
+
+            iterator.remove();
+
+            block.setType(Material.AIR);
+
+            if(skyHopper.getLocation() != null) hopperManager.getSkyHopperDataManager().removeSkyHopper(skyHopper.getLocation());
+
+            ItemStack skyHopperItem = hopperManager.getSkyHopperCreator().createSkyHopperItemStack(skyHopper, 1);
+            if(skyHopperItem != null) {
+                block.getWorld().dropItem(block.getLocation(), skyHopperItem);
             }
         }
     }
