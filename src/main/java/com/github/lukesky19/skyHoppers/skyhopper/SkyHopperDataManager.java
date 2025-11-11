@@ -104,6 +104,16 @@ public class SkyHopperDataManager {
     }
 
     /**
+     * Check if a SkyHopper is loaded at the given location.
+     * @apiNote There may be a SkyHopper at that location, but it may not be loaded. See {@link #isLocationSkyHopper(Location)}.
+     * @param location The {@link Location} to check.
+     * @return true if there is a SkyHopper loaded for that location, otherwise false.
+     */
+    public boolean isSkyHopperLoaded(@NotNull Location location) {
+        return skyHopperMap.containsKey(location);
+    }
+
+    /**
      * Is there a SkyHopper at the {@link Location} provided?
      * This checks based on location and does not consider if the SkyHopper is loaded or not.
      * @param location The {@link Location} to check.

@@ -141,6 +141,12 @@ public class HopperClickListener implements Listener {
         if(block == null || !playerInteractEvent.hasBlock()) return;
         Location location = block.getLocation();
 
+        // Extra check for if there is a SkyHopper at the location, but it isn't loaded.
+        // This should be kept due to an issue where locations weren't saved properly in Version 1.1.0.0 to 1.1.1.1.
+        if(!hopperManager.getSkyHopperDataManager().isSkyHopperLoaded(location)) {
+            hopperManager.getSkyHopperProcessor().loadSkyHopperAtLocationDirectly(location);
+        }
+
         if(isPlayerLinking(uuid)) {
             if (!(block.getState(false) instanceof Container container)) return;
 

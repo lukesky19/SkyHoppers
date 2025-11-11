@@ -161,7 +161,6 @@ public class SkyHopperProcessor {
      * @param chunk The chunk to check for SkyHoppers to load.
      */
     public void loadSkyHoppersInChunk(@NotNull Chunk chunk) {
-        @NotNull Map<Location, SkyHopper> skyHopperMap = skyHopperManager.getSkyHopperDataManager().getSkyHoppersMap();
         int chunkX = chunk.getX();
         int chunkZ = chunk.getZ();
 
@@ -169,27 +168,43 @@ public class SkyHopperProcessor {
         List<Location> locationList = skyHopperManager.getSkyHopperDataManager().getLocationsInChunk(chunkX, chunkZ);
 
         for(Location location : locationList) {
-            // Check if the SkyHopper is already loaded
-            if(skyHopperMap.containsKey(location)) continue;
-
-            // Check if the block at the location is a hopper
-            if(!(location.getBlock().getState(false) instanceof Hopper hopper)) continue;
-
-            // Get the PersistentDataContainer
-            PersistentDataContainer pdc = hopper.getPersistentDataContainer();
-
-            // Get the SkyHopper from the given Hopper
-            SkyHopper loadedSkyHopper = loadSkyHopper(location, pdc);
-
-            // Check if the SkyHopper is invalid or null
-            if(loadedSkyHopper == null) continue;
-
-            // Save any updated SkyHopper data to the Hopper PDC
-            skyHopperManager.getSkyHopperSaver().saveSkyHopper(loadedSkyHopper, hopper);
-
-            // Cache the SkyHopper
-            skyHopperManager.getSkyHopperDataManager().cacheSkyHopper(location, loadedSkyHopper);
+            loadSkyHopperAtLocation(location);
         }
+    }
+
+    /**
+     * Attempt to load the SkyHopper at the provided {@link Location}.
+     * @param location The {@link Location} of the SkyHopper to load.
+     */
+    public void loadSkyHopperAtLocation(@NotNull Location location) {
+        // Check if the location is a SkyHopper
+        if(!skyHopperManager.isLocationSkyHopper(location)) return;
+        // Check if the SkyHopper is already loaded
+        if(skyHopperManager.getSkyHopperDataManager().isSkyHopperLoaded(location)) return;
+
+        loadSkyHopperAtLocationDirectly(location);
+    }
+
+    /**
+     * Loads a {@link SkyHopper} from the location provided directly if possible.
+     * @param location The {@link Location} of the SkyHopper.
+     */
+    public void loadSkyHopperAtLocationDirectly(@NotNull Location location) {
+        // Check if the block at the location is a hopper
+        if(!(location.getBlock().getState(false) instanceof Hopper hopper)) return;
+
+        // Get the PersistentDataContainer
+        PersistentDataContainer pdc = hopper.getPersistentDataContainer();
+
+        // Get the SkyHopper from the given Hopper
+        @Nullable SkyHopper skyHopper = loadSkyHopper(location, pdc);
+        if(skyHopper == null) return;
+
+        // Save any updated SkyHopper data to the Hopper PDC
+        skyHopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper, hopper);
+
+        // Cache the SkyHopper
+        skyHopperManager.getSkyHopperDataManager().cacheSkyHopper(location, skyHopper);
     }
 
     /**
