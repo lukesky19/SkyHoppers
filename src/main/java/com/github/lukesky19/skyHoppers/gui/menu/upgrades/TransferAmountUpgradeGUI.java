@@ -422,11 +422,12 @@ public class TransferAmountUpgradeGUI extends SkyHopperGUI {
                 return;
             }
 
+            int currentAmount = skyHopper.getMaxTransferAmount();
             int upgradeAmount = nextUpgrade.get().getKey();
             double upgradePrice = nextUpgrade.get().getValue();
 
             List<TagResolver.Single> placeholders = List.of(
-                    Placeholder.parsed("current", String.valueOf(skyHopper.getMaxTransferAmount())),
+                    Placeholder.parsed("current", String.valueOf(currentAmount)),
                     Placeholder.parsed("next", String.valueOf(upgradeAmount)),
                     Placeholder.parsed("price", String.valueOf(upgradePrice)));
 
@@ -445,14 +446,14 @@ public class TransferAmountUpgradeGUI extends SkyHopperGUI {
                     EconomyHook economyHook = hookManager.getHook(EconomyHook.class);
 
                     if(economyHook.getBalance(player) >= upgradePrice) {
+                        List<TagResolver.Single> messagePlaceholders = List.of(
+                                Placeholder.parsed("current", String.valueOf(currentAmount)),
+                                Placeholder.parsed("next", String.valueOf(upgradeAmount)));
+
                         economyHook.removeFromBalance(player, upgradePrice);
 
                         skyHopper.setTransferAmount(upgradeAmount);
                         skyHopper.setMaxTransferAmount(upgradeAmount);
-
-                        List<TagResolver.Single> messagePlaceholders = List.of(
-                                Placeholder.parsed("current", String.valueOf(skyHopper.getTransferAmount())),
-                                Placeholder.parsed("next", String.valueOf(upgradeAmount)));
 
                         player.sendMessage(AdventureUtil.serialize(player, locale.prefix() + locale.transferAmountUpgrade(), messagePlaceholders));
 

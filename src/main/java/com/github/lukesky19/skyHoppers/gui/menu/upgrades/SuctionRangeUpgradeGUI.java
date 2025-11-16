@@ -422,11 +422,12 @@ public class SuctionRangeUpgradeGUI extends SkyHopperGUI {
                 return;
             }
 
+            int currentRange = skyHopper.getMaxSuctionRange();
             int upgradeRange = nextUpgrade.get().getKey();
             double upgradePrice = nextUpgrade.get().getValue();
 
             List<TagResolver.Single> placeholders = List.of(
-                    Placeholder.parsed("current", String.valueOf(skyHopper.getMaxSuctionRange())),
+                    Placeholder.parsed("current", String.valueOf(currentRange)),
                     Placeholder.parsed("next", String.valueOf(upgradeRange)),
                     Placeholder.parsed("price", String.valueOf(upgradePrice)));
 
@@ -445,14 +446,14 @@ public class SuctionRangeUpgradeGUI extends SkyHopperGUI {
                     EconomyHook economyHook = hookManager.getHook(EconomyHook.class);
 
                     if(economyHook.getBalance(player) >= upgradePrice) {
+                        List<TagResolver.Single> messagePlaceholders = List.of(
+                                Placeholder.parsed("current", String.valueOf(currentRange)),
+                                Placeholder.parsed("next", String.valueOf(upgradeRange)));
+
                         economyHook.removeFromBalance(player, upgradePrice);
 
                         skyHopper.setSuctionRange(upgradeRange);
                         skyHopper.setMaxSuctionRange(upgradeRange);
-
-                        List<TagResolver.Single> messagePlaceholders = List.of(
-                                Placeholder.parsed("current", String.valueOf(skyHopper.getSuctionRange())),
-                                Placeholder.parsed("next", String.valueOf(upgradeRange)));
 
                         player.sendMessage(AdventureUtil.serialize(player, locale.prefix() + locale.suctionRangeUpgrade(), messagePlaceholders));
 

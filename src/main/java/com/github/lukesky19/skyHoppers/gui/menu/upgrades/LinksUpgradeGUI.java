@@ -290,11 +290,12 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
                 return;
             }
 
+            int currentAmount = skyHopper.getMaxContainers();
             int upgradeAmount = nextUpgrade.get().getKey();
             double upgradePrice = nextUpgrade.get().getValue();
 
             List<TagResolver.Single> placeholders = List.of(
-                    Placeholder.parsed("current", String.valueOf(skyHopper.getMaxContainers())),
+                    Placeholder.parsed("current", String.valueOf(currentAmount)),
                     Placeholder.parsed("next", String.valueOf(upgradeAmount)),
                     Placeholder.parsed("price", String.valueOf(upgradePrice)));
 
@@ -313,14 +314,14 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
                     EconomyHook economyHook = hookManager.getHook(EconomyHook.class);
 
                     if(economyHook.getBalance(player) >= upgradePrice) {
+                        List<TagResolver.Single> messagePlaceholders = List.of(
+                                Placeholder.parsed("current", String.valueOf(currentAmount)),
+                                Placeholder.parsed("next", String.valueOf(upgradeAmount)));
+
                         economyHook.removeFromBalance(player, upgradePrice);
 
                         skyHopper.setMaxContainers(upgradeAmount);
                         skyHopper.setMaxContainers(upgradeAmount);
-
-                        List<TagResolver.Single> messagePlaceholders = List.of(
-                                Placeholder.parsed("current", String.valueOf(skyHopper.getMaxContainers())),
-                                Placeholder.parsed("next", String.valueOf(upgradeAmount)));
 
                         player.sendMessage(AdventureUtil.serialize(player, locale.prefix() + locale.maxLinksUpgrade(), messagePlaceholders));
 
