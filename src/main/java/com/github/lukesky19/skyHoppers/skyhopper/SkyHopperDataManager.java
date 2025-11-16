@@ -21,6 +21,7 @@ import com.github.lukesky19.skyHoppers.database.DatabaseManager;
 import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Container;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,8 +40,8 @@ public class SkyHopperDataManager {
 
     private final @NotNull List<@NotNull Location> hopperLocations = new ArrayList<>();
     private final @NotNull Map<@NotNull Location, @NotNull SkyHopper> skyHopperMap = new HashMap<>();
-    private final @NotNull Map<@NotNull Integer, @Nullable Map<Integer, @Nullable List<@NotNull Location>>> locationGrid = new HashMap<>();
-    private final @NotNull Map<@NotNull Integer, @Nullable Map<Integer, @Nullable List<@NotNull SkyHopper>>> hopperGrid = new HashMap<>();
+    private final @NotNull Map<@NotNull String, Map<@NotNull Integer, @Nullable Map<Integer, @Nullable List<@NotNull Location>>>> locationGrid = new HashMap<>();
+    private final @NotNull Map<@NotNull String, Map<@NotNull Integer, @Nullable Map<Integer, @Nullable List<@NotNull SkyHopper>>>> hopperGrid = new HashMap<>();
 
     /**
      * Constructor
@@ -81,24 +82,28 @@ public class SkyHopperDataManager {
 
     /**
      * Get a {@link List} of {@link SkyHopper}s that are between the chunkX and chunkZ provided.
+     * @param world The {@link World} to get SkyHoppers for.
      * @param chunkX The chunk's X coordinate.
      * @param chunkZ The chunk's Z coordinate.
      * @return A {@link List} of {@link SkyHopper}s inside the chunk bounds provided.
      */
-    public @NotNull List<SkyHopper> getSkyHoppersInChunk(int chunkX, int chunkZ) {
+    public @NotNull List<SkyHopper> getSkyHoppersInChunk(@NotNull World world, int chunkX, int chunkZ) {
         return new ArrayList<>(hopperGrid
+                .computeIfAbsent(world.getName(), k -> new HashMap<>())
                 .computeIfAbsent(chunkX, k -> new HashMap<>())
                 .computeIfAbsent(chunkZ, k -> new ArrayList<>()));
     }
 
     /**
      * Get a {@link List} of {@link Location}s that are between the chunkX and chunkZ provided.
+     * @param world The {@link World} to get locations for.
      * @param chunkX The chunk's X coordinate.
      * @param chunkZ The chunk's Z coordinate.
      * @return A {@link List} of {@link Location}s inside the chunk bounds provided.
      */
-    public @NotNull List<Location> getLocationsInChunk(int chunkX, int chunkZ) {
+    public @NotNull List<Location> getLocationsInChunk(@NotNull World world, int chunkX, int chunkZ) {
         return new ArrayList<>(locationGrid
+                .computeIfAbsent(world.getName(), k -> new HashMap<>())
                 .computeIfAbsent(chunkX, k -> new HashMap<>())
                 .computeIfAbsent(chunkZ, k -> new ArrayList<>()));
     }
@@ -135,6 +140,7 @@ public class SkyHopperDataManager {
         cacheLocation(location, chunkX, chunkZ);
 
         hopperGrid
+                .computeIfAbsent(location.getWorld().getName(), k -> new HashMap<>())
                 .computeIfAbsent(chunkX, k -> new HashMap<>())
                 .computeIfAbsent(chunkZ, k -> new ArrayList<>())
                 .add(skyHopper);
@@ -172,6 +178,7 @@ public class SkyHopperDataManager {
         }
 
         locationGrid
+                .computeIfAbsent(location.getWorld().getName(), k -> new HashMap<>())
                 .computeIfAbsent(chunkX, k -> new HashMap<>())
                 .computeIfAbsent(chunkZ, k -> new ArrayList<>())
                 .add(location);
@@ -186,11 +193,12 @@ public class SkyHopperDataManager {
 
         guiManager.closeOpenGUIsForLocation(location);
 
+        String worldName = location.getWorld().getName();
         int chunkX = location.getBlockX() >> 4;
         int chunkZ = location.getBlockZ() >> 4;
 
-        List<SkyHopper> hoppers = getSkyHoppersInChunk(chunkX, chunkZ);
-        List<Location> locationList = getLocationsInChunk(chunkX, chunkZ);
+        List<SkyHopper> hoppers = getSkyHoppersInChunk(location.getWorld(), chunkX, chunkZ);
+        List<Location> locationList = getLocationsInChunk(location.getWorld(), chunkX, chunkZ);
 
         if(!hoppers.isEmpty()) {
             @Nullable SkyHopper skyHopper = skyHopperMap.get(location);
@@ -199,12 +207,19 @@ public class SkyHopperDataManager {
             }
 
             if(hoppers.isEmpty()) {
-                Map<Integer, List<SkyHopper>> chunkMap = hopperGrid.get(chunkX);
-                if(chunkMap != null) {
-                    chunkMap.remove(chunkZ);
+                Map<Integer, Map<Integer, List<SkyHopper>>> worldMap = hopperGrid.get(worldName);
+                if(worldMap != null) {
+                    Map<Integer, List<SkyHopper>> chunkMap = worldMap.get(chunkX);
+                    if(chunkMap != null) {
+                        chunkMap.remove(chunkZ);
 
-                    if(chunkMap.isEmpty()) {
-                        hopperGrid.remove(chunkX);
+                        if(chunkMap.isEmpty()) {
+                            worldMap.remove(chunkX);
+                        }
+                    }
+
+                    if(worldMap.isEmpty()) {
+                        hopperGrid.remove(worldName);
                     }
                 }
             }
@@ -214,13 +229,20 @@ public class SkyHopperDataManager {
             locationList.remove(location);
 
             if(locationList.isEmpty()) {
-                Map<Integer, List<Location>> locationMap = locationGrid.get(chunkX);
+                Map<Integer, Map<Integer, List<Location>>> worldMap = locationGrid.get(worldName);
+                if(worldMap != null) {
+                    Map<Integer, List<Location>> locationMap = worldMap.get(chunkX);
 
-                if(locationMap != null) {
-                    locationMap.remove(chunkZ);
+                    if(locationMap != null) {
+                        locationMap.remove(chunkZ);
 
-                    if(locationMap.isEmpty()) {
-                        hopperGrid.remove(chunkX);
+                        if(locationMap.isEmpty()) {
+                            worldMap.remove(chunkX);
+                        }
+                    }
+
+                    if(worldMap.isEmpty()) {
+                        locationGrid.remove(worldName);
                     }
                 }
             }

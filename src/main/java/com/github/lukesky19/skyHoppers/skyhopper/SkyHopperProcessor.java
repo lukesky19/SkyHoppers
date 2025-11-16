@@ -165,7 +165,7 @@ public class SkyHopperProcessor {
         int chunkZ = chunk.getZ();
 
         // Retrieve SkyHoppers for the specific chunk
-        List<Location> locationList = skyHopperManager.getSkyHopperDataManager().getLocationsInChunk(chunkX, chunkZ);
+        List<Location> locationList = skyHopperManager.getSkyHopperDataManager().getLocationsInChunk(chunk.getWorld(), chunkX, chunkZ);
 
         for(Location location : locationList) {
             loadSkyHopperAtLocation(location);
@@ -182,7 +182,7 @@ public class SkyHopperProcessor {
         // Check if the SkyHopper is already loaded
         if(skyHopperManager.getSkyHopperDataManager().isSkyHopperLoaded(location)) return;
 
-        loadSkyHopperAtLocationDirectly(location);
+        this.loadSkyHopperAtLocationDirectly(location);
     }
 
     /**
@@ -195,6 +195,14 @@ public class SkyHopperProcessor {
 
         // Get the PersistentDataContainer
         PersistentDataContainer pdc = hopper.getPersistentDataContainer();
+
+        // Check if Hopper is not a SkyHopper
+        Integer hopperStatus = pdc.get(HopperKeys.ENABLED.getKey(), PersistentDataType.INTEGER);
+        // If the hopper status is null, this is not a SkyHopper so there is no data to load and the SkyHopper was removed in some other way.
+        if(hopperStatus == null) {
+            skyHopperManager.getSkyHopperDataManager().removeSkyHopper(location);
+            return;
+        }
 
         // Get the SkyHopper from the given Hopper
         @Nullable SkyHopper skyHopper = loadSkyHopper(location, pdc);
