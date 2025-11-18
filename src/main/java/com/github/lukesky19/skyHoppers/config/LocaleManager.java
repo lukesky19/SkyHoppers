@@ -122,13 +122,13 @@ public class LocaleManager {
 
         Settings settings = settingsManager.getSettings();
         if(settings == null) {
-            logger.warn(AdventureUtil.serialize("Unable to load locale configuration as the plugin's settings.yml is invalid."));
+            logger.warn(AdventureUtil.deserialize("Unable to load locale configuration as the plugin's settings.yml is invalid."));
             return;
         }
 
         String localeString = settingsManager.getSettings().locale();
         if(localeString == null) {
-            logger.warn(AdventureUtil.serialize("Unable to load locale configuration as no locale name is configured in settings.yml."));
+            logger.warn(AdventureUtil.deserialize("Unable to load locale configuration as no locale name is configured in settings.yml."));
             return;
         }
 
@@ -218,12 +218,12 @@ public class LocaleManager {
                 saveLocale(localeString);
             }
 
-            case null -> logger.warn(AdventureUtil.serialize("Unable to check locale version as it is not configured."));
+            case null -> logger.warn(AdventureUtil.deserialize("Unable to check locale version as it is not configured."));
 
             default -> {
-                logger.warn(AdventureUtil.serialize("Your plugin locale is outdated. Current version: " + locale.configVersion() + ". Latest version: 1.2.0.0."));
-                logger.warn(AdventureUtil.serialize("You should regenerate your " + localeString + ".yml or migrate your " + localeString + ".yml to the new version."));
-                logger.warn(AdventureUtil.serialize("The default config will be used until you fix your locale configuration."));
+                logger.warn(AdventureUtil.deserialize("Your plugin locale is outdated. Current version: " + locale.configVersion() + ". Latest version: 1.2.0.0."));
+                logger.warn(AdventureUtil.deserialize("You should regenerate your " + localeString + ".yml or migrate your " + localeString + ".yml to the new version."));
+                logger.warn(AdventureUtil.deserialize("The default config will be used until you fix your locale configuration."));
 
                 locale = null;
             }

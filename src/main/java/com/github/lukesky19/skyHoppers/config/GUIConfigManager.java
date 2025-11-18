@@ -160,14 +160,14 @@ public class GUIConfigManager {
         ComponentLogger logger = plugin.getComponentLogger();
 
         if(guiConfig.configVersion() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to check the config version in " + fileName + " as it is not configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to check the config version in " + fileName + " as it is not configured."));
             return false;
         }
 
         if(!guiConfig.configVersion().equals("1.1.0.0")) {
-            logger.warn(AdventureUtil.serialize("The gui configuration for " + fileName + " is outdated. Current version: " + guiConfig.configVersion() + ". Latest version: 1.1.0.0."));
-            logger.warn(AdventureUtil.serialize("You should regenerate your " + fileName + " or migrate your " + fileName + " to the new version."));
-            logger.warn(AdventureUtil.serialize("The GUI for " + fileName + " will not be able to open until this is corrected."));
+            logger.warn(AdventureUtil.deserialize("The gui configuration for " + fileName + " is outdated. Current version: " + guiConfig.configVersion() + ". Latest version: 1.1.0.0."));
+            logger.warn(AdventureUtil.deserialize("You should regenerate your " + fileName + " or migrate your " + fileName + " to the new version."));
+            logger.warn(AdventureUtil.deserialize("The GUI for " + fileName + " will not be able to open until this is corrected."));
 
             return false;
         }
@@ -183,14 +183,14 @@ public class GUIConfigManager {
         ComponentLogger logger = plugin.getComponentLogger();
 
         if(upgradeGUIConfig.configVersion() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to check the config version in " + fileName + " as it is not configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to check the config version in " + fileName + " as it is not configured."));
             return false;
         }
 
         if(!upgradeGUIConfig.configVersion().equals("1.1.0.0")) {
-            logger.warn(AdventureUtil.serialize("The gui configuration for " + fileName + " is outdated. Current version: " + upgradeGUIConfig.configVersion() + ". Latest version: 1.1.0.0."));
-            logger.warn(AdventureUtil.serialize("You should regenerate your " + fileName + " or migrate your " + fileName + " to the new version."));
-            logger.warn(AdventureUtil.serialize("The GUI for " + fileName + " will not be able to open until this is corrected."));
+            logger.warn(AdventureUtil.deserialize("The gui configuration for " + fileName + " is outdated. Current version: " + upgradeGUIConfig.configVersion() + ". Latest version: 1.1.0.0."));
+            logger.warn(AdventureUtil.deserialize("You should regenerate your " + fileName + " or migrate your " + fileName + " to the new version."));
+            logger.warn(AdventureUtil.deserialize("The GUI for " + fileName + " will not be able to open until this is corrected."));
 
             return false;
         }

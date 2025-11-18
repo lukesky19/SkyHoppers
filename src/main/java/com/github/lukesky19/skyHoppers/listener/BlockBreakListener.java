@@ -90,7 +90,7 @@ public class BlockBreakListener implements Listener {
         SkyHopper skyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(hopperLocation);
         if(skyHopper == null) {
             if(hopperManager.isLocationSkyHopper(hopperLocation)) {
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperNotLoaded()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperNotLoaded()));
                 blockBreakEvent.setCancelled(true);
             }
 
@@ -98,7 +98,7 @@ public class BlockBreakListener implements Listener {
         }
 
         if(hookManager.canNotBuild(player, hopperLocation)) {
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.noBuild()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.noBuild()));
             blockBreakEvent.setCancelled(true);
             return;
         }
@@ -107,12 +107,12 @@ public class BlockBreakListener implements Listener {
             // Delete the hopper's data
             hopperManager.getSkyHopperDataManager().removeSkyHopper(hopperLocation);
 
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperBroken()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperBroken()));
 
             boolean dropToInventory;
             @Nullable Settings settings = settingsManager.getSettings();
             if(settings == null) {
-                logger.warn(AdventureUtil.serialize("Plugin settings are invalid. Broken SkyHoppers will be dropped to the ground by default."));
+                logger.warn(AdventureUtil.deserialize("Plugin settings are invalid. Broken SkyHoppers will be dropped to the ground by default."));
                 dropToInventory = false;
             } else {
                 dropToInventory = settings.dropToInventory();
@@ -143,7 +143,7 @@ public class BlockBreakListener implements Listener {
 
             hopperClickListener.disableLinkingForLocation(hopperLocation);
         } else {
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.noBreak()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.noBreak()));
             blockBreakEvent.setCancelled(true);
         }
     }

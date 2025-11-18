@@ -70,7 +70,7 @@ public class HopperPlaceListener implements Listener {
         if (!result) return;
 
         if (hookManager.canNotBuild(player, hopper.getLocation())) {
-            player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.noBuild()));
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.noBuild()));
 
             blockPlaceEvent.setCancelled(true);
 
@@ -87,6 +87,6 @@ public class HopperPlaceListener implements Listener {
 
         hopperManager.getSkyHopperDataManager().cacheSkyHopper(hopper.getLocation(), skyHopper);
 
-        player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperPlaced()));
+        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperPlaced()));
     }
 }

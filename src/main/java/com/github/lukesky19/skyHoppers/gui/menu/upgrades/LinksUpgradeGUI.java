@@ -110,19 +110,19 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
      */
     public boolean create() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the linked containers upgrade GUI due to invalid GUI configuration."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the linked containers upgrade GUI due to invalid GUI configuration."));
             return false;
         }
 
         GUIType guiType = guiConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the linked containers upgrade GUI due to an invalid GUIType"));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the linked containers upgrade GUI due to an invalid GUIType"));
             return false;
         }
 
         String guiName = guiConfig.name();
         if(guiName == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the linked containers upgrade GUI due to an invalid gui name."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the linked containers upgrade GUI due to an invalid gui name."));
             return false;
         }
 
@@ -135,27 +135,27 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
     @Override
     public boolean update() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to decorate the GUI due to invalid configuration for the links upgrade GUI."));
+            logger.warn(AdventureUtil.deserialize("Unable to decorate the GUI due to invalid configuration for the links upgrade GUI."));
             if(isOpen) close();
             return false;
         }
 
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.serialize("Unable to update the links upgrade GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtil.deserialize("Unable to update the links upgrade GUI as the InventoryView was not created."));
             if(isOpen) close();
             return false;
         }
 
         Settings settings = settingsManager.getSettings();
         if(settings == null) {
-            logger.warn(AdventureUtil.serialize("Unable to update the links upgrade GUI as the plugin settings are invalid."));
+            logger.warn(AdventureUtil.deserialize("Unable to update the links upgrade GUI as the plugin settings are invalid."));
             if(isOpen) close();
             return false;
         }
 
         TreeMap<Integer, Double> upgrades = settingsManager.getContainerUpgrades();
         if(upgrades == null) {
-            logger.warn(AdventureUtil.serialize("Unable to update the links upgrade GUI as the links upgrade settings are invalid."));
+            logger.warn(AdventureUtil.deserialize("Unable to update the links upgrade GUI as the links upgrade settings are invalid."));
             if(isOpen) close();
             return false;
         }
@@ -256,7 +256,7 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().exit();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the exit button in the linked containers upgrade gui due to no slot configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the exit button in the linked containers upgrade gui due to no slot configured."));
             return;
         }
 
@@ -286,7 +286,7 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
             ButtonConfig buttonConfig = guiConfig.entries().upgrade();
 
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to create the upgrade button in the linked containers upgrade gui due to no slot configured."));
+                logger.warn(AdventureUtil.deserialize("Unable to create the upgrade button in the linked containers upgrade gui due to no slot configured."));
                 return;
             }
 
@@ -323,7 +323,7 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
                         skyHopper.setMaxContainers(upgradeAmount);
                         skyHopper.setMaxContainers(upgradeAmount);
 
-                        player.sendMessage(AdventureUtil.serialize(player, locale.prefix() + locale.maxLinksUpgrade(), messagePlaceholders));
+                        player.sendMessage(AdventureUtil.deserialize(player, locale.prefix() + locale.maxLinksUpgrade(), messagePlaceholders));
 
                         hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
@@ -331,7 +331,7 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
 
                         update();
                     } else {
-                        player.sendMessage(AdventureUtil.serialize(player, locale.prefix() + locale.notEnoughMoney()));
+                        player.sendMessage(AdventureUtil.deserialize(player, locale.prefix() + locale.notEnoughMoney()));
                     }
                 });
 
@@ -341,7 +341,7 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
             ButtonConfig buttonConfig = guiConfig.entries().upgradeMax();
 
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to create the upgrade max button in the linked containers upgrade gui due to no slot configured."));
+                logger.warn(AdventureUtil.deserialize("Unable to create the upgrade max button in the linked containers upgrade gui due to no slot configured."));
                 return;
             }
 
@@ -367,7 +367,7 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
 
         guiConfig.entries().dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to add a dummy button to the links upgrade GUI due to an invalid slot."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the links upgrade GUI due to an invalid slot."));
                 return;
             }
 

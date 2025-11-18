@@ -115,19 +115,19 @@ public class LinksGUI extends SkyHopperGUI {
      */
     public boolean create() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the links.yml GUI due to invalid GUI configuration."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the links.yml GUI due to invalid GUI configuration."));
             return false;
         }
 
         GUIType guiType = guiConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the links.yml GUI due to an invalid GUIType"));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the links.yml GUI due to an invalid GUIType"));
             return false;
         }
 
         String guiName = guiConfig.name();
         if(guiName == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the links.yml GUI due to an invalid gui name."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the links.yml GUI due to an invalid gui name."));
             return false;
         }
 
@@ -140,7 +140,7 @@ public class LinksGUI extends SkyHopperGUI {
     @Override
     public boolean update() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to decorate the GUI due to invalid configuration for the links GUI."));
+            logger.warn(AdventureUtil.deserialize("Unable to decorate the GUI due to invalid configuration for the links GUI."));
             if(isOpen) close();
             return false;
         }
@@ -148,7 +148,7 @@ public class LinksGUI extends SkyHopperGUI {
         clearButtons();
 
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.serialize("Unable to update the links GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtil.deserialize("Unable to update the links GUI as the InventoryView was not created."));
             if(isOpen) close();
             return false;
         }
@@ -284,13 +284,13 @@ public class LinksGUI extends SkyHopperGUI {
 
                         Component itemName = container.customName();
                         if(itemName == null) {
-                            itemName = AdventureUtil.serialize(FormatUtil.formatItemTypeName(containerItemType));
+                            itemName = AdventureUtil.deserialize(FormatUtil.formatItemTypeName(containerItemType));
                         }
 
                         itemStackBuilder.setName(itemName);
                     } else {
                         itemStackBuilder.setItemType(ItemType.BARRIER);
-                        itemStackBuilder.setName(AdventureUtil.serialize("<red>Unknown Container</red>"));
+                        itemStackBuilder.setName(AdventureUtil.deserialize("<red>Unknown Container</red>"));
                     }
 
                     List<TagResolver.Single> placeholders = List.of(
@@ -298,7 +298,7 @@ public class LinksGUI extends SkyHopperGUI {
                             Placeholder.parsed("y", String.valueOf(linkedLocation.getY())),
                             Placeholder.parsed("z", String.valueOf(linkedLocation.getZ())));
 
-                    List<Component> lore = buttonConfig.item().lore().stream().map(line -> AdventureUtil.serialize(line, placeholders)).toList();
+                    List<Component> lore = buttonConfig.item().lore().stream().map(line -> AdventureUtil.deserialize(line, placeholders)).toList();
 
                     itemStackBuilder.setLore(lore);
 
@@ -320,19 +320,19 @@ public class LinksGUI extends SkyHopperGUI {
 
                                     boolean creationResult = outputFilterGUI.create();
                                     if(!creationResult) {
-                                        player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                                         return;
                                     }
 
                                     boolean updateResult = outputFilterGUI.update();
                                     if(!updateResult) {
-                                        player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                                         return;
                                     }
 
                                     boolean openResult = outputFilterGUI.open();
                                     if(!openResult) {
-                                        player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                                     }
                                 }
 
@@ -371,7 +371,7 @@ public class LinksGUI extends SkyHopperGUI {
             assert guiConfig != null;
             ButtonConfig buttonConfig = guiConfig.entries().nextPage();
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to create the next page button in the links gui due to no slot configured."));
+                logger.warn(AdventureUtil.deserialize("Unable to create the next page button in the links gui due to no slot configured."));
                 return;
             }
 
@@ -402,7 +402,7 @@ public class LinksGUI extends SkyHopperGUI {
             assert guiConfig != null;
             ButtonConfig buttonConfig = guiConfig.entries().previousPage();
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to create the previous page button in the links gui due to no slot configured."));
+                logger.warn(AdventureUtil.deserialize("Unable to create the previous page button in the links gui due to no slot configured."));
                 return;
             }
 
@@ -438,7 +438,7 @@ public class LinksGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().link();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the link button in the links gui due to no slot configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the link button in the links gui due to no slot configured."));
             return;
         }
 
@@ -461,8 +461,8 @@ public class LinksGUI extends SkyHopperGUI {
                 if(skyHopper.getLocation() != null) {
                     hopperClickListener.addLinkingPlayer(player, skyHopper.getLocation());
 
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.linkingEnabled()));
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.linkingHowToExit()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.linkingEnabled()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.linkingHowToExit()));
                 }
             });
 
@@ -478,7 +478,7 @@ public class LinksGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().exit();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the exit button in the links gui due to no slot configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the exit button in the links gui due to no slot configured."));
             return;
         }
 
@@ -505,7 +505,7 @@ public class LinksGUI extends SkyHopperGUI {
 
         guiConfig.entries().dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to add a dummy button to the links GUI due to an invalid slot."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the links GUI due to an invalid slot."));
                 return;
             }
 

@@ -121,7 +121,7 @@ public class HopperClickListener implements Listener {
 
                 Player player = skyHoppers.getServer().getPlayer(uuid);
                 if(player != null && player.isOnline() && player.isConnected()) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.linkingDisabled()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.linkingDisabled()));
                 }
             }
         }
@@ -151,7 +151,7 @@ public class HopperClickListener implements Listener {
             if (!(block.getState(false) instanceof Container container)) return;
 
             if (hookManager.canNotOpen(player, container.getLocation())) {
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.containerNoAccess()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.containerNoAccess()));
 
                 playerInteractEvent.setCancelled(true);
 
@@ -173,7 +173,7 @@ public class HopperClickListener implements Listener {
                     && linkingSkyHopper.getLocation().equals(targetSkyHopper.getLocation())) {
                 linkingPlayers.remove(player.getUniqueId());
 
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.linkingDisabled()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.linkingDisabled()));
 
                 return;
             }
@@ -190,7 +190,7 @@ public class HopperClickListener implements Listener {
 
                         guiManager.refreshViewersGUI(location);
 
-                        player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.containerUnlinked()));
+                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.containerUnlinked()));
 
                         return;
                     }
@@ -204,9 +204,9 @@ public class HopperClickListener implements Listener {
 
                 guiManager.refreshViewersGUI(location);
 
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.containerLinked()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.containerLinked()));
             } else {
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.containerLinksMaxed()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.containerLinksMaxed()));
             }
         } else {
             if (!(block.getState(false) instanceof Hopper hopperBlock)) return;
@@ -217,7 +217,7 @@ public class HopperClickListener implements Listener {
             playerInteractEvent.setCancelled(true);
 
             if(hookManager.canNotOpen(player, hopperBlock.getLocation())) {
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperNoAccess()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperNoAccess()));
                 return;
             }
 
@@ -228,22 +228,22 @@ public class HopperClickListener implements Listener {
 
                 boolean creationResult = hopperGUI.create();
                 if(!creationResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean updateResult = hopperGUI.update();
                 if(!updateResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean openResult = hopperGUI.open();
                 if(!openResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                 }
             } else {
-                player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.hopperNoAccess()));
+                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperNoAccess()));
             }
         }
     }

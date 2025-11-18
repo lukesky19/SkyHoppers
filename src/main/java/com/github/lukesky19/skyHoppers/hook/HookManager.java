@@ -67,7 +67,7 @@ public class HookManager {
 
         @Nullable Settings settings = settingsManager.getSettings();
         if(settings == null) {
-            skyHoppers.getComponentLogger().warn(AdventureUtil.serialize("Unable to setup hooks due to invalid plugin settings."));
+            skyHoppers.getComponentLogger().warn(AdventureUtil.deserialize("Unable to setup hooks due to invalid plugin settings."));
             return;
         }
 

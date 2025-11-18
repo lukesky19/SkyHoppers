@@ -253,7 +253,7 @@ public class SkyHopperProcessor {
         @NotNull Locale locale = localeManager.getLocale();
 
         if(settings == null) {
-            logger.info(AdventureUtil.serialize(locale.prefix() + locale.failedSkyHopperLoad()));
+            logger.info(AdventureUtil.deserialize(locale.prefix() + locale.failedSkyHopperLoad()));
             return null;
         }
 

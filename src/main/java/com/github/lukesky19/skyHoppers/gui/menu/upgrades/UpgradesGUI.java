@@ -108,19 +108,19 @@ public class UpgradesGUI extends SkyHopperGUI {
      */
     public boolean create() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the input_filter.yml GUI due to invalid GUI configuration."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the input_filter.yml GUI due to invalid GUI configuration."));
             return false;
         }
 
         GUIType guiType = guiConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the input_filter.yml GUI due to an invalid GUIType"));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the input_filter.yml GUI due to an invalid GUIType"));
             return false;
         }
 
         String guiName = guiConfig.name();
         if(guiName == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the input_filter.yml GUI due to an invalid gui name."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the input_filter.yml GUI due to an invalid gui name."));
             return false;
         }
 
@@ -136,13 +136,13 @@ public class UpgradesGUI extends SkyHopperGUI {
         if(settings == null) return false;
 
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to decorate the GUI due to invalid configuration for the input filter GUI."));
+            logger.warn(AdventureUtil.deserialize("Unable to decorate the GUI due to invalid configuration for the input filter GUI."));
             if(isOpen) close();
             return false;
         }
 
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.serialize("Unable to update the input filter GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtil.deserialize("Unable to update the input filter GUI as the InventoryView was not created."));
             if(isOpen) close();
             return false;
         }
@@ -267,7 +267,7 @@ public class UpgradesGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().suctionSpeed();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the suction speed button due to no slot configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the suction speed button due to no slot configured."));
             return;
         }
 
@@ -290,19 +290,19 @@ public class UpgradesGUI extends SkyHopperGUI {
 
                 boolean creationResult = suctionSpeedUpgradeGUI.create();
                 if(!creationResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean updateResult = suctionSpeedUpgradeGUI.update();
                 if(!updateResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean openResult = suctionSpeedUpgradeGUI.open();
                 if(!openResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                 }
             });
 
@@ -320,7 +320,7 @@ public class UpgradesGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().suctionAmount();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the suction amount button due to no slot configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the suction amount button due to no slot configured."));
             return;
         }
 
@@ -343,19 +343,19 @@ public class UpgradesGUI extends SkyHopperGUI {
 
                 boolean creationResult = suctionAmountUpgradeGUI.create();
                 if(!creationResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean updateResult = suctionAmountUpgradeGUI.update();
                 if(!updateResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean openResult = suctionAmountUpgradeGUI.open();
                 if(!openResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                 }
             });
 
@@ -373,7 +373,7 @@ public class UpgradesGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().suctionRange();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the suction range button due to no slot configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the suction range button due to no slot configured."));
             return;
         }
 
@@ -396,19 +396,19 @@ public class UpgradesGUI extends SkyHopperGUI {
 
                 boolean creationResult = suctionRangeUpgradeGUI.create();
                 if(!creationResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean updateResult = suctionRangeUpgradeGUI.update();
                 if(!updateResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean openResult = suctionRangeUpgradeGUI.open();
                 if(!openResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                 }
             });
 
@@ -426,7 +426,7 @@ public class UpgradesGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().maxLinks();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the max links button due to no slot configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the max links button due to no slot configured."));
             return;
         }
 
@@ -449,19 +449,19 @@ public class UpgradesGUI extends SkyHopperGUI {
 
                 boolean creationResult = linksUpgradeGUI.create();
                 if(!creationResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean updateResult = linksUpgradeGUI.update();
                 if(!updateResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean openResult = linksUpgradeGUI.open();
                 if(!openResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                 }
             });
 
@@ -479,7 +479,7 @@ public class UpgradesGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().transferSpeed();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the transfer speed button due to no slot configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the transfer speed button due to no slot configured."));
             return;
         }
 
@@ -502,19 +502,19 @@ public class UpgradesGUI extends SkyHopperGUI {
 
                 boolean creationResult = transferSpeedUpgradeGUI.create();
                 if(!creationResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean updateResult = transferSpeedUpgradeGUI.update();
                 if(!updateResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean openResult = transferSpeedUpgradeGUI.open();
                 if(!openResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                 }
             });
 
@@ -532,7 +532,7 @@ public class UpgradesGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().transferAmount();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the transfer amount button due to no slot configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the transfer amount button due to no slot configured."));
             return;
         }
 
@@ -555,19 +555,19 @@ public class UpgradesGUI extends SkyHopperGUI {
 
                 boolean creationResult = transferAmountUpgradeGUI.create();
                 if(!creationResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean updateResult = transferAmountUpgradeGUI.update();
                 if(!updateResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean openResult = transferAmountUpgradeGUI.open();
                 if(!openResult) {
-                    player.sendMessage(AdventureUtil.serialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                 }
             });
 
@@ -583,7 +583,7 @@ public class UpgradesGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().exit();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the exit button in the upgrades gui due to no slot configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the exit button in the upgrades gui due to no slot configured."));
             return;
         }
 
@@ -610,7 +610,7 @@ public class UpgradesGUI extends SkyHopperGUI {
 
         guiConfig.entries().dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to add a dummy button to the upgrades GUI due to an invalid slot."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the upgrades GUI due to an invalid slot."));
                 return;
             }
 

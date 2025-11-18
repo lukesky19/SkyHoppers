@@ -109,7 +109,7 @@ public class SkyHopperCreator {
         }
 
         if(itemStack == null) {
-            skyHoppers.getComponentLogger().error(AdventureUtil.serialize("Failed to create the ItemStack for a SkyHopper."));
+            skyHoppers.getComponentLogger().error(AdventureUtil.deserialize("Failed to create the ItemStack for a SkyHopper."));
             return null;
         }
 

@@ -101,19 +101,19 @@ public class SelectPlayerGUI extends SkyHopperGUI {
      */
     public boolean create() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the members.yml GUI due to invalid GUI configuration."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the members.yml GUI due to invalid GUI configuration."));
             return false;
         }
 
         GUIType guiType = guiConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the members.yml GUI due to an invalid GUIType"));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the members.yml GUI due to an invalid GUIType"));
             return false;
         }
 
         String guiName = guiConfig.name();
         if(guiName == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the InventoryView for the members.yml GUI due to an invalid gui name."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the members.yml GUI due to an invalid gui name."));
             return false;
         }
 
@@ -126,13 +126,13 @@ public class SelectPlayerGUI extends SkyHopperGUI {
     @Override
     public boolean update() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.serialize("Unable to decorate the GUI due to invalid configuration for the select player GUI."));
+            logger.warn(AdventureUtil.deserialize("Unable to decorate the GUI due to invalid configuration for the select player GUI."));
             if(isOpen) close();
             return false;
         }
 
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.serialize("Unable to update the select player GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtil.deserialize("Unable to update the select player GUI as the InventoryView was not created."));
             if(isOpen) close();
             return false;
         }
@@ -282,10 +282,10 @@ public class SelectPlayerGUI extends SkyHopperGUI {
                     if(itemStackConfig.name() != null) {
                         List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("player_name", playerName));
 
-                        itemStackBuilder.setName(AdventureUtil.serialize(itemStackConfig.name(), placeholders));
+                        itemStackBuilder.setName(AdventureUtil.deserialize(itemStackConfig.name(), placeholders));
                     }
 
-                    List<Component> lore = itemStackConfig.lore().stream().map(AdventureUtil::serialize).toList();
+                    List<Component> lore = itemStackConfig.lore().stream().map(AdventureUtil::deserialize).toList();
                     List<ItemFlag> itemFlags = itemStackConfig.itemFlags().stream().map(ItemFlag::valueOf).toList();
 
                     itemStackBuilder.setLore(lore);
@@ -332,7 +332,7 @@ public class SelectPlayerGUI extends SkyHopperGUI {
             ButtonConfig buttonConfig = guiConfig.entries().nextPage();
 
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to create the next page button in the select player gui due to no slot configured."));
+                logger.warn(AdventureUtil.deserialize("Unable to create the next page button in the select player gui due to no slot configured."));
                 return;
             }
 
@@ -363,7 +363,7 @@ public class SelectPlayerGUI extends SkyHopperGUI {
             assert guiConfig != null;
             ButtonConfig buttonConfig = guiConfig.entries().previousPage();
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to create the previous page button in the select player gui due to no slot configured."));
+                logger.warn(AdventureUtil.deserialize("Unable to create the previous page button in the select player gui due to no slot configured."));
                 return;
             }
 
@@ -401,7 +401,7 @@ public class SelectPlayerGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().exit();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.serialize("Unable to create the exit button in the select player gui due to no slot configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the exit button in the select player gui due to no slot configured."));
             return;
         }
 
@@ -428,7 +428,7 @@ public class SelectPlayerGUI extends SkyHopperGUI {
 
         guiConfig.entries().dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.serialize("Unable to add a dummy button to the select player GUI due to an invalid slot."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the select player GUI due to an invalid slot."));
                 return;
             }
 

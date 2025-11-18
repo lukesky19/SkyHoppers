@@ -212,11 +212,11 @@ public class SettingsManager {
                 saveSettings();
             }
 
-            case null -> logger.warn(AdventureUtil.serialize("Unable to check settings version as it is not configured."));
+            case null -> logger.warn(AdventureUtil.deserialize("Unable to check settings version as it is not configured."));
 
             default -> {
-                logger.warn(AdventureUtil.serialize("Your plugin settings are outdated. Current version: " + settings.configVersion() + ". Latest version: 1.2.0.0."));
-                logger.warn(AdventureUtil.serialize("You should regenerate your settings.yml or migrate your settings.yml to the new version."));
+                logger.warn(AdventureUtil.deserialize("Your plugin settings are outdated. Current version: " + settings.configVersion() + ". Latest version: 1.2.0.0."));
+                logger.warn(AdventureUtil.deserialize("You should regenerate your settings.yml or migrate your settings.yml to the new version."));
             }
         }
     }

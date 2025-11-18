@@ -55,14 +55,14 @@ public class SkyHopperSaver {
     public void saveSkyHopper(@NotNull SkyHopper skyHopper) {
         Location location = skyHopper.getLocation();
         if(location == null) {
-            logger.warn(AdventureUtil.serialize("Unable to save SkyHopper to a Hopper's PDC due to a null location for the SkyHopper."));
+            logger.warn(AdventureUtil.deserialize("Unable to save SkyHopper to a Hopper's PDC due to a null location for the SkyHopper."));
             return;
         }
 
         if(location.getBlock().getState(false) instanceof Hopper hopper) {
             saveSkyHopper(skyHopper, hopper);
         } else {
-            logger.warn(AdventureUtil.serialize("Unable to save SkyHopper to a Hopper's PDC as the block at the SkyHopper's location is not a Hopper."));
+            logger.warn(AdventureUtil.deserialize("Unable to save SkyHopper to a Hopper's PDC as the block at the SkyHopper's location is not a Hopper."));
         }
     }
 
