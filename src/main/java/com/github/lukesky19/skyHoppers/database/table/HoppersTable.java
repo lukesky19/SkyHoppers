@@ -150,7 +150,7 @@ public class HoppersTable {
                     hopperLocations.add(new Location(world, x, y, z));
                 }
             } catch(SQLException e) {
-                logger.error(AdventureUtil.serialize("Failed to load SkyHopper locations from the database."));
+                logger.error(AdventureUtil.deserialize("Failed to load SkyHopper locations from the database."));
                 return List.of();
             }
 
