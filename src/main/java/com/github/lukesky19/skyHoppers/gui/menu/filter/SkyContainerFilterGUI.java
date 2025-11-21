@@ -126,6 +126,25 @@ public class SkyContainerFilterGUI extends SkyHopperGUI {
         return create(guiType, guiName, List.of());
     }
 
+    @Override
+    public void close() {
+        skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
+            guiManager.removeViewer(location, uuid);
+
+            this.isOpen = false;
+
+            if(previousGUI != null) {
+                player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
+
+                previousGUI.refresh();
+
+                previousGUI.open();
+            } else {
+                player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
+            }
+        }, 1L);
+    }
+
     /**
      * Creates and populates the buttons for this GUI.
      */
@@ -285,7 +304,7 @@ public class SkyContainerFilterGUI extends SkyHopperGUI {
 
             for (int i = 0; i <= guiSize - 10; i++) {
                 if(maxItems >= itemNum) {
-                    ItemType itemType = skyHopper.getFilterItems().get(itemNum);
+                    ItemType itemType = skyContainer.getFilterItems().get(itemNum);
 
                     GUIButton.Builder builder = new GUIButton.Builder();
 
