@@ -29,8 +29,10 @@ import com.github.lukesky19.skyHoppers.hook.HookManager;
 import com.github.lukesky19.skyHoppers.listener.*;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.task.TaskManager;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.libs.bstats.bukkit.Metrics;
 import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -82,6 +84,7 @@ public final class SkyHoppers extends JavaPlugin {
      */
     @Override
     public void onEnable() {
+        if(!checkSkyLibVersion()) return;
         // Setup dependencies
         setupBStats();
 
@@ -165,5 +168,27 @@ public final class SkyHoppers extends JavaPlugin {
     private void setupBStats() {
         int pluginId = 23993;
         new Metrics(this, pluginId);
+    }
+
+    /**
+     * Checks if the Server has the proper SkyLib version.
+     * @return true if it does, false if not.
+     */
+    private boolean checkSkyLibVersion() {
+        PluginManager pluginManager = this.getServer().getPluginManager();
+        Plugin skyLib = pluginManager.getPlugin("SkyLib");
+        if(skyLib != null) {
+            String version = skyLib.getPluginMeta().getVersion();
+            String[] splitVersion = version.split("\\.");
+            int second = Integer.parseInt(splitVersion[1]);
+
+            if(second >= 4) {
+                return true;
+            }
+        }
+
+        this.getComponentLogger().error(AdventureUtil.deserialize("SkyLib Version 1.4.0.0 or newer is required to run this plugin."));
+        this.getServer().getPluginManager().disablePlugin(this);
+        return false;
     }
 }
