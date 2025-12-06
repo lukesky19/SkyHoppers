@@ -188,7 +188,7 @@ public class HopperClickListener implements Listener {
 
                         hopperManager.getSkyHopperSaver().saveSkyHopper(linkingSkyHopper);
 
-                        guiManager.refreshViewersGUI(location);
+                        guiManager.refreshGUIsByLocation(location);
 
                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.containerUnlinked()));
 
@@ -202,7 +202,7 @@ public class HopperClickListener implements Listener {
 
                 hopperManager.getSkyHopperSaver().saveSkyHopper(linkingSkyHopper);
 
-                guiManager.refreshViewersGUI(location);
+                guiManager.refreshGUIsByLocation(location);
 
                 player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.containerLinked()));
             } else {

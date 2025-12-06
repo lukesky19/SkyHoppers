@@ -181,7 +181,7 @@ public class MembersGUI extends SkyHopperGUI {
     public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
         if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
 
-        guiManager.removeViewer(location, uuid);
+        guiManager.removeOpenGUI(identifier);
 
         isOpen = false;
 
@@ -305,7 +305,7 @@ public class MembersGUI extends SkyHopperGUI {
 
                             hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
-                            guiManager.refreshViewersGUI(location);
+                            guiManager.refreshGUIsByLocation(location);
 
                             added = 0;
                             playerNum = 0;
@@ -422,7 +422,7 @@ public class MembersGUI extends SkyHopperGUI {
                 skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
                         player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
 
-                guiManager.removeViewer(location, player.getUniqueId());
+                guiManager.removeOpenGUI(identifier);
 
                 SelectPlayerGUI selectPlayerGUI = new SelectPlayerGUI(skyHoppers, guiManager, location, skyHopper, player, guiConfigManager, hopperManager, this);
 

@@ -17,11 +17,12 @@
 */
 package com.github.lukesky19.skyHoppers.gui;
 
-import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.gui.menu.filter.SkyContainerFilterGUI;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.LocationUUIDKey;
+import com.github.lukesky19.skylib.api.gui.interfaces.BaseGUI;
+import com.github.lukesky19.skylib.api.gui.interfaces.IGUIManager;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -32,91 +33,87 @@ import java.util.UUID;
 /**
  * This class manages open GUIs for SkyHoppers.
  */
-public class GUIManager {
-    private final @NotNull SkyHoppers skyHoppers;
-    private final @NotNull Map<Location, Map<UUID, SkyHopperGUI>> openGUIsByLocationAndPlayer = new HashMap<>();
+public class GUIManager implements IGUIManager<LocationUUIDKey> {
+    private final @NotNull Map<Location, Map<UUID, BaseGUI<LocationUUIDKey>>> openGUIsByLocationAndPlayer = new HashMap<>();
 
     /**
      * Constructor
-     * @param skyHoppers A {@link SkyHoppers} instance.
      */
-    public GUIManager(@NotNull SkyHoppers skyHoppers) {
-        this.skyHoppers = skyHoppers;
+    public GUIManager() {}
+
+    @Override
+    public void addOpenGUI(@NotNull LocationUUIDKey identifier, @NotNull BaseGUI<LocationUUIDKey> data) {
+        Map<UUID, BaseGUI<LocationUUIDKey>> uuidGuiMap = openGUIsByLocationAndPlayer.computeIfAbsent(identifier.location(), location -> new HashMap<>());
+
+        uuidGuiMap.put(identifier.uuid(), data);
+    }
+
+    @Override
+    public void removeOpenGUI(@NotNull LocationUUIDKey identifier) {
+        Map<UUID, BaseGUI<LocationUUIDKey>> uuidGuiMap = openGUIsByLocationAndPlayer.get(identifier.location());
+        if(uuidGuiMap == null) return;
+
+        uuidGuiMap.remove(identifier.uuid());
+
+        if(uuidGuiMap.isEmpty()) {
+            openGUIsByLocationAndPlayer.remove(identifier.location());
+        }
     }
 
     /**
-     * Get the {@link SkyHopperGUI} that is open by the provided player's {@link UUID}.
+     * Refresh all guis with the same location and uuid.
+     * @param locationUUIDKey The {@link LocationUUIDKey}.
+     */
+    @Override
+    public void refreshGUIs(@NotNull LocationUUIDKey locationUUIDKey) {
+        openGUIsByLocationAndPlayer.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().equals(locationUUIDKey.location()))
+                .map(Map.Entry::getValue)
+                .filter(map -> map.containsKey(locationUUIDKey.uuid()))
+                .map(map -> map.get(locationUUIDKey.uuid()))
+                .forEach(BaseGUI::refresh);
+    }
+
+    @Override
+    public @Nullable BaseGUI<LocationUUIDKey> getOpenGUI(@NotNull LocationUUIDKey locationUUIDKey) {
+        return openGUIsByLocationAndPlayer
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().equals(locationUUIDKey.location()))
+                .map(Map.Entry::getValue)
+                .filter(map -> map.containsKey(locationUUIDKey.uuid()))
+                .findFirst()
+                .map(entry -> entry.get(locationUUIDKey.uuid()))
+                .orElse(null);
+    }
+
+    /**
+     * Refresh all guis with the same location.
+     * @param location The {@link Location}.
+     */
+    public void refreshGUIsByLocation(@NotNull Location location) {
+        openGUIsByLocationAndPlayer.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().equals(location))
+                .map(Map.Entry::getValue)
+                .map(Map::values)
+                .forEach(collection -> collection.forEach(BaseGUI::refresh));
+    }
+
+    /**
+     * Get the {@link BaseGUI} that is open by the provided player's {@link UUID}.
      * @param uuid The {@link UUID} of the player.
-     * @return The {@link SkyHopperGUI} the player is viewing or null.
+     * @return The {@link BaseGUI} the player is viewing or null.
      */
-    public @Nullable SkyHopperGUI getGuiByUUID(@NotNull UUID uuid) {
-        for(Map.Entry<Location, Map<UUID, SkyHopperGUI>> locationEntry : openGUIsByLocationAndPlayer.entrySet()) {
-            Map<UUID, SkyHopperGUI> viewers = locationEntry.getValue();
-
-            for(Map.Entry<UUID, SkyHopperGUI> viewerEntry : viewers.entrySet()) {
-                UUID viewerUuid = viewerEntry.getKey();
-                if(viewerUuid.equals(uuid)) {
-                    return viewerEntry.getValue();
-                }
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Adds a viewer for a SkyHopper's Location.
-     * @param location The Location of the SkyHopper.
-     * @param viewer The Player's UUID viewing the SkyHopper's settings.
-     * @param gui The GUI the Player is viewing.
-     */
-    public void addViewer(@NotNull Location location, @NotNull UUID viewer, @NotNull SkyHopperGUI gui) {
-        Map<UUID, SkyHopperGUI> uuidGuiMap = openGUIsByLocationAndPlayer.getOrDefault(location, new HashMap<>());
-
-        uuidGuiMap.put(viewer, gui);
-        openGUIsByLocationAndPlayer.put(location, uuidGuiMap);
-    }
-
-    /**
-     * Removes a viewer for a SkyHopper's Location.
-     * @param location The Location of the SkyHopper.
-     * @param viewer The Player's UUID who was viewing the SkyHopper's settings.
-     */
-    public void removeViewer(Location location, UUID viewer) {
-        Map<UUID, SkyHopperGUI> uuidGuiMap = openGUIsByLocationAndPlayer.get(location);
-        if(uuidGuiMap == null) return;
-
-        uuidGuiMap.remove(viewer);
-
-        if(uuidGuiMap.isEmpty()) {
-            openGUIsByLocationAndPlayer.remove(location);
-        } else {
-            openGUIsByLocationAndPlayer.put(location, uuidGuiMap);
-        }
-    }
-
-    /**
-     * Refreshes all players viewing a SkyHopper's settings at the given Location.
-     * @param location The Location of the SkyHopper.
-     */
-    public void refreshViewersGUI(@NotNull Location location) {
-        Map<UUID, SkyHopperGUI> uuidGuiMap = openGUIsByLocationAndPlayer.get(location);
-        if(uuidGuiMap == null) return;
-
-        if(uuidGuiMap.isEmpty()) {
-            openGUIsByLocationAndPlayer.remove(location);
-            return;
-        }
-
-        for(Map.Entry<UUID, SkyHopperGUI> entry : uuidGuiMap.entrySet()) {
-            UUID uuid = entry.getKey();
-            SkyHopperGUI gui = entry.getValue();
-
-            Player player = skyHoppers.getServer().getPlayer(uuid);
-            if(player != null && player.isOnline() && player.isConnected()) {
-                gui.refresh();
-            }
-        }
+    public @Nullable BaseGUI<LocationUUIDKey> getGuiByUUID(@NotNull UUID uuid) {
+        return openGUIsByLocationAndPlayer
+                .values()
+                .stream()
+                .filter(map -> map.containsKey(uuid))
+                .findFirst()
+                .map(entry -> entry.get(uuid))
+                .orElse(null);
     }
 
     /**
@@ -124,25 +121,12 @@ public class GUIManager {
      * @param location The {@link Location} of the {@link SkyHopper}.
      */
     public void closeOutputFilterGUIs(@NotNull Location location) {
-        Map<UUID, SkyHopperGUI> uuidGuiMap = openGUIsByLocationAndPlayer.get(location);
-        if(uuidGuiMap == null) return;
-
-        if(uuidGuiMap.isEmpty()) {
-            openGUIsByLocationAndPlayer.remove(location);
-            return;
-        }
-
-        for(Map.Entry<UUID, SkyHopperGUI> entry : uuidGuiMap.entrySet()) {
-            UUID uuid = entry.getKey();
-            SkyHopperGUI gui = entry.getValue();
-
-            Player player = skyHoppers.getServer().getPlayer(uuid);
-            if(player != null && player.isOnline() && player.isConnected()) {
-                if(gui instanceof SkyContainerFilterGUI) {
-                    gui.close();
-                }
-            }
-        }
+        openGUIsByLocationAndPlayer.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().equals(location))
+                .map(Map.Entry::getValue)
+                .map(Map::values)
+                .forEach(collection -> collection.forEach(BaseGUI::close));
     }
 
     /**
@@ -150,23 +134,12 @@ public class GUIManager {
      * @param location The {@link Location} of the {@link SkyHopper} to close GUIs for.
      */
     public void closeOpenGUIsForLocation(@NotNull Location location) {
-        Map<UUID, SkyHopperGUI> uuidGuiMap = openGUIsByLocationAndPlayer.get(location);
-        if(uuidGuiMap == null) return;
-
-        if(uuidGuiMap.isEmpty()) {
-            openGUIsByLocationAndPlayer.remove(location);
-            return;
-        }
-
-        for(Map.Entry<UUID, SkyHopperGUI> entry : uuidGuiMap.entrySet()) {
-            UUID uuid = entry.getKey();
-            SkyHopperGUI gui = entry.getValue();
-
-            Player player = skyHoppers.getServer().getPlayer(uuid);
-            if(player != null && player.isOnline() && player.isConnected()) {
-                gui.unload(false);
-            }
-        }
+        openGUIsByLocationAndPlayer.entrySet()
+                .stream()
+                .filter(entry -> entry.getKey().equals(location))
+                .map(Map.Entry::getValue)
+                .map(Map::values)
+                .forEach(collection -> collection.forEach(gui -> gui.unload(false)));
     }
 
     /**
@@ -174,18 +147,7 @@ public class GUIManager {
      * @param onDisable Is the plugin being disabled?
      */
     public void closeOpenGUIs(boolean onDisable) {
-        for(Map.Entry<Location, Map<UUID, SkyHopperGUI>> locationMapEntry : openGUIsByLocationAndPlayer.entrySet()) {
-            Map<UUID, SkyHopperGUI> uuidGuiMap = locationMapEntry.getValue();
-
-            if(uuidGuiMap.isEmpty()) continue;
-
-            for(Map.Entry<UUID, SkyHopperGUI> guiEntry : uuidGuiMap.entrySet()) {
-                SkyHopperGUI gui = guiEntry.getValue();
-
-                gui.unload(onDisable);
-            }
-        }
-
-        openGUIsByLocationAndPlayer.clear();
+        openGUIsByLocationAndPlayer.entrySet().iterator().forEachRemaining(entry ->
+                entry.getValue().forEach((uuid, gui) -> gui.unload(onDisable)));
     }
 }

@@ -129,7 +129,7 @@ public class SkyContainerFilterGUI extends SkyHopperGUI {
     @Override
     public void close() {
         skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
-            guiManager.removeViewer(location, uuid);
+            guiManager.removeOpenGUI(identifier);
 
             this.isOpen = false;
 
@@ -197,7 +197,7 @@ public class SkyContainerFilterGUI extends SkyHopperGUI {
     public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
         if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
 
-        guiManager.removeViewer(location, uuid);
+        guiManager.removeOpenGUI(identifier);
 
         this.isOpen = false;
 
@@ -252,7 +252,7 @@ public class SkyContainerFilterGUI extends SkyHopperGUI {
 
         hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
-        guiManager.refreshViewersGUI(location);
+        guiManager.refreshGUIsByLocation(location);
 
         added = 0;
         itemNum = 0;
@@ -329,7 +329,7 @@ public class SkyContainerFilterGUI extends SkyHopperGUI {
 
                                 hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
-                                guiManager.refreshViewersGUI(location);
+                                guiManager.refreshGUIsByLocation(location);
 
                                 added = 0;
                                 itemNum = 0;
@@ -447,7 +447,7 @@ public class SkyContainerFilterGUI extends SkyHopperGUI {
 
                 hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
-                guiManager.refreshViewersGUI(location);
+                guiManager.refreshGUIsByLocation(location);
 
                 added = 0;
                 itemNum = 0;

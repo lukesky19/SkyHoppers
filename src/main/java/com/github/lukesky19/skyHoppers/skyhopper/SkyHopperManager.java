@@ -24,6 +24,8 @@ import com.github.lukesky19.skyHoppers.database.DatabaseManager;
 import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.HopperKeys;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
@@ -34,6 +36,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class SkyHopperManager {
     private final @NotNull SkyHoppers skyHoppers;
+    private final @NotNull ComponentLogger logger;
     private final @NotNull DatabaseManager databaseManager;
 
     private final @NotNull SkyHopperDataManager skyHopperDataManager;
@@ -56,6 +59,7 @@ public class SkyHopperManager {
             @NotNull DatabaseManager databaseManager,
             @NotNull GUIManager guiManager) {
         this.skyHoppers = skyHoppers;
+        this.logger = skyHoppers.getComponentLogger();
         this.databaseManager = databaseManager;
 
         this.skyHopperDataManager = new SkyHopperDataManager(databaseManager, guiManager);
@@ -103,15 +107,26 @@ public class SkyHopperManager {
         getSkyHopperDataManager().clearData();
 
         // Migrates the old database to the new
-        databaseManager.migrateLegacyDatabase().whenComplete((v, t) -> {
+        databaseManager.migrateLegacyDatabase().thenAccept(v1 -> {
             // Load SkyHopper Locations
             databaseManager.getHoppersTable().getSkyHopperLocations().thenAccept(list -> {
+                if(list.isEmpty()) {
+                    logger.warn(AdventureUtil.deserialize("SkyHopper Locations List from the database is empty."));
+                    return;
+                }
+
                 // Cache Locations
                 skyHopperDataManager.cacheLocations(list);
 
                 // Queue chunks next tick
                 skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, skyHopperProcessor::queueLoadedChunks, 1L);
+            }).exceptionally(ex -> {
+                logger.warn(AdventureUtil.deserialize("Failed to get SkyHopper Locations from the database. " + ex.getMessage()));
+                return null;
             });
+        }).exceptionally(ex -> {
+            logger.warn(AdventureUtil.deserialize("Failed to migrate legacy database. " + ex.getMessage()));
+            return null;
         });
     }
 

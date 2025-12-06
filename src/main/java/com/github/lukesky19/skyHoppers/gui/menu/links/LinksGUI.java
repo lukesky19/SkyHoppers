@@ -186,7 +186,7 @@ public class LinksGUI extends SkyHopperGUI {
     public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
         if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
 
-        guiManager.removeViewer(location, uuid);
+        guiManager.removeOpenGUI(identifier);
 
         isOpen = false;
 
@@ -314,7 +314,7 @@ public class LinksGUI extends SkyHopperGUI {
                                     skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
                                             player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
 
-                                    guiManager.removeViewer(location, uuid);
+                                    guiManager.removeOpenGUI(identifier);
 
                                     SkyContainerFilterGUI outputFilterGUI = new SkyContainerFilterGUI(skyHoppers, guiManager, location, skyHopper, player, guiConfigManager, hopperManager, skyContainer, this);
 
@@ -343,7 +343,7 @@ public class LinksGUI extends SkyHopperGUI {
 
                                     guiManager.closeOutputFilterGUIs(location);
 
-                                    guiManager.refreshViewersGUI(location);
+                                    guiManager.refreshGUIsByLocation(location);
 
                                     added = 0;
                                     containerNum = 0;
@@ -455,7 +455,7 @@ public class LinksGUI extends SkyHopperGUI {
                 skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
                     player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
 
-                    guiManager.removeViewer(location, uuid);
+                    guiManager.removeOpenGUI(identifier);
                 }, 1L);
 
                 if(skyHopper.getLocation() != null) {

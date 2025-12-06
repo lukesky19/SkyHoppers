@@ -95,7 +95,7 @@ public final class SkyHoppers extends JavaPlugin {
         settingsManager = new SettingsManager(this);
         localeManager = new LocaleManager(this, settingsManager);
         guiConfigManager = new GUIConfigManager(this);
-        guiManager = new GUIManager(this);
+        guiManager = new GUIManager();
         hookManager = new HookManager(this, settingsManager);
 
         hopperManager = new SkyHopperManager(this, settingsManager, localeManager, databaseManager, guiManager);

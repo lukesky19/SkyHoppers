@@ -280,7 +280,7 @@ public class SkyHopperDataManager {
                     guiManager.closeOutputFilterGUIs(location);
 
                     // Refresh any other open GUIs for the SkyHopper.
-                    guiManager.refreshViewersGUI(location);
+                    guiManager.refreshGUIsByLocation(location);
                 }
             });
         });

@@ -189,7 +189,7 @@ public class UpgradesGUI extends SkyHopperGUI {
     public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
         if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
 
-        guiManager.removeViewer(location, uuid);
+        guiManager.removeOpenGUI(identifier);
 
         isOpen = false;
 
@@ -284,7 +284,7 @@ public class UpgradesGUI extends SkyHopperGUI {
                 skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
                         player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
 
-                guiManager.removeViewer(location, player.getUniqueId());
+                guiManager.removeOpenGUI(identifier);
 
                 SuctionSpeedUpgradeGUI suctionSpeedUpgradeGUI = new SuctionSpeedUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager, this);
 
@@ -337,7 +337,7 @@ public class UpgradesGUI extends SkyHopperGUI {
                 skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
                         player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
 
-                guiManager.removeViewer(location, player.getUniqueId());
+                guiManager.removeOpenGUI(identifier);
 
                 SuctionAmountUpgradeGUI suctionAmountUpgradeGUI = new SuctionAmountUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager, this);
 
@@ -390,7 +390,7 @@ public class UpgradesGUI extends SkyHopperGUI {
                 skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
                         player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
 
-                guiManager.removeViewer(location, player.getUniqueId());
+                guiManager.removeOpenGUI(identifier);
 
                 SuctionRangeUpgradeGUI suctionRangeUpgradeGUI = new SuctionRangeUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager, this);
 
@@ -443,7 +443,7 @@ public class UpgradesGUI extends SkyHopperGUI {
                 skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
                         player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
 
-                guiManager.removeViewer(location, player.getUniqueId());
+                guiManager.removeOpenGUI(identifier);
 
                 LinksUpgradeGUI linksUpgradeGUI = new LinksUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager, this);
 
@@ -496,7 +496,7 @@ public class UpgradesGUI extends SkyHopperGUI {
                 skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
                         player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
 
-                guiManager.removeViewer(location, player.getUniqueId());
+                guiManager.removeOpenGUI(identifier);
 
                 TransferSpeedUpgradeGUI transferSpeedUpgradeGUI = new TransferSpeedUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager, this);
 
@@ -549,7 +549,7 @@ public class UpgradesGUI extends SkyHopperGUI {
                 skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
                         player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
 
-                guiManager.removeViewer(location, player.getUniqueId());
+                guiManager.removeOpenGUI(identifier);
 
                 TransferAmountUpgradeGUI transferAmountUpgradeGUI = new TransferAmountUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager, this);
 

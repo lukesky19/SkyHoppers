@@ -18,10 +18,11 @@
 package com.github.lukesky19.skyHoppers.gui;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
+import com.github.lukesky19.skyHoppers.util.LocationUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.gui.interfaces.ButtonGUI;
+import com.github.lukesky19.skylib.api.gui.abstracts.ButtonGUI;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Location;
@@ -42,7 +43,7 @@ import java.util.concurrent.CompletableFuture;
 /**
  * This class is used to create a GUI to interface with a SkyHopper.
  */
-public abstract class SkyHopperGUI implements ButtonGUI {
+public abstract class SkyHopperGUI extends ButtonGUI<LocationUUIDKey> {
     /**
      * A {@link SkyHoppers} instance.
      */
@@ -100,6 +101,7 @@ public abstract class SkyHopperGUI implements ButtonGUI {
             @NotNull Player player,
             @NotNull Location location,
             @Nullable SkyHopperGUI previousGUI) {
+        super(skyHoppers, guiManager, new LocationUUIDKey(location, player.getUniqueId()), player);
         this.skyHoppers = skyHoppers;
         this.logger = skyHoppers.getComponentLogger();
         this.guiManager = guiManager;
@@ -165,7 +167,7 @@ public abstract class SkyHopperGUI implements ButtonGUI {
         skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
             inventoryView.open();
 
-            guiManager.addViewer(location, uuid, this);
+            guiManager.addOpenGUI(identifier, this);
 
             this.isOpen = true;
         }, 1L);
@@ -181,7 +183,7 @@ public abstract class SkyHopperGUI implements ButtonGUI {
     @Override
     public void close() {
         skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
-            guiManager.removeViewer(location, uuid);
+            guiManager.removeOpenGUI(identifier);
 
             this.isOpen = false;
 
@@ -208,12 +210,12 @@ public abstract class SkyHopperGUI implements ButtonGUI {
             skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
                 player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
 
-                guiManager.removeViewer(location, uuid);
+                guiManager.removeOpenGUI(identifier);
             }, 1L);
         } else {
             player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
 
-            guiManager.removeViewer(location, uuid);
+            guiManager.removeOpenGUI(identifier);
         }
 
         this.isOpen = false;
@@ -257,11 +259,6 @@ public abstract class SkyHopperGUI implements ButtonGUI {
 
     @Override
     public abstract void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent);
-
-    @Override
-    public void handleTopDrag(@NotNull InventoryDragEvent inventoryDragEvent) {
-        inventoryDragEvent.setCancelled(true);
-    }
 
     @Override
     public abstract void handleBottomDrag(@NotNull InventoryDragEvent inventoryDragEvent);

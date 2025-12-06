@@ -55,7 +55,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
  * This class lets Players manage a SkyHopper's settings.
@@ -218,10 +217,7 @@ public class HopperGUI extends SkyHopperGUI {
     public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
         if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
 
-        Player player = (Player) inventoryCloseEvent.getPlayer();
-        UUID uuid = player.getUniqueId();
-
-        guiManager.removeViewer(location, uuid);
+        guiManager.removeOpenGUI(identifier);
 
         this.isOpen = false;
     }
@@ -308,7 +304,7 @@ public class HopperGUI extends SkyHopperGUI {
 
                 hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
-                guiManager.refreshViewersGUI(location);
+                guiManager.refreshGUIsByLocation(location);
 
                 update();
             });
@@ -343,7 +339,7 @@ public class HopperGUI extends SkyHopperGUI {
 
                 hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
-                guiManager.refreshViewersGUI(location);
+                guiManager.refreshGUIsByLocation(location);
 
                 update();
             });
@@ -378,7 +374,7 @@ public class HopperGUI extends SkyHopperGUI {
 
                 hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
-                guiManager.refreshViewersGUI(location);
+                guiManager.refreshGUIsByLocation(location);
 
                 update();
             });
@@ -413,7 +409,7 @@ public class HopperGUI extends SkyHopperGUI {
 
                 hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
-                guiManager.refreshViewersGUI(location);
+                guiManager.refreshGUIsByLocation(location);
 
                 update();
             });
@@ -446,10 +442,11 @@ public class HopperGUI extends SkyHopperGUI {
             builder.setItemStack(optionalItemStack.get());
 
             builder.setAction(event -> {
-                skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
-                        player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
+                skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
+                    player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
 
-                guiManager.removeViewer(location, player.getUniqueId());
+                    guiManager.removeOpenGUI(identifier);
+                }, 1L);
 
                 LinksGUI linksGUI = new LinksGUI(skyHoppers, guiManager, location, skyHopper, player, localeManager, guiConfigManager, hopperManager, hopperClickListener, this);
 
@@ -552,7 +549,7 @@ public class HopperGUI extends SkyHopperGUI {
                 Bukkit.getScheduler().runTaskLater(skyHoppers, () ->
                         player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
 
-                guiManager.removeViewer(location, player.getUniqueId());
+                guiManager.removeOpenGUI(identifier);
 
                 UpgradesGUI upgradesGUI = new UpgradesGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager,this);
 
@@ -605,7 +602,7 @@ public class HopperGUI extends SkyHopperGUI {
                 skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
                         player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
 
-                guiManager.removeViewer(location, player.getUniqueId());
+                guiManager.removeOpenGUI(identifier);
 
                 MembersGUI membersGUI = new MembersGUI(skyHoppers, guiManager, location, skyHopper, player, localeManager, guiConfigManager, hopperManager, this);
 

@@ -18,7 +18,8 @@
 package com.github.lukesky19.skyHoppers.listener;
 
 import com.github.lukesky19.skyHoppers.gui.GUIManager;
-import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
+import com.github.lukesky19.skyHoppers.util.LocationUUIDKey;
+import com.github.lukesky19.skylib.api.gui.interfaces.BaseGUI;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -54,7 +55,7 @@ public class InventoryListener implements Listener {
         UUID uuid = inventoryClickEvent.getWhoClicked().getUniqueId();
         Inventory inventory = inventoryClickEvent.getClickedInventory();
 
-        SkyHopperGUI gui = guiManager.getGuiByUUID(uuid);
+        BaseGUI<LocationUUIDKey> gui = guiManager.getGuiByUUID(uuid);
         if(gui == null) return;
 
         gui.handleGlobalClick(inventoryClickEvent);
@@ -75,7 +76,7 @@ public class InventoryListener implements Listener {
         UUID uuid = inventoryDragEvent.getWhoClicked().getUniqueId();
         Inventory inventory = inventoryDragEvent.getInventory();
 
-        SkyHopperGUI gui = guiManager.getGuiByUUID(uuid);
+        BaseGUI<LocationUUIDKey> gui = guiManager.getGuiByUUID(uuid);
         if(gui == null) return;
 
         gui.handleGlobalDrag(inventoryDragEvent);
@@ -95,7 +96,7 @@ public class InventoryListener implements Listener {
     public void onClose(InventoryCloseEvent inventoryCloseEvent) {
         UUID uuid = inventoryCloseEvent.getPlayer().getUniqueId();
 
-        SkyHopperGUI gui = guiManager.getGuiByUUID(uuid);
+        BaseGUI<LocationUUIDKey> gui = guiManager.getGuiByUUID(uuid);
         if (gui != null) {
             gui.handleClose(inventoryCloseEvent);
         }
