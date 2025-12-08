@@ -32,7 +32,6 @@ import com.github.lukesky19.skylib.api.gui.GUIType;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.api.player.PlayerUtil;
-import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -245,80 +244,80 @@ public class SelectPlayerGUI extends SkyHopperGUI {
      * @param playerCount The number of players on the server.
      */
     private void createPlayerButtons(int guiSize, int playerCount) {
-        List<Player> onlinePlayers = ImmutableList.copyOf(skyHoppers.getServer().getOnlinePlayers());
+        List<? extends Player> onlinePlayers = skyHoppers.getServer().getOnlinePlayers().stream().toList();
         List<UUID> skyHopperMembers = skyHopper.getMembers();
 
         assert guiConfig != null;
         ItemStackConfig itemStackConfig = guiConfig.entries().playerHead().item();
 
         if(guiSize - 10 >= 17) {
-            for (int i = 0; i <= guiSize - 10; i++) {
-                if (playerCount >= playerNum) {
-                    UUID onlinePlayerId = onlinePlayers.get(playerNum).getUniqueId();
+            for(int i = 0; i <= guiSize - 10; i++) {
+                if(playerNum > playerCount) break;
 
-                    if(skyHopperMembers.contains(uuid) || (skyHopper.getOwner() != null && skyHopper.getOwner().equals(uuid))) {
-                        i--;
-                        playerNum++;
-                        continue;
-                    }
+                UUID onlinePlayerId = onlinePlayers.get(playerNum).getUniqueId();
 
-                    PlayerProfile profile = PlayerUtil.getCachedPlayerProfile(uuid);
-                    String playerName = "<red><bold>Player Name Not Found</bold></red>";
-
-                    if(profile == null) {
-                        OfflinePlayer offlinePlayer = skyHoppers.getServer().getOfflinePlayer(onlinePlayerId);
-                        if(offlinePlayer.getName() != null) {
-                            playerName = offlinePlayer.getName();
-                        }
-                    } else {
-                        if(profile.getName() != null) {
-                            playerName = profile.getName();
-                        }
-                    }
-
-                    ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-                    itemStackBuilder.setItemType(ItemType.PLAYER_HEAD);
-
-                    if(itemStackConfig.name() != null) {
-                        List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("player_name", playerName));
-
-                        itemStackBuilder.setName(AdventureUtil.deserialize(itemStackConfig.name(), placeholders));
-                    }
-
-                    List<Component> lore = itemStackConfig.lore().stream().map(AdventureUtil::deserialize).toList();
-                    List<ItemFlag> itemFlags = itemStackConfig.itemFlags().stream().map(ItemFlag::valueOf).toList();
-
-                    itemStackBuilder.setLore(lore);
-                    itemFlags.forEach(itemStackBuilder::addItemFlag);
-
-                    itemStackBuilder.setPlayer(player);
-
-                    Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
-                    if(optionalItemStack.isPresent()) {
-                        GUIButton.Builder buttonBuilder = new GUIButton.Builder();
-
-                        buttonBuilder.setItemStack(optionalItemStack.get());
-
-                        buttonBuilder.setAction(inventoryClickEvent -> {
-                            skyHopper.addMember(onlinePlayerId);
-
-                            hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
-
-                            guiManager.refreshGUIsByLocation(location);
-
-                            added = 0;
-                            playerNum = 0;
-
-                            update();
-                        });
-
-                        setButton(i, buttonBuilder.build());
-
-                        added++;
-                    }
-
+                if(skyHopperMembers.contains(onlinePlayerId) || (skyHopper.getOwner() != null && skyHopper.getOwner().equals(onlinePlayerId))) {
+                    i--;
                     playerNum++;
+                    continue;
                 }
+
+                PlayerProfile profile = PlayerUtil.getCachedPlayerProfile(onlinePlayerId);
+                String playerName = "<red><bold>Player Name Not Found</bold></red>";
+
+                if(profile == null) {
+                    OfflinePlayer offlinePlayer = skyHoppers.getServer().getOfflinePlayer(onlinePlayerId);
+                    if(offlinePlayer.getName() != null) {
+                        playerName = offlinePlayer.getName();
+                    }
+                } else {
+                    if(profile.getName() != null) {
+                        playerName = profile.getName();
+                    }
+                }
+
+                ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
+                itemStackBuilder.setItemType(ItemType.PLAYER_HEAD);
+
+                if(itemStackConfig.name() != null) {
+                    List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("player_name", playerName));
+
+                    itemStackBuilder.setName(AdventureUtil.deserialize(itemStackConfig.name(), placeholders));
+                }
+
+                List<Component> lore = itemStackConfig.lore().stream().map(AdventureUtil::deserialize).toList();
+                List<ItemFlag> itemFlags = itemStackConfig.itemFlags().stream().map(ItemFlag::valueOf).toList();
+
+                itemStackBuilder.setLore(lore);
+                itemFlags.forEach(itemStackBuilder::addItemFlag);
+
+                itemStackBuilder.setPlayer(player);
+
+                Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+                if(optionalItemStack.isPresent()) {
+                    GUIButton.Builder buttonBuilder = new GUIButton.Builder();
+
+                    buttonBuilder.setItemStack(optionalItemStack.get());
+
+                    buttonBuilder.setAction(inventoryClickEvent -> {
+                        skyHopper.addMember(onlinePlayerId);
+
+                        hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
+
+                        guiManager.refreshGUIsByLocation(location);
+
+                        added = 0;
+                        playerNum = 0;
+
+                        update();
+                    });
+
+                    setButton(i, buttonBuilder.build());
+
+                    added++;
+                }
+
+                playerNum++;
             }
         }
     }
