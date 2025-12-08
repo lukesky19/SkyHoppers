@@ -262,22 +262,16 @@ public class SelectPlayerGUI extends SkyHopperGUI {
                     continue;
                 }
 
-                PlayerProfile profile = PlayerUtil.getCachedPlayerProfile(onlinePlayerId);
-                String playerName = "<red><bold>Player Name Not Found</bold></red>";
-
-                if(profile == null) {
-                    OfflinePlayer offlinePlayer = skyHoppers.getServer().getOfflinePlayer(onlinePlayerId);
-                    if(offlinePlayer.getName() != null) {
-                        playerName = offlinePlayer.getName();
-                    }
-                } else {
-                    if(profile.getName() != null) {
-                        playerName = profile.getName();
-                    }
-                }
-
                 ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
                 itemStackBuilder.setItemType(ItemType.PLAYER_HEAD);
+
+                @NotNull OfflinePlayer offlinePlayer = skyHoppers.getServer().getOfflinePlayer(onlinePlayerId);
+                @Nullable PlayerProfile profile = PlayerUtil.getCachedPlayerProfile(onlinePlayerId);
+
+                String playerName = profile != null ? profile.getName() : offlinePlayer.getName();
+                if(playerName == null) {
+                    playerName = "<red><bold>Unknown Player</bold></red>";
+                }
 
                 if(itemStackConfig.name() != null) {
                     List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("player_name", playerName));
@@ -291,7 +285,8 @@ public class SelectPlayerGUI extends SkyHopperGUI {
                 itemStackBuilder.setLore(lore);
                 itemFlags.forEach(itemStackBuilder::addItemFlag);
 
-                itemStackBuilder.setPlayer(player);
+                // Set player head skin
+                itemStackBuilder.setPlayer(offlinePlayer);
 
                 Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
                 if(optionalItemStack.isPresent()) {
