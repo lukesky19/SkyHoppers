@@ -313,7 +313,7 @@ public class TransferSpeedUpgradeGUI extends SkyHopperGUI {
 
                     hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
-                    guiManager.removeOpenGUI(identifier);
+                    guiManager.refreshGUIsByLocation(location);
 
                     update();
                 });
@@ -378,7 +378,7 @@ public class TransferSpeedUpgradeGUI extends SkyHopperGUI {
 
                     hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
-                    guiManager.removeOpenGUI(identifier);
+                    guiManager.refreshGUIsByLocation(location);
 
                     update();
                 });
@@ -459,7 +459,7 @@ public class TransferSpeedUpgradeGUI extends SkyHopperGUI {
 
                         hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
-                        guiManager.removeOpenGUI(identifier);
+                        guiManager.refreshGUIsByLocation(location);
 
                         update();
                     } else {

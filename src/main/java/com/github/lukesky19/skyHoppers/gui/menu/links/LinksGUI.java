@@ -311,10 +311,11 @@ public class LinksGUI extends SkyHopperGUI {
                         guiButtonBuilder.setAction(event -> {
                             switch (event.getClick()) {
                                 case LEFT, SHIFT_LEFT -> {
-                                    skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
-                                            player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
+                                    skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
+                                        player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
 
-                                    guiManager.removeOpenGUI(identifier);
+                                        guiManager.removeOpenGUI(identifier);
+                                    }, 1L);
 
                                     SkyContainerFilterGUI outputFilterGUI = new SkyContainerFilterGUI(skyHoppers, guiManager, location, skyHopper, player, guiConfigManager, hopperManager, skyContainer, this);
 

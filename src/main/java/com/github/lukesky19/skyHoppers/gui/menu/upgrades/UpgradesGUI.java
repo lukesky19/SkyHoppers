@@ -546,10 +546,11 @@ public class UpgradesGUI extends SkyHopperGUI {
             buttonBuilder.setItemStack(optionalItemStack.get());
 
             buttonBuilder.setAction(event -> {
-                skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
-                        player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
+                skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
+                    player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
 
-                guiManager.removeOpenGUI(identifier);
+                    guiManager.removeOpenGUI(identifier);
+                }, 1L);
 
                 TransferAmountUpgradeGUI transferAmountUpgradeGUI = new TransferAmountUpgradeGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager, this);
 
