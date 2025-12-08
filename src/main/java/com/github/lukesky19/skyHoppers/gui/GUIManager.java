@@ -147,7 +147,7 @@ public class GUIManager implements IGUIManager<LocationUUIDKey> {
      * @param onDisable Is the plugin being disabled?
      */
     public void closeOpenGUIs(boolean onDisable) {
-        openGUIsByLocationAndPlayer.entrySet().iterator().forEachRemaining(entry ->
-                entry.getValue().forEach((uuid, gui) -> gui.unload(onDisable)));
+        openGUIsByLocationAndPlayer.entrySet().iterator().forEachRemaining(entry1 ->
+                entry1.getValue().entrySet().iterator().forEachRemaining((entry2) -> entry2.getValue().unload(onDisable)));
     }
 }
