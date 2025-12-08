@@ -48,7 +48,7 @@ public class ChunkListener implements Listener {
     }
 
     /**
-     * Listens to when a chunk is loaded and loads the SkyHoppers in that chunk that aren't already loaded.
+     * Listens to when a chunk is unloaded and unloads the SkyHoppers in that chunk that aren't already loaded.
      * @param chunkUnloadEvent A {@link ChunkUnloadEvent}.
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

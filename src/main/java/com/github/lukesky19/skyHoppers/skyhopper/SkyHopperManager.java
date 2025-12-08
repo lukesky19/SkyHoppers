@@ -63,7 +63,7 @@ public class SkyHopperManager {
         this.databaseManager = databaseManager;
 
         this.skyHopperDataManager = new SkyHopperDataManager(databaseManager, guiManager);
-        this.skyHopperProcessor = new SkyHopperProcessor(skyHoppers, settingsManager, localeManager, guiManager, this);
+        this.skyHopperProcessor = new SkyHopperProcessor(skyHoppers, settingsManager, localeManager, this);
         this.skyHopperSaver = new SkyHopperSaver(skyHoppers);
         this.skyHopperCreator = new SkyHopperCreator(skyHoppers, settingsManager, skyHopperSaver);
     }

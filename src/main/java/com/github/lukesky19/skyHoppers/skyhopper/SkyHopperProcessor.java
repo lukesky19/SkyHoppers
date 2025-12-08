@@ -22,7 +22,6 @@ import com.github.lukesky19.skyHoppers.config.LocaleManager;
 import com.github.lukesky19.skyHoppers.config.SettingsManager;
 import com.github.lukesky19.skyHoppers.config.data.Locale;
 import com.github.lukesky19.skyHoppers.config.data.Settings;
-import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.Filterable;
 import com.github.lukesky19.skyHoppers.skyhopper.data.HopperKeys;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
@@ -56,7 +55,6 @@ public class SkyHopperProcessor {
     private final @NotNull ComponentLogger logger;
     private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
-    private final @NotNull GUIManager guiManager;
     private final @NotNull SkyHopperManager skyHopperManager;
     private final int LATEST_SKYHOPPER_VERSION = 1;
 
@@ -69,20 +67,17 @@ public class SkyHopperProcessor {
      * @param skyHoppers A {@link SkyHoppers} instance.
      * @param settingsManager A {@link SettingsManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
-     * @param guiManager A {@link GUIManager} instance.
      * @param skyHopperManager A {@link SkyHopperManager} instance.
      */
     public SkyHopperProcessor(
             @NotNull SkyHoppers skyHoppers,
             @NotNull SettingsManager settingsManager,
             @NotNull LocaleManager localeManager,
-            @NotNull GUIManager guiManager,
             @NotNull SkyHopperManager skyHopperManager) {
         this.skyHoppers = skyHoppers;
         this.logger = skyHoppers.getComponentLogger();
         this.settingsManager = settingsManager;
         this.localeManager = localeManager;
-        this.guiManager = guiManager;
         this.skyHopperManager = skyHopperManager;
     }
 
@@ -220,26 +215,14 @@ public class SkyHopperProcessor {
      * @param chunk The chunk to check for SkyHoppers to unload.
      */
     public void unLoadSkyHoppersInChunk(@NotNull Chunk chunk) {
-        @NotNull Map<Location, SkyHopper> skyHopperMap = skyHopperManager.getSkyHopperDataManager().getSkyHoppersMap();
+        SkyHopperDataManager skyHopperDataManager = skyHopperManager.getSkyHopperDataManager();
         int chunkX = chunk.getX();
         int chunkZ = chunk.getZ();
 
-        Iterator<Map.Entry<Location, SkyHopper>> iterator = skyHopperMap.entrySet().iterator();
-        while(iterator.hasNext()) {
-            Map.Entry<Location, SkyHopper> entry = iterator.next();
-            Location location = entry.getKey();
+        // Retrieve SkyHopper locations for the specific chunk
+        List<Location> locationList = skyHopperDataManager.getLocationsInChunk(chunk.getWorld(), chunkX, chunkZ);
 
-            // Change location X and Z to chunk X and Z.
-            int locX = location.getBlockX() >> 4;
-            int locZ = location.getBlockZ() >> 4;
-            if(locX != chunkX || locZ != chunkZ) continue;
-
-            // Close any open GUIs for this SkyHopper
-            guiManager.closeOpenGUIsForLocation(location);
-
-            // Then remove it from the cache
-            iterator.remove();
-        }
+        locationList.forEach(skyHopperDataManager::clearSkyHopper);
     }
 
     /**

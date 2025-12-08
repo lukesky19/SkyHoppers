@@ -20,6 +20,7 @@ package com.github.lukesky19.skyHoppers.skyhopper;
 import com.github.lukesky19.skyHoppers.database.DatabaseManager;
 import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Container;
@@ -249,6 +250,38 @@ public class SkyHopperDataManager {
         }
 
         locationList.remove(location);
+
+        skyHopperMap.remove(location);
+    }
+
+    /**
+     * Removes a {@link SkyHopper} from the cache and closes any open GUIs for the {@link SkyHopper}'s {@link Location}.
+     * This does not remove the location from the database. Use {@link #removeSkyHopper(Location)} for that.
+     * @param location The {@link Location} of the {@link SkyHopper}.
+     */
+    public void clearSkyHopper(@NotNull Location location) {
+        guiManager.closeOpenGUIsForLocation(location);
+
+        @NotNull String worldName = location.getWorld().getName();
+        Chunk chunk = location.getChunk();
+        int chunkX = chunk.getX();
+        int chunkZ = chunk.getZ();
+
+        Map<Integer, Map<Integer, List<SkyHopper>>> worldMap = hopperGrid.get(worldName);
+        if(worldMap != null) {
+            Map<Integer, List<SkyHopper>> chunkMap = worldMap.get(chunkX);
+            if(chunkMap != null) {
+                chunkMap.remove(chunkZ);
+
+                if(chunkMap.isEmpty()) {
+                    worldMap.remove(chunkX);
+                }
+            }
+
+            if(worldMap.isEmpty()) {
+                hopperGrid.remove(worldName);
+            }
+        }
 
         skyHopperMap.remove(location);
     }
