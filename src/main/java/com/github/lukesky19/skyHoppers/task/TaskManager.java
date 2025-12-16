@@ -18,11 +18,11 @@
 package com.github.lukesky19.skyHoppers.task;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.config.SettingsManager;
-import com.github.lukesky19.skyHoppers.config.data.Settings;
 import com.github.lukesky19.skyHoppers.hook.HookManager;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
-import com.github.lukesky19.skyHoppers.task.tasks.*;
+import com.github.lukesky19.skyHoppers.task.tasks.QueuedTransferTask;
+import com.github.lukesky19.skyHoppers.task.tasks.SuctionTask;
+import com.github.lukesky19.skyHoppers.task.tasks.TransferTask;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,30 +32,24 @@ import org.jetbrains.annotations.Nullable;
  */
 public class TaskManager {
     private final @NotNull SkyHoppers skyHoppers;
-    private final @NotNull SettingsManager settingsManager;
     private final @NotNull SkyHopperManager hopperManager;
     private final @NotNull HookManager hookManager;
 
     private @Nullable BukkitTask transferTask;
     private @Nullable BukkitTask suctionTask;
-    private @Nullable BukkitTask skyHopperLoadTask;
-    private @Nullable BukkitTask skyHopperUnloadTask;
     private @Nullable BukkitTask queuedTransferTask;
 
     /**
      * Constructor
      * @param skyHoppers A {@link SkyHoppers} instance.
-     * @param settingsManager A {@link SettingsManager} instance.
      * @param hopperManager A {@link SkyHopperManager} instance.
      * @param hookManager A {@link HookManager} instance.
      */
     public TaskManager(
             @NotNull SkyHoppers skyHoppers,
-            @NotNull SettingsManager settingsManager,
             @NotNull SkyHopperManager hopperManager,
             @NotNull HookManager hookManager) {
         this.skyHoppers = skyHoppers;
-        this.settingsManager = settingsManager;
         this.hopperManager = hopperManager;
         this.hookManager = hookManager;
     }
@@ -101,56 +95,6 @@ public class TaskManager {
             }
 
             suctionTask = null;
-        }
-    }
-
-    /**
-     * Start the plugin's {@link SkyHopperLoadTask}.
-     */
-    public void startSkyHopperLoadTask() {
-        stopSkyHopperLoadTask();
-
-        @Nullable Settings settings = settingsManager.getSettings();
-        if(settings == null) return;
-
-        skyHopperLoadTask = new SkyHopperLoadTask(hopperManager, settings.chunksPerPeriod()).runTaskTimer(skyHoppers, settings.periodInTicks(), settings.periodInTicks());
-    }
-
-    /**
-     * Stop the plugin's {@link SkyHopperLoadTask}.
-     */
-    public void stopSkyHopperLoadTask() {
-        if(skyHopperLoadTask != null) {
-            if(!skyHopperLoadTask.isCancelled()) {
-                skyHopperLoadTask.cancel();
-            }
-
-            skyHopperLoadTask = null;
-        }
-    }
-
-    /**
-     * Start the plugin's {@link SkyHopperUnloadTask}.
-     */
-    public void startSkyHopperUnloadTask() {
-        stopSkyHopperUnloadTask();
-
-        @Nullable Settings settings = settingsManager.getSettings();
-        if(settings == null) return;
-
-        skyHopperUnloadTask = new SkyHopperUnloadTask(hopperManager, settings.chunksPerPeriod()).runTaskTimer(skyHoppers, settings.periodInTicks(), settings.periodInTicks());
-    }
-
-    /**
-     * Stop the plugin's {@link SkyHopperUnloadTask}.
-     */
-    public void stopSkyHopperUnloadTask() {
-        if(skyHopperUnloadTask != null) {
-            if(!skyHopperUnloadTask.isCancelled()) {
-                skyHopperUnloadTask.cancel();
-            }
-
-            skyHopperUnloadTask = null;
         }
     }
 

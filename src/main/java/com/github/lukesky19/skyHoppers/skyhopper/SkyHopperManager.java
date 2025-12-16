@@ -31,6 +31,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+
 /**
  * This class manages the classes that manage SkyHopper data management, loading, saving, and creation.
  */
@@ -118,8 +120,11 @@ public class SkyHopperManager {
                 // Cache Locations
                 skyHopperDataManager.cacheLocations(list);
 
-                // Queue chunks next tick
-                skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, skyHopperProcessor::queueLoadedChunks, 1L);
+                // Load SkyHoppers in loaded Chunks
+                skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
+                        skyHoppers.getServer().getWorlds()
+                                .forEach(world -> Arrays.stream(world.getLoadedChunks())
+                                        .forEach(skyHopperProcessor::loadSkyHoppersInChunk)), 1L);
             }).exceptionally(ex -> {
                 logger.warn(AdventureUtil.deserialize("Failed to get SkyHopper Locations from the database. " + ex.getMessage()));
                 return null;

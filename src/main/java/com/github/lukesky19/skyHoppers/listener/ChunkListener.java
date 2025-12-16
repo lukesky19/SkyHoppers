@@ -18,24 +18,26 @@
 package com.github.lukesky19.skyHoppers.listener;
 
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperProcessor;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This class listens for when a chunk is loaded and loads any SkyHoppers in those chunks that aren't already loaded.
  */
 public class ChunkListener implements Listener {
-    private final SkyHopperManager hopperManager;
+    private final @NotNull SkyHopperProcessor skyHopperProcessor;
 
     /**
      * Constructor
      * @param hopperManager A {@link SkyHopperManager} instance.
      */
-    public ChunkListener(SkyHopperManager hopperManager) {
-        this.hopperManager = hopperManager;
+    public ChunkListener(@NotNull SkyHopperManager hopperManager) {
+        this.skyHopperProcessor = hopperManager.getSkyHopperProcessor();
     }
 
     /**
@@ -44,7 +46,7 @@ public class ChunkListener implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onChunkLoad(ChunkLoadEvent chunkLoadEvent) {
-        hopperManager.getSkyHopperProcessor().queueLoadChunk(chunkLoadEvent.getChunk());
+        skyHopperProcessor.loadSkyHoppersInChunk(chunkLoadEvent.getChunk());
     }
 
     /**
@@ -53,6 +55,6 @@ public class ChunkListener implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onChunkUnload(ChunkUnloadEvent chunkUnloadEvent) {
-        hopperManager.getSkyHopperProcessor().queueUnloadChunk(chunkUnloadEvent.getChunk());
+        skyHopperProcessor.unLoadSkyHoppersInChunk(chunkUnloadEvent.getChunk());
     }
 }

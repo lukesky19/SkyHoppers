@@ -203,8 +203,6 @@ public class SettingsManager {
                         "1.2.0.0",
                         settings.locale(),
                         settings.dropToInventory(),
-                        10,
-                        4,
                         settings.disabledHooks(),
                         newSkyHopperConfig,
                         settings.upgrades());

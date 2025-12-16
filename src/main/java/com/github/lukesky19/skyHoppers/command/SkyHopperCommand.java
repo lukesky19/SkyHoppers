@@ -23,6 +23,7 @@ import com.github.lukesky19.skyHoppers.config.SettingsManager;
 import com.github.lukesky19.skyHoppers.config.data.Locale;
 import com.github.lukesky19.skyHoppers.config.data.Settings;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperProcessor;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
@@ -40,6 +41,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -522,8 +524,12 @@ public class SkyHopperCommand {
             .executes(ctx -> {
                 Locale locale = localeManager.getLocale();
                 CommandSender sender = ctx.getSource().getSender();
+                SkyHopperProcessor skyHopperProcessor = hopperManager.getSkyHopperProcessor();
 
-                hopperManager.getSkyHopperProcessor().queueLoadedChunks();
+                // Load SkyHoppers in loaded Chunks
+                plugin.getServer().getWorlds()
+                        .forEach(world -> Arrays.stream(world.getLoadedChunks())
+                                .forEach(skyHopperProcessor::loadSkyHoppersInChunk));
 
                 sender.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.skyhoppersLoaded()));
 

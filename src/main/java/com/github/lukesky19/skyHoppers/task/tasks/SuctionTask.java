@@ -65,6 +65,7 @@ public class SuctionTask extends BukkitRunnable {
         for(SkyHopper currentSkyHopper : hopperManager.getSkyHoppersList()) {
             if(currentSkyHopper == null
                     || currentSkyHopper.getLocation() == null
+                    || !currentSkyHopper.getLocation().isChunkLoaded()
                     || currentSkyHopper.getNextSuctionTime() > System.currentTimeMillis()
                     || !currentSkyHopper.isSkyHopperEnabled()
                     || !(currentSkyHopper.getLocation().getBlock().getState(false) instanceof Hopper hopper))

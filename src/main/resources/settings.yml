@@ -3,10 +3,6 @@ locale: en_US
 # Should SkyHoppers be added to the player's inventory directly when broken?
 # This includes the contents of the Hopper as well.
 drop-to-inventory: false
-# How many chunks should be processed per time period?
-chunks-per-period: 10
-# How often should the number of chunks above be processed?
-period-in-ticks: 4
 sky-hopper-config:
     # Starting upgrade numbers
     # Default: 10

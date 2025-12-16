@@ -71,6 +71,7 @@ public class TransferTask extends BukkitRunnable {
                     || currentSkyHopper.getLinkedContainers().isEmpty()
                     || System.currentTimeMillis() < currentSkyHopper.getNextTransferTime()
                     || currentSkyHopper.getLocation() == null
+                    || !currentSkyHopper.getLocation().isChunkLoaded()
                     || !(currentSkyHopper.getLocation().getBlock().getState(false) instanceof Hopper hopper)
                     || hopper.getBlock().isBlockPowered()
                     || isInventoryEmpty(hopper.getInventory())) {

@@ -35,7 +35,6 @@ import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.block.Hopper;
@@ -51,15 +50,12 @@ import java.util.*;
  * This class is used to load and unload {@link SkyHopper}s in {@link Chunk}s.
  */
 public class SkyHopperProcessor {
-    private final @NotNull SkyHoppers skyHoppers;
     private final @NotNull ComponentLogger logger;
     private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
     private final @NotNull SkyHopperManager skyHopperManager;
     private final int LATEST_SKYHOPPER_VERSION = 1;
 
-    private final @NotNull Queue<Chunk> chunkLoadQueue = new LinkedList<>();
-    private final @NotNull Queue<Chunk> chunkUnloadQueue = new LinkedList<>();
     private final @NotNull Queue<QueuedTransfer> queuedTransfers = new LinkedList<>();
 
     /**
@@ -74,47 +70,10 @@ public class SkyHopperProcessor {
             @NotNull SettingsManager settingsManager,
             @NotNull LocaleManager localeManager,
             @NotNull SkyHopperManager skyHopperManager) {
-        this.skyHoppers = skyHoppers;
         this.logger = skyHoppers.getComponentLogger();
         this.settingsManager = settingsManager;
         this.localeManager = localeManager;
         this.skyHopperManager = skyHopperManager;
-    }
-
-    /**
-     * Get the next {@link Chunk} to be processed or null.
-     * @return The next {@link Chunk} to be processed or null.
-     */
-    public @Nullable Chunk getNextQueuedLoadChunk() {
-        return chunkLoadQueue.poll();
-    }
-
-    /**
-     * Queues a chunk to load SkyHoppers in.
-     * @param chunk The {@link Chunk} to queue.
-     */
-    public void queueLoadChunk(@NotNull Chunk chunk) {
-        chunkUnloadQueue.remove(chunk);
-
-        chunkLoadQueue.add(chunk);
-    }
-
-    /**
-     * Get the next unloaded {@link Chunk} to be processed or null.
-     * @return The next unloaded {@link Chunk} to be processed or null.
-     */
-    public @Nullable Chunk getNextQueuedUnloadChunk() {
-        return chunkUnloadQueue.poll();
-    }
-
-    /**
-     * Queues a chunk to unload SkyHoppers in.
-     * @param chunk The {@link Chunk} to queue.
-     */
-    public void queueUnloadChunk(@NotNull Chunk chunk) {
-        chunkLoadQueue.remove(chunk);
-
-        chunkUnloadQueue.add(chunk);
     }
 
     /**
@@ -141,26 +100,12 @@ public class SkyHopperProcessor {
     }
 
     /**
-     * Queue the currently loaded chunks for processing.
-     */
-    public void queueLoadedChunks() {
-        for(World world : skyHoppers.getServer().getWorlds()) {
-            for(Chunk chunk : world.getLoadedChunks()) {
-                queueLoadChunk(chunk);
-            }
-        }
-    }
-
-    /**
      * Loads all SkyHoppers in a chunk.
      * @param chunk The chunk to check for SkyHoppers to load.
      */
     public void loadSkyHoppersInChunk(@NotNull Chunk chunk) {
-        int chunkX = chunk.getX();
-        int chunkZ = chunk.getZ();
-
         // Retrieve SkyHoppers for the specific chunk
-        List<Location> locationList = skyHopperManager.getSkyHopperDataManager().getLocationsInChunk(chunk.getWorld(), chunkX, chunkZ);
+        List<Location> locationList = skyHopperManager.getSkyHopperDataManager().getLocationsInChunk(chunk.getWorld(), chunk.getX(), chunk.getZ());
 
         for(Location location : locationList) {
             loadSkyHopperAtLocation(location);
@@ -222,7 +167,7 @@ public class SkyHopperProcessor {
         // Retrieve SkyHopper locations for the specific chunk
         List<Location> locationList = skyHopperDataManager.getLocationsInChunk(chunk.getWorld(), chunkX, chunkZ);
 
-        locationList.forEach(skyHopperDataManager::clearSkyHopper);
+        locationList.forEach(location -> skyHopperDataManager.clearSkyHopper(location, chunkX, chunkZ));
     }
 
     /**

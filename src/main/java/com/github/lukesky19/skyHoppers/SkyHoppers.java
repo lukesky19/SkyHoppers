@@ -99,7 +99,7 @@ public final class SkyHoppers extends JavaPlugin {
         hookManager = new HookManager(this, settingsManager);
 
         hopperManager = new SkyHopperManager(this, settingsManager, localeManager, databaseManager, guiManager);
-        taskManager = new TaskManager(this, settingsManager, hopperManager, hookManager);
+        taskManager = new TaskManager(this, hopperManager, hookManager);
         SkyHopperCommand skyHopperCommand = new SkyHopperCommand(this, settingsManager, localeManager, hopperManager);
 
         this.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, commands ->
@@ -156,8 +156,6 @@ public final class SkyHoppers extends JavaPlugin {
         taskManager.startTransferTask();
         taskManager.startSuctionTask();
         taskManager.startQueuedTransferTask();
-        taskManager.startSkyHopperLoadTask();
-        taskManager.startSkyHopperUnloadTask();
 
         this.unPauseSkyHoppers();
     }

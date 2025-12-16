@@ -21,7 +21,6 @@ import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.CheckForNull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
@@ -31,8 +30,6 @@ import java.util.Map;
  * @param configVersion The config version of the file.
  * @param locale The locale string to use.
  * @param dropToInventory Should SkyHoppers when broken be added to the player's inventory directly?
- * @param chunksPerPeriod The number of chunks to process the loading of SkyHoppers for the period.
- * @param periodInTicks How often the number of chunks above should be processed.
  * @param disabledHooks A list of disabled hooks.
  * @param skyHopperConfig The configuration for the SkyHopper ItemStack and starting upgrades.
  * @param upgrades The configuration for the SkyHopper upgrades.
@@ -42,8 +39,6 @@ public record Settings(
         @Nullable String configVersion,
         @Nullable String locale,
         boolean dropToInventory,
-        int chunksPerPeriod,
-        long periodInTicks,
         @NotNull List<String> disabledHooks,
         @NotNull SkyHopperConfig skyHopperConfig,
         @NotNull Upgrades upgrades) {
@@ -76,7 +71,7 @@ public record Settings(
      * @param disabled The string to show when something is disabled.
      */
     @ConfigSerializable
-    public record Placeholders(@CheckForNull String enabled, @CheckForNull String disabled) {}
+    public record Placeholders(@Nullable String enabled, @Nullable String disabled) {}
 
     /**
      * The upgrade configuration.
