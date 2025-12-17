@@ -73,19 +73,30 @@ public class HoppersTable {
      * Creates the table in the database if it doesn't exist.
      */
     public void createTable() {
-        versionsTable.getTableVersion(tableName).thenAccept(version -> {
-            // If -1, assume outdated format and data needs migrated
-            if(version == -1) {
-                String temporaryTableName = "skyhoppers_hoppers_temp";
-                String temporaryTableCreationSql = "CREATE TABLE IF NOT EXISTS " + temporaryTableName + " (" +
-                        "world TEXT NOT NULL, " +
-                        "x INTEGER NOT NULL, " +
-                        "y INTEGER NOT NULL, " +
-                        "z INTEGER NOT NULL, " +
-                        "UNIQUE (world, x, y, z))";
+        String tableCreationSql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
+                "world TEXT NOT NULL, " +
+                "x INTEGER NOT NULL, " +
+                "y INTEGER NOT NULL, " +
+                "z INTEGER NOT NULL, " +
+                "UNIQUE (world, x, y, z))";
 
-                queueManager.queueWriteTransaction(temporaryTableCreationSql)
-                        .thenAccept(v1 ->
+        // Create the table if it doesn't exist
+        queueManager.queueWriteTransaction(tableCreationSql).thenAccept(v1 ->
+                // Get the table version
+                versionsTable.getTableVersion(tableName).thenAccept(version -> {
+                    // If -1, assume outdated format and data needs migrated
+                    if(version == -1) {
+                        String temporaryTableName = "skyhoppers_hoppers_temp";
+                        String temporaryTableCreationSql = "CREATE TABLE IF NOT EXISTS " + temporaryTableName + " (" +
+                                "world TEXT NOT NULL, " +
+                                "x INTEGER NOT NULL, " +
+                                "y INTEGER NOT NULL, " +
+                                "z INTEGER NOT NULL, " +
+                                "UNIQUE (world, x, y, z))";
+
+                        // Create a temporary table to store the original table's data in.
+                        queueManager.queueWriteTransaction(temporaryTableCreationSql).thenAccept(v3 ->
+                                // Get all locations stored in the table and insert them into the new table
                                 getSkyHopperLocations().thenAccept(list -> {
                                     List<CompletableFuture<Void>> futureList = new ArrayList<>();
 
@@ -93,36 +104,31 @@ public class HoppersTable {
                                         String updateSql = "INSERT INTO " + temporaryTableName + " (world, x, y, z) VALUES (?, ?, ?, ?) ON CONFLICT (world, x, y, z) DO NOTHING";
 
                                         StringParameter worldParameter = new StringParameter(location.getWorld().getName());
-                                        IntegerParameter xParameter = new IntegerParameter(location.getBlockX());
-                                        IntegerParameter yParameter = new IntegerParameter(location.getBlockY());
-                                        IntegerParameter zParameter = new IntegerParameter(location.getBlockZ());
+                                        IntegerParameter xParameter = new IntegerParameter(location.getX());
+                                        IntegerParameter yParameter = new IntegerParameter(location.getY());
+                                        IntegerParameter zParameter = new IntegerParameter(location.getZ());
 
-                                        futureList.add(queueManager.queueWriteTransaction(updateSql, List.of(worldParameter, xParameter, yParameter, zParameter)).thenAccept(result -> {}));
+                                        futureList.add(queueManager.queueWriteTransaction(updateSql, List.of(worldParameter, xParameter, yParameter, zParameter)).thenRun(() -> {}));
                                     });
 
+                                    // Once all data is transferred, delete the old table
                                     CompletableFuture<Void> allFutures = CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0]));
-                                    allFutures.thenAccept(v2 -> {
+                                    allFutures.thenAccept(v4 -> {
                                         String dropTableSql = "DROP TABLE " + tableName;
-                                        queueManager.queueWriteTransaction(dropTableSql).thenAccept(v3 -> {
+                                        // Then rename the temporary table to the old table's name.
+                                        queueManager.queueWriteTransaction(dropTableSql).thenAccept(v5 -> {
                                             String alterSql = "ALTER TABLE " + temporaryTableName + " RENAME TO " + tableName;
 
-                                            queueManager.queueWriteTransaction(alterSql).thenAccept(v5 ->
+                                            // And lastly update the version
+                                            queueManager.queueWriteTransaction(alterSql).thenAccept(v6 ->
                                                     versionsTable.updateVersion(tableName, 1));
                                         });
                                     });
-                                }));
-            } else {
-                String tableCreationSql = "CREATE TABLE IF NOT EXISTS " + tableName + " (" +
-                        "world TEXT NOT NULL, " +
-                        "x INTEGER NOT NULL, " +
-                        "y INTEGER NOT NULL, " +
-                        "z INTEGER NOT NULL, " +
-                        "UNIQUE (world, x, y, z))";
-
-                queueManager.queueWriteTransaction(tableCreationSql).thenAccept(v ->
-                        versionsTable.updateVersion(tableName, 1));
-            }
-        });
+                                })
+                        );
+                    }
+                })
+        );
     }
 
     /**
