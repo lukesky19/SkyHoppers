@@ -24,7 +24,7 @@ import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperDataManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.transfer.impl.container.InventoryToContainerTransfer;
-import org.bukkit.Location;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import org.bukkit.block.Container;
 import org.bukkit.block.Hopper;
 import org.bukkit.inventory.Inventory;
@@ -71,7 +71,7 @@ public class TransferTask extends BukkitRunnable {
                     || currentSkyHopper.getLinkedContainers().isEmpty()
                     || System.currentTimeMillis() < currentSkyHopper.getNextTransferTime()
                     || currentSkyHopper.getLocation() == null
-                    || !currentSkyHopper.getLocation().isChunkLoaded()
+                    || currentSkyHopper.getLocation().isChunkUnloaded()
                     || !(currentSkyHopper.getLocation().getBlock().getState(false) instanceof Hopper hopper)
                     || hopper.getBlock().isBlockPowered()
                     || isInventoryEmpty(hopper.getInventory())) {
@@ -95,9 +95,9 @@ public class TransferTask extends BukkitRunnable {
      */
     private void transfer(@NotNull SkyHopper skyHopper, @NotNull Inventory hopperInv, int amount) {
         for(SkyContainer skyContainer : skyHopper.getLinkedContainers()) {
-            Location location = skyContainer.getLocation().clone();
-            if(!location.isChunkLoaded()) continue;
-            if(!(location.getBlock().getState(false) instanceof Container container)) continue;
+            ImmutableLocation location = skyContainer.getLocation();
+            if(location.isChunkUnloaded()) continue;
+            if(!(location.getBlockState() instanceof Container container)) continue;
             if(isInventoryFull(container.getInventory())) continue;
             @Nullable SkyHopper destinationSkyHopper = hopperManager.getSkyHopper(location);
 

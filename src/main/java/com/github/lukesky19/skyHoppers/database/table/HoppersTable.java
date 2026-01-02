@@ -19,6 +19,7 @@ package com.github.lukesky19.skyHoppers.database.table;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.database.QueueManager;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.database.parameter.impl.IntegerParameter;
 import com.github.lukesky19.skylib.api.database.parameter.impl.StringParameter;
@@ -133,13 +134,13 @@ public class HoppersTable {
 
     /**
      * Get the list of all SkyHopper {@link Location}s.
-     * @return A {@link CompletableFuture} containing {@link List} of {@link Location}s.
+     * @return A {@link CompletableFuture} containing {@link List} of {@link ImmutableLocation}s.
      */
-    public @NotNull CompletableFuture<@NotNull List<@NotNull Location>> getSkyHopperLocations() {
+    public @NotNull CompletableFuture<@NotNull List<@NotNull ImmutableLocation>> getSkyHopperLocations() {
         String querySql = "SELECT * FROM " + tableName;
 
         return queueManager.queueReadTransaction(querySql, resultSet -> {
-            List<Location> hopperLocations = new ArrayList<>();
+            List<ImmutableLocation> hopperLocations = new ArrayList<>();
 
             try {
                 while(resultSet.next()) {
@@ -149,11 +150,10 @@ public class HoppersTable {
                     int z = resultSet.getInt("z");
 
                     World world = skyHoppers.getServer().getWorld(worldName);
-                    if(world == null) {
-                        world = WorldCreator.name(worldName).createWorld();
-                    }
+                    if(world == null) world = WorldCreator.name(worldName).createWorld();
+                    if(world == null) continue;
 
-                    hopperLocations.add(new Location(world, x, y, z));
+                    hopperLocations.add(new ImmutableLocation(world, x, y, z));
                 }
             } catch(SQLException e) {
                 logger.error(AdventureUtil.deserialize("Failed to load SkyHopper locations from the database."));
@@ -166,16 +166,16 @@ public class HoppersTable {
 
     /**
      * Add a SkyHopper location to the database.
-     * @param location The {@link Location} to save.
+     * @param location The {@link ImmutableLocation} to save.
      * @return A {@link CompletableFuture} of type {@link Void} when complete.
      */
-    public @NotNull CompletableFuture<Void> addSkyHopperLocation(@NotNull Location location) {
+    public @NotNull CompletableFuture<Void> addSkyHopperLocation(@NotNull ImmutableLocation location) {
         String updateSql = "INSERT INTO " + tableName + " (world, x, y, z) VALUES (?, ?, ?, ?) ON CONFLICT (world, x, y, z) DO NOTHING";
 
         StringParameter worldParameter = new StringParameter(location.getWorld().getName());
-        IntegerParameter xParameter = new IntegerParameter(location.getBlockX());
-        IntegerParameter yParameter = new IntegerParameter(location.getBlockY());
-        IntegerParameter zParameter = new IntegerParameter(location.getBlockZ());
+        IntegerParameter xParameter = new IntegerParameter(location.getX());
+        IntegerParameter yParameter = new IntegerParameter(location.getY());
+        IntegerParameter zParameter = new IntegerParameter(location.getZ());
 
         return queueManager.queueWriteTransaction(updateSql, List.of(worldParameter, xParameter, yParameter, zParameter)).thenAccept(result -> {});
     }
@@ -184,13 +184,13 @@ public class HoppersTable {
      * Delete a SkyHopper location from the database.
      * @param location The {@link Location} to delete.
      */
-    public void removeSkyHopperLocation(@NotNull Location location) {
+    public void removeSkyHopperLocation(@NotNull ImmutableLocation location) {
         String updateSql = "DELETE FROM " + tableName + " WHERE world = ? AND x = ? AND y = ? AND z = ?";
 
         StringParameter worldParameter = new StringParameter(location.getWorld().getName());
-        IntegerParameter xParameter = new IntegerParameter(location.getBlockX());
-        IntegerParameter yParameter = new IntegerParameter(location.getBlockY());
-        IntegerParameter zParameter = new IntegerParameter(location.getBlockZ());
+        IntegerParameter xParameter = new IntegerParameter(location.getX());
+        IntegerParameter yParameter = new IntegerParameter(location.getY());
+        IntegerParameter zParameter = new IntegerParameter(location.getZ());
 
         queueManager.queueWriteTransaction(updateSql, List.of(worldParameter, xParameter, yParameter, zParameter));
     }

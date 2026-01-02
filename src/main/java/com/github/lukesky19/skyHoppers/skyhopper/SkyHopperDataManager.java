@@ -20,6 +20,7 @@ package com.github.lukesky19.skyHoppers.skyhopper;
 import com.github.lukesky19.skyHoppers.database.DatabaseManager;
 import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Container;
@@ -38,10 +39,10 @@ public class SkyHopperDataManager {
     private final @NotNull DatabaseManager databaseManager;
     private final @NotNull GUIManager guiManager;
 
-    private final @NotNull List<Location> hopperLocations = new ArrayList<>();
-    private final @NotNull Map<Location, SkyHopper> skyHopperMap = new HashMap<>();
-    private final @NotNull Map<String, Map<Integer, Map<Integer, List<Location>>>> locationGrid = new HashMap<>();
-    private final @NotNull Map<String, Map<Integer, Map<Integer, Map<Location, SkyHopper>>>> hopperGrid = new HashMap<>();
+    private final @NotNull List<ImmutableLocation> hopperLocations = new ArrayList<>();
+    private final @NotNull Map<ImmutableLocation, SkyHopper> skyHopperMap = new HashMap<>();
+    private final @NotNull Map<String, Map<Integer, Map<Integer, List<ImmutableLocation>>>> locationGrid = new HashMap<>();
+    private final @NotNull Map<String, Map<Integer, Map<Integer, Map<ImmutableLocation, SkyHopper>>>> hopperGrid = new HashMap<>();
 
     /**
      * Constructor
@@ -57,10 +58,10 @@ public class SkyHopperDataManager {
 
     /**
      * Get the {@link SkyHopper} at a given location.
-     * @param location The {@link Location} of the SkyHopper.
+     * @param location The {@link ImmutableLocation} of the SkyHopper.
      * @return The {@link SkyHopper} or null if there is no {@link SkyHopper} at that {@link Location}.
      */
-    public @Nullable SkyHopper getSkyHopper(@NotNull Location location) {
+    public @Nullable SkyHopper getSkyHopper(@NotNull ImmutableLocation location) {
         return skyHopperMap.get(location);
     }
 
@@ -73,21 +74,21 @@ public class SkyHopperDataManager {
     }
 
     /**
-     * Get a {@link Map} mapping {@link Location}s to {@link SkyHopper}s that are loaded.
-     * @return A {@link Map} mapping {@link Location}s to {@link SkyHopper}s that are loaded.
+     * Get a {@link Map} mapping {@link ImmutableLocation}s to {@link SkyHopper}s that are loaded.
+     * @return A {@link Map} mapping {@link ImmutableLocation}s to {@link SkyHopper}s that are loaded.
      */
-    public @NotNull Map<Location, SkyHopper> getSkyHoppersMap() {
+    public @NotNull Map<ImmutableLocation, SkyHopper> getSkyHoppersMap() {
         return skyHopperMap;
     }
 
     /**
-     * Get a {@link List} of {@link Location}s that are between the chunkX and chunkZ provided.
+     * Get a {@link List} of {@link ImmutableLocation}s that are between the chunkX and chunkZ provided.
      * @param world The {@link World} to get locations for.
      * @param chunkX The chunk's X coordinate.
      * @param chunkZ The chunk's Z coordinate.
-     * @return A {@link List} of {@link Location}s inside the chunk bounds provided.
+     * @return A {@link List} of {@link ImmutableLocation}s inside the chunk bounds provided.
      */
-    public @NotNull List<Location> getLocationsInChunk(@NotNull World world, int chunkX, int chunkZ) {
+    public @NotNull List<ImmutableLocation> getLocationsInChunk(@NotNull World world, int chunkX, int chunkZ) {
         return new ArrayList<>(locationGrid.getOrDefault(world.getName(), new HashMap<>())
                 .getOrDefault(chunkX, new HashMap<>())
                 .getOrDefault(chunkZ, new ArrayList<>()));
@@ -95,21 +96,21 @@ public class SkyHopperDataManager {
 
     /**
      * Check if a SkyHopper is loaded at the given location.
-     * @apiNote There may be a SkyHopper at that location, but it may not be loaded. See {@link #isLocationSkyHopper(Location)}.
-     * @param location The {@link Location} to check.
+     * @apiNote There may be a SkyHopper at that location, but it may not be loaded. See {@link #isLocationSkyHopper(ImmutableLocation)}.
+     * @param location The {@link ImmutableLocation} to check.
      * @return true if there is a SkyHopper loaded for that location, otherwise false.
      */
-    public boolean isSkyHopperLoaded(@NotNull Location location) {
+    public boolean isSkyHopperLoaded(@NotNull ImmutableLocation location) {
         return skyHopperMap.containsKey(location);
     }
 
     /**
-     * Is there a SkyHopper at the {@link Location} provided?
+     * Is there a SkyHopper at the {@link ImmutableLocation} provided?
      * This checks based on location and does not consider if the SkyHopper is loaded or not.
-     * @param location The {@link Location} to check.
+     * @param location The {@link ImmutableLocation} to check.
      * @return true if there is a SkyHopper at that location, otherwise false.
      */
-    public boolean isLocationSkyHopper(@NotNull Location location) {
+    public boolean isLocationSkyHopper(@NotNull ImmutableLocation location) {
         return hopperLocations.contains(location);
     }
 
@@ -118,9 +119,9 @@ public class SkyHopperDataManager {
      * @param location The {@link Location} of the {@link SkyHopper}.
      * @param skyHopper The {@link SkyHopper}.
      */
-    public void cacheSkyHopper(@NotNull Location location, @NotNull SkyHopper skyHopper) {
-        int chunkX = location.getBlockX() >> 4;
-        int chunkZ = location.getBlockZ() >> 4;
+    public void cacheSkyHopper(@NotNull ImmutableLocation location, @NotNull SkyHopper skyHopper) {
+        int chunkX = location.getX() >> 4;
+        int chunkZ = location.getZ() >> 4;
 
         cacheLocation(location, chunkX, chunkZ);
 
@@ -134,19 +135,19 @@ public class SkyHopperDataManager {
     }
 
     /**
-     * Cache the {@link List} of {@link Location}s provided.
+     * Cache the {@link List} of {@link ImmutableLocation}s provided.
      * @param locationList The {@link List} of {@link Location}s to cache.
      */
-    public void cacheLocations(@NotNull List<Location> locationList) {
+    public void cacheLocations(@NotNull List<ImmutableLocation> locationList) {
         locationList.forEach(this::cacheLocation);
     }
 
     /**
      * Cache the location provided.
-     * @param location The {@link Location} to cache.
+     * @param location The {@link ImmutableLocation} to cache.
      */
-    public void cacheLocation(@NotNull Location location) {
-        cacheLocation(location, location.getBlockX() >> 4, location.getBlockZ() >> 4);
+    public void cacheLocation(@NotNull ImmutableLocation location) {
+        cacheLocation(location, location.getX() >> 4, location.getZ() >> 4);
     }
 
     /**
@@ -155,7 +156,7 @@ public class SkyHopperDataManager {
      * @param chunkX The location's chunk's X coordinate.
      * @param chunkZ The location's chunk's Z coordinate.
      */
-    public void cacheLocation(@NotNull Location location, int chunkX, int chunkZ) {
+    public void cacheLocation(@NotNull ImmutableLocation location, int chunkX, int chunkZ) {
         if(!hopperLocations.contains(location)) {
             databaseManager.getHoppersTable().addSkyHopperLocation(location);
 
@@ -173,9 +174,9 @@ public class SkyHopperDataManager {
      * Removes a {@link SkyHopper} from the cache, the {@link Location} database, and closes any open GUIs for the {@link SkyHopper}'s {@link Location}.
      * @param location The {@link Location} of the {@link SkyHopper}.
      */
-    public void removeSkyHopper(@NotNull Location location) {
-        int chunkX = location.getBlockX() >> 4;
-        int chunkZ = location.getBlockZ() >> 4;
+    public void removeSkyHopper(@NotNull ImmutableLocation location) {
+        int chunkX = location.getX() >> 4;
+        int chunkZ = location.getZ() >> 4;
 
         // Close any open GUIs for the SkyHopper being removed.
         guiManager.closeOpenGUIsForLocation(location);
@@ -197,13 +198,13 @@ public class SkyHopperDataManager {
     }
 
     /**
-     * Removes a {@link SkyHopper} from the cache and closes any open GUIs for the {@link SkyHopper}'s {@link Location}.
-     * This does not remove the location from the database. Use {@link #removeSkyHopper(Location)} for that.
-     * @param location The {@link Location} of the {@link SkyHopper}.
+     * Removes a {@link SkyHopper} from the cache and closes any open GUIs for the {@link SkyHopper}'s {@link ImmutableLocation}.
+     * This does not remove the location from the database. Use {@link #removeSkyHopper(ImmutableLocation)} for that.
+     * @param location The {@link ImmutableLocation} of the {@link SkyHopper}.
      * @param chunkX The chunk's X coordinate that the SkyHopper is in.
      * @param chunkZ The chunk's Z coordinate that the SkyHopper is in.
      */
-    public void clearSkyHopper(@NotNull Location location, int chunkX, int chunkZ) {
+    public void clearSkyHopper(@NotNull ImmutableLocation location, int chunkX, int chunkZ) {
         guiManager.closeOpenGUIsForLocation(location);
 
         removeSkyHopperFromGrid(location, chunkX, chunkZ);
@@ -226,7 +227,7 @@ public class SkyHopperDataManager {
      * @param container The {@link Container} broken.
      */
     public void handleContainerBroken(@NotNull Container container) {
-        Location containerLocation = container.getLocation();
+        ImmutableLocation containerLocation = ImmutableLocation.fromBukkitLocation(container.getLocation());
 
         // Loop through all loaded SkyHoppers
         skyHopperMap.forEach((location, skyHopper) -> {
@@ -235,7 +236,7 @@ public class SkyHopperDataManager {
                 // Check if the broken container matches a linked container's location
                 if(skyContainer.getLocation().equals(containerLocation)) {
                     // Close any output filter GUIs for the SkyContainer provided
-                    guiManager.closeOutputFilterGUIs(location);
+                    guiManager.closeSkyContainerRelatedGUIs(location);
 
                     // Refresh any other open GUIs for the SkyHopper.
                     guiManager.refreshGUIsByLocation(location);
@@ -250,14 +251,14 @@ public class SkyHopperDataManager {
      * @param chunkX The chunk's X coordinate.
      * @param chunkZ The chunk's Z coordinate.
      */
-    private void removeLocationFromGrid(@NotNull Location location, int chunkX, int chunkZ) {
+    private void removeLocationFromGrid(@NotNull ImmutableLocation location, int chunkX, int chunkZ) {
         String worldName = location.getWorld().getName();
 
-        @Nullable Map<Integer, Map<Integer, List<Location>>> chunkXMap = locationGrid.get(worldName);
+        @Nullable Map<Integer, Map<Integer, List<ImmutableLocation>>> chunkXMap = locationGrid.get(worldName);
         if(chunkXMap != null && !chunkXMap.isEmpty()) {
-            @Nullable Map<Integer, List<Location>> chunkZMap = chunkXMap.get(chunkX);
+            @Nullable Map<Integer, List<ImmutableLocation>> chunkZMap = chunkXMap.get(chunkX);
             if(chunkZMap != null && !chunkZMap.isEmpty()) {
-                @Nullable List<Location> locationList = chunkZMap.get(chunkZ);
+                @Nullable List<ImmutableLocation> locationList = chunkZMap.get(chunkZ);
                 if(locationList != null && !locationList.isEmpty()) {
                     locationList.remove(location);
 
@@ -283,14 +284,14 @@ public class SkyHopperDataManager {
      * @param chunkX The chunk's X coordinate.
      * @param chunkZ The chunk's Z coordinate.
      */
-    private void removeSkyHopperFromGrid(@NotNull Location location, int chunkX, int chunkZ) {
+    private void removeSkyHopperFromGrid(@NotNull ImmutableLocation location, int chunkX, int chunkZ) {
         String worldName = location.getWorld().getName();
 
-        @Nullable Map<Integer, Map<Integer, Map<Location, SkyHopper>>> chunkXMap = hopperGrid.get(worldName);
+        @Nullable Map<Integer, Map<Integer, Map<ImmutableLocation, SkyHopper>>> chunkXMap = hopperGrid.get(worldName);
         if(chunkXMap != null && !chunkXMap.isEmpty()) {
-            @Nullable Map<Integer, Map<Location, SkyHopper>> chunkZMap = chunkXMap.get(chunkX);
+            @Nullable Map<Integer, Map<ImmutableLocation, SkyHopper>> chunkZMap = chunkXMap.get(chunkX);
             if(chunkZMap != null && !chunkZMap.isEmpty()) {
-                @Nullable Map<Location, SkyHopper> locationSkyHopperMap = chunkZMap.get(chunkZ);
+                @Nullable Map<ImmutableLocation, SkyHopper> locationSkyHopperMap = chunkZMap.get(chunkZ);
                 if(locationSkyHopperMap != null && !locationSkyHopperMap.isEmpty()) {
                     locationSkyHopperMap.remove(location);
 

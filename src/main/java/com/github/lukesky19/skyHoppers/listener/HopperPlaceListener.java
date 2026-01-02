@@ -22,6 +22,7 @@ import com.github.lukesky19.skyHoppers.config.data.Locale;
 import com.github.lukesky19.skyHoppers.hook.HookManager;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -78,15 +79,26 @@ public class HopperPlaceListener implements Listener {
         }
 
         SkyHopper skyHopper = hopperManager.getSkyHopperProcessor().loadSkyHopper(null, itemInHand.getItemMeta().getPersistentDataContainer());
-        if(skyHopper == null) return;
+        if(skyHopper == null) {
+            blockPlaceEvent.setCancelled(true);
+            return;
+        }
 
-        skyHopper.setOwner(player.getUniqueId());
-        skyHopper.setLocation(hopper.getLocation());
+        try {
+            ImmutableLocation immutableLocation = ImmutableLocation.fromBukkitLocation(hopper.getLocation());
 
-        hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
+            skyHopper.setOwner(player.getUniqueId());
+            skyHopper.setLocation(immutableLocation);
 
-        hopperManager.getSkyHopperDataManager().cacheSkyHopper(hopper.getLocation(), skyHopper);
+            hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
-        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperPlaced()));
+            hopperManager.getSkyHopperDataManager().cacheSkyHopper(immutableLocation, skyHopper);
+
+            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperPlaced()));
+        } catch (RuntimeException e) {
+            blockPlaceEvent.setCancelled(true);
+
+            throw new RuntimeException(e);
+        }
     }
 }

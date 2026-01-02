@@ -22,6 +22,7 @@ import com.github.lukesky19.skyHoppers.skyhopper.data.Filterable.FilterType;
 import com.github.lukesky19.skyHoppers.skyhopper.data.HopperKeys;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.libs.morepersistentdatatypes.DataType;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
@@ -53,7 +54,7 @@ public class SkyHopperSaver {
      * @param skyHopper The {@link SkyHopper} to save.
      */
     public void saveSkyHopper(@NotNull SkyHopper skyHopper) {
-        Location location = skyHopper.getLocation();
+        ImmutableLocation location = skyHopper.getLocation();
         if(location == null) {
             logger.warn(AdventureUtil.deserialize("Unable to save SkyHopper to a Hopper's PDC due to a null location for the SkyHopper."));
             return;
@@ -110,7 +111,7 @@ public class SkyHopperSaver {
         List<PersistentDataContainer> pdcList = new ArrayList<>();
 
         for (SkyContainer skyContainer : skyHopper.getLinkedContainers()) {
-            Location linkedLocation = skyContainer.getLocation();
+            Location linkedLocation = skyContainer.getLocation().toBukkitLocation();
 
             FilterType filterType = skyContainer.getFilterType();
             PersistentDataContainer persistentDataContainer = pdc.getAdapterContext().newPersistentDataContainer();
@@ -122,6 +123,9 @@ public class SkyHopperSaver {
             // Save the output filter items
             persistentDataContainer.set(HopperKeys.FILTER_ITEMS.getKey(),
                     PersistentDataType.LIST.listTypeFrom(PersistentDataType.STRING), containerFilterItemNames);
+
+            // Save the priority
+            persistentDataContainer.set(HopperKeys.PRIORITY.getKey(), PersistentDataType.INTEGER, skyContainer.getPriority());
 
             pdcList.add(persistentDataContainer);
         }

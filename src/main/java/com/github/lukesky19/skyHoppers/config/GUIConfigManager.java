@@ -18,8 +18,7 @@
 package com.github.lukesky19.skyHoppers.config;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
-import com.github.lukesky19.skyHoppers.config.data.gui.GUIConfig;
-import com.github.lukesky19.skyHoppers.config.data.gui.UpgradeGUIConfig;
+import com.github.lukesky19.skyHoppers.config.data.gui.*;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
@@ -30,37 +29,30 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * This class manages the loading and parsing of the plugin gui configuration files.
  */
 public class GUIConfigManager {
     private final @NotNull SkyHoppers plugin;
-    private final @NotNull Map<String, GUIConfig> guiConfigs = new HashMap<>();
-    private final @NotNull Map<String, UpgradeGUIConfig> upgradeGuiConfigs = new HashMap<>();
+    private final @NotNull ComponentLogger logger;
 
-    private final @NotNull String GUI_PATH = "gui" + File.separator;
-    private final @NotNull String UPGRADES_PATH = GUI_PATH + "upgrades" + File.separator;
+    private @Nullable SkyHopperGUIConfig hopperGUIConfig;
+    private @Nullable SkyContainerGUIConfig skyContainerGUIConfig;
+    private @Nullable FilterGUIConfig inputFilterGUIConfig;
+    private @Nullable LinkedContainersGUIConfig linkedContainersGUIConfig;
+    private @Nullable FilterGUIConfig outputFilterGUIConfig;
+    private @Nullable MembersGUIConfig membersGUIConfig;
+    private @Nullable SelectPlayerGUIConfig selectPlayerGUIConfig;
+    private @Nullable SelectUpgradeGUIConfig upgradesGUIConfig;
+    private @Nullable PriorityGUIConfig priorityGUIConfig;
 
-    /**
-     * Gets the plugin's non-upgrade GUI configuration based on the file name provided.
-     * @param name The name of the file
-     * @return The {@link GUIConfig} or null if no config is loaded for that file name.
-     */
-    public @Nullable GUIConfig getGuiConfig(String name) {
-        return guiConfigs.get(name);
-    }
-
-    /**
-     * Gets the plugin's upgrade GUI configuration based on the file name provided.
-     * @param name The name of the file
-     * @return The {@link UpgradeGUIConfig} or null if no config is loaded for that file name.
-     */
-    public @Nullable UpgradeGUIConfig getUpgradeConfig(String name) {
-        return upgradeGuiConfigs.get(name);
-    }
+    private @Nullable UpgradeGUIConfig linksUpgradeGUIConfig;
+    private @Nullable UpgradeGUIConfig suctionAmountUpgradeGUIConfig;
+    private @Nullable UpgradeGUIConfig suctionRangeUpgradeGUIConfig;
+    private @Nullable UpgradeGUIConfig suctionSpeedUpgradeGUIConfig;
+    private @Nullable UpgradeGUIConfig transferAmountUpgradeGUIConfig;
+    private @Nullable UpgradeGUIConfig transferSpeedUpgradeGUIConfig;
 
     /**
      * Constructor
@@ -68,153 +60,141 @@ public class GUIConfigManager {
      */
     public GUIConfigManager(@NotNull SkyHoppers plugin) {
         this.plugin = plugin;
-    }
-
-    /**
-     * Initialize the path of GUI config files and a default null configuration.
-     */
-    private void initializePaths() {
-        guiConfigs.clear();
-        upgradeGuiConfigs.clear();
-
-        String[] guiFiles = {
-                "hopper.yml", "input_filter.yml", "links.yml", "output_filter.yml",
-                "members.yml", "select_player.yml", "upgrades.yml"
-        };
-
-        String[] upgradeGuiFiles = {
-                "links.yml", "suction_amount.yml", "suction_range.yml",
-                "suction_speed.yml", "transfer_amount.yml", "transfer_speed.yml"
-        };
-
-        for (String file : guiFiles) {
-            guiConfigs.put(file, null);
-        }
-
-        for (String file : upgradeGuiFiles) {
-            upgradeGuiConfigs.put(file, null);
-        }
+        this.logger = plugin.getComponentLogger();
     }
 
     /**
      * Reload the plugin's GUI configurations
      */
     public void reload() {
-        initializePaths();
+        hopperGUIConfig = loadConfiguration(getGUIPath("hopper.yml"), SkyHopperGUIConfig.class, false);
+        skyContainerGUIConfig = loadConfiguration(getGUIPath("skycontainer.yml"), SkyContainerGUIConfig.class, false);
+        inputFilterGUIConfig = loadConfiguration(getGUIPath("input_filter.yml"), FilterGUIConfig.class, false);
+        linkedContainersGUIConfig = loadConfiguration(getGUIPath("links.yml"), LinkedContainersGUIConfig.class, false);
+        outputFilterGUIConfig = loadConfiguration(getGUIPath("output_filter.yml"), FilterGUIConfig.class, false);
+        membersGUIConfig = loadConfiguration(getGUIPath("members.yml"), MembersGUIConfig.class, false);
+        selectPlayerGUIConfig = loadConfiguration(getGUIPath("select_player.yml"), SelectPlayerGUIConfig.class, false);
+        upgradesGUIConfig = loadConfiguration(getGUIPath("upgrades.yml"), SelectUpgradeGUIConfig.class, false);
 
-        saveDefaultConfig();
+        linksUpgradeGUIConfig = loadConfiguration(getUpgradePath("links.yml"), UpgradeGUIConfig.class, true);
+        suctionAmountUpgradeGUIConfig = loadConfiguration(getUpgradePath("suction_amount.yml"), UpgradeGUIConfig.class, true);
+        suctionRangeUpgradeGUIConfig = loadConfiguration(getUpgradePath("suction_range.yml"), UpgradeGUIConfig.class, true);
+        suctionSpeedUpgradeGUIConfig = loadConfiguration(getUpgradePath("suction_speed.yml"), UpgradeGUIConfig.class, true);
+        transferAmountUpgradeGUIConfig = loadConfiguration(getUpgradePath("transfer_amount.yml"), UpgradeGUIConfig.class, true);
+        transferSpeedUpgradeGUIConfig = loadConfiguration(getUpgradePath("transfer_speed.yml"), UpgradeGUIConfig.class, true);
 
-        loadConfigs();
+        priorityGUIConfig = loadConfiguration(getGUIPath("priority.yml"), PriorityGUIConfig.class, false);
     }
 
     /**
-     * Loads the plugin's GUI configurations,
+     * Load the configuration.
+     * @param path The path to load the config for.
+     * @param clazz The class to load configuration to.
+     * @param isUpgrade Is the config an upgrade GUI config?
+     * @return The configuration or null.
+     * @param <T> The class created for the configuration.
      */
-    private void loadConfigs() {
-        for (String file : guiConfigs.keySet()) {
-            loadGuiConfig(file);
-        }
+    private <T> @Nullable T loadConfiguration(@NotNull Path path, @NotNull Class<T> clazz, boolean isUpgrade) {
+        saveDefaultConfig(path, isUpgrade);
 
-        for (String file : upgradeGuiConfigs.keySet()) {
-            loadUpgradeGuiConfig(file);
-        }
-    }
-
-    /**
-     * Loads an individual non-upgrade GUI configuration file.
-     * @param fileName The name of the file to load.
-     */
-    private void loadGuiConfig(@NotNull String fileName) {
-        Path path = Path.of(plugin.getDataFolder() + File.separator + GUI_PATH + fileName);
         YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(path);
-        try {
-            GUIConfig guiConfig = loader.load().get(GUIConfig.class);
 
-            if(checkGUIConfigVersion(fileName, guiConfig)) guiConfigs.put(fileName, guiConfig);
-        } catch (ConfigurateException e) {
-            throw new RuntimeException(e);
+        try {
+            T config = loader.load().get(clazz);
+
+            if(config != null) {
+                if(config instanceof IGUIConfig guiConfig) {
+                    if(!checkConfigVersion(path.getFileName().toString(), guiConfig)) {
+                        return null;
+                    }
+                }
+            }
+
+            return config;
+        } catch (ConfigurateException configurateException) {
+            logger.error(AdventureUtil.deserialize("Unable to load GUI config for record " + clazz.getName() + ". Error: " + configurateException.getMessage()));
+            return null;
         }
     }
 
     /**
-     * Loads an individual upgrade GUI configuration file.
-     * @param fileName The name of the file to load.
+     * Get the {@link Path} for the file name.
+     * This is for normal gui configurations.
+     * @param fileName The file name.
+     * @return A {@link Path}.
      */
-    private void loadUpgradeGuiConfig(@NotNull String fileName) {
-        Path path = Path.of(plugin.getDataFolder() + File.separator + UPGRADES_PATH + fileName);
-        YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(path);
-        try {
-            UpgradeGUIConfig upgradeGUIConfig = loader.load().get(UpgradeGUIConfig.class);
-
-            if(checkUpgradeGUIConfigVersion(fileName, upgradeGUIConfig)) upgradeGuiConfigs.put(fileName, upgradeGUIConfig);
-        } catch (ConfigurateException e) {
-            throw new RuntimeException(e);
-        }
+    private @NotNull Path getGUIPath(@NotNull String fileName) {
+        return Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + fileName);
     }
 
     /**
-     * Check the version of a {@link GUIConfig} and display warnings if outdated.
+     * Get the {@link Path} for the file name.
+     * This is for upgrade gui configurations.
+     * @param fileName The file name.
+     * @return A {@link Path}.
      */
-    private boolean checkGUIConfigVersion(@NotNull String fileName, @Nullable GUIConfig guiConfig) {
-        if(guiConfig == null) return false;
-        ComponentLogger logger = plugin.getComponentLogger();
+    private @NotNull Path getUpgradePath(@NotNull String fileName) {
+        return Path.of(plugin.getDataFolder() + File.separator + "gui" + File.separator + "upgrades" + File.separator + fileName);
+    }
 
-        if(guiConfig.configVersion() == null) {
+    /**
+     * Check the config version.
+     * @param fileName The file name.
+     * @param config The {@link IGUIConfig}.
+     * @return true if valid, or false if out of date.
+     */
+    private boolean checkConfigVersion(@NotNull String fileName, @NotNull IGUIConfig config) {
+        @Nullable String version = config.getConfigVersion();
+
+        if(version == null) {
             logger.warn(AdventureUtil.deserialize("Unable to check the config version in " + fileName + " as it is not configured."));
             return false;
         }
 
-        if(!guiConfig.configVersion().equals("1.1.0.0")) {
-            logger.warn(AdventureUtil.deserialize("The gui configuration for " + fileName + " is outdated. Current version: " + guiConfig.configVersion() + ". Latest version: 1.1.0.0."));
-            logger.warn(AdventureUtil.deserialize("You should regenerate your " + fileName + " or migrate your " + fileName + " to the new version."));
-            logger.warn(AdventureUtil.deserialize("The GUI for " + fileName + " will not be able to open until this is corrected."));
+        if(config instanceof LinkedContainersGUIConfig) {
+            if(version.equals("1.1.1.0")) {
+                return true;
+            } else if(version.equals("1.1.0.0")) {
+                logger.info(AdventureUtil.deserialize("The gui configuration for " + fileName + " is outdated. Current version: " + version + ". Latest version: 1.1.1.0."));
+                logger.info(AdventureUtil.deserialize("This is a minor update that changes the lore of one of the button's lore with updated functionality."));
+                logger.info(AdventureUtil.deserialize("You may wish you update your configuration as well, but will continue to work regardless."));
 
-            return false;
-        }
+                return true;
+            } else {
+                logger.warn(AdventureUtil.deserialize("The gui configuration for " + fileName + " is outdated. Current version: " + version + ". Latest version: 1.1.0.0."));
+                logger.warn(AdventureUtil.deserialize("You should regenerate your " + fileName + " or migrate your " + fileName + " to the new version."));
+                logger.warn(AdventureUtil.deserialize("The GUI for " + fileName + " will not be able to open until this is corrected."));
 
-        return true;
-    }
+                return false;
+            }
+        } else if(config instanceof PriorityGUIConfig || config instanceof SkyContainerGUIConfig) {
+            return true;
+        } else {
+            if(!version.equals("1.1.0.0")) {
+                logger.warn(AdventureUtil.deserialize("The gui configuration for " + fileName + " is outdated. Current version: " + version + ". Latest version: 1.1.0.0."));
+                logger.warn(AdventureUtil.deserialize("You should regenerate your " + fileName + " or migrate your " + fileName + " to the new version."));
+                logger.warn(AdventureUtil.deserialize("The GUI for " + fileName + " will not be able to open until this is corrected."));
 
-    /**
-     * Check the version of an {@link UpgradeGUIConfig} and display warnings if outdated.
-     */
-    private boolean checkUpgradeGUIConfigVersion(@NotNull String fileName, @Nullable UpgradeGUIConfig upgradeGUIConfig) {
-        if(upgradeGUIConfig == null) return false;
-        ComponentLogger logger = plugin.getComponentLogger();
-
-        if(upgradeGUIConfig.configVersion() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to check the config version in " + fileName + " as it is not configured."));
-            return false;
-        }
-
-        if(!upgradeGUIConfig.configVersion().equals("1.1.0.0")) {
-            logger.warn(AdventureUtil.deserialize("The gui configuration for " + fileName + " is outdated. Current version: " + upgradeGUIConfig.configVersion() + ". Latest version: 1.1.0.0."));
-            logger.warn(AdventureUtil.deserialize("You should regenerate your " + fileName + " or migrate your " + fileName + " to the new version."));
-            logger.warn(AdventureUtil.deserialize("The GUI for " + fileName + " will not be able to open until this is corrected."));
-
-            return false;
-        }
-
-        return true;
-    }
-
-
-    /**
-     * Saves the default GUI configuration files bundled with the plugin.
-     */
-    private void saveDefaultConfig() {
-        for (String file : guiConfigs.keySet()) {
-            Path path = Path.of(plugin.getDataFolder() + File.separator + GUI_PATH + file);
-            if(!path.toFile().exists()) {
-                saveResource(GUI_PATH + file);
+                return false;
             }
         }
 
-        for (String file : upgradeGuiConfigs.keySet()) {
-            Path path = Path.of(plugin.getDataFolder() + File.separator + UPGRADES_PATH + file);
+        return true;
+    }
 
+    /**
+     * Saves the default GUI configuration file bundled with the plugin for the path provided.
+     * @param path The {@link Path}.
+     * @param isUpgrade Is an upgrade GUI config path.
+     */
+    private void saveDefaultConfig(@NotNull Path path, boolean isUpgrade) {
+        if(isUpgrade) {
             if(!path.toFile().exists()) {
-                saveResource(UPGRADES_PATH + file);
+                saveResource("gui" + File.separator + "upgrades" + File.separator + path.getFileName().toString());
+            }
+        } else {
+            if(!path.toFile().exists()) {
+                saveResource("gui" + File.separator + path.getFileName().toString());
             }
         }
     }
@@ -225,5 +205,125 @@ public class GUIConfigManager {
      */
     private void saveResource(@NotNull String resourcePath) {
         plugin.saveResource(resourcePath, false);
+    }
+
+    /**
+     * Get the {@link SkyHopperGUIConfig} for the main SkyHopper GUI.
+     * @return The {@link SkyHopperGUIConfig} or null.
+     */
+    public @Nullable SkyHopperGUIConfig getHopperGUIConfig() {
+        return hopperGUIConfig;
+    }
+
+    /**
+     * Get the {@link SkyContainerGUIConfig} for the main SkyContainer GUI.
+     * @return The {@link SkyContainerGUIConfig} or null.
+     */
+    public @Nullable SkyContainerGUIConfig getSkyContainerGUIConfig() {
+        return skyContainerGUIConfig;
+    }
+
+    /**
+     * Get the {@link FilterGUIConfig} for viewing the input filter.
+     * @return The {@link FilterGUIConfig} or null.
+     */
+    public @Nullable FilterGUIConfig getInputFilterGUIConfig() {
+        return inputFilterGUIConfig;
+    }
+
+    /**
+     * Get the {@link LinkedContainersGUIConfig} for viewing linked containers.
+     * @return The {@link LinkedContainersGUIConfig} or null.
+     */
+    public @Nullable LinkedContainersGUIConfig getLinkedContainersGUIConfig() {
+        return linkedContainersGUIConfig;
+    }
+
+    /**
+     * Get the {@link FilterGUIConfig} for viewing the output filter.
+     * @return The {@link FilterGUIConfig} or null.
+     */
+    public @Nullable FilterGUIConfig getOutputFilterGUIConfig() {
+        return outputFilterGUIConfig;
+    }
+
+    /**
+     * Get the {@link MembersGUIConfig} for viewing members.
+     * @return The {@link MembersGUIConfig} or null.
+     */
+    public @Nullable MembersGUIConfig getMembersGUIConfig() {
+        return membersGUIConfig;
+    }
+
+    /**
+     * Get the {@link SelectPlayerGUIConfig} for selecting a player.
+     * @return The {@link SelectPlayerGUIConfig} or null.
+     */
+    public @Nullable SelectPlayerGUIConfig getSelectPlayerGUIConfig() {
+        return selectPlayerGUIConfig;
+    }
+
+    /**
+     * Get the {@link SelectUpgradeGUIConfig} for viewing upgrade selections.
+     * @return The {@link SelectUpgradeGUIConfig} or null.
+     */
+    public @Nullable SelectUpgradeGUIConfig getUpgradesGUIConfig() {
+        return upgradesGUIConfig;
+    }
+
+    /**
+     * Get the {@link UpgradeGUIConfig} for linked container upgrades.
+     * @return The {@link UpgradeGUIConfig} or null.
+     */
+    public @Nullable UpgradeGUIConfig getLinksUpgradeGUIConfig() {
+        return linksUpgradeGUIConfig;
+    }
+
+    /**
+     * Get the {@link UpgradeGUIConfig} for suction amount upgrades.
+     * @return The {@link UpgradeGUIConfig} or null.
+     */
+    public @Nullable UpgradeGUIConfig getSuctionAmountUpgradeGUIConfig() {
+        return suctionAmountUpgradeGUIConfig;
+    }
+
+    /**
+     * Get the {@link UpgradeGUIConfig} for suction range upgrades.
+     * @return The {@link UpgradeGUIConfig} or null.
+     */
+    public @Nullable UpgradeGUIConfig getSuctionRangeUpgradeGUIConfig() {
+        return suctionRangeUpgradeGUIConfig;
+    }
+
+    /**
+     * Get the {@link UpgradeGUIConfig} for suction speed upgrades.
+     * @return The {@link UpgradeGUIConfig} or null.
+     */
+    public @Nullable UpgradeGUIConfig getSuctionSpeedUpgradeGUIConfig() {
+        return suctionSpeedUpgradeGUIConfig;
+    }
+
+    /**
+     * Get the {@link UpgradeGUIConfig} for transfer amount upgrades.
+     * @return The {@link UpgradeGUIConfig} or null.
+     */
+    public @Nullable UpgradeGUIConfig getTransferAmountUpgradeGUIConfig() {
+        return transferAmountUpgradeGUIConfig;
+    }
+
+    /**
+     * Get the {@link UpgradeGUIConfig} for transfer speed upgrades.
+     * @return The {@link UpgradeGUIConfig} or null.
+     */
+    public @Nullable UpgradeGUIConfig getTransferSpeedUpgradeGUIConfig() {
+        return transferSpeedUpgradeGUIConfig;
+    }
+
+    /**
+     * Get the {@link PriorityGUIConfig}.
+     * @return The {@link PriorityGUIConfig} or null.
+     */
+    public @Nullable PriorityGUIConfig getPriorityGUIConfig() {
+        return priorityGUIConfig;
     }
 }

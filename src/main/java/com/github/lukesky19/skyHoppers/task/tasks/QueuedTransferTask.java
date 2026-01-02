@@ -25,7 +25,7 @@ import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.task.data.QueuedTransfer;
 import com.github.lukesky19.skyHoppers.transfer.impl.container.ContainerToInventoryTransfer;
 import com.github.lukesky19.skyHoppers.transfer.impl.container.InventoryToContainerTransfer;
-import org.bukkit.Location;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -65,8 +65,8 @@ public class QueuedTransferTask extends BukkitRunnable {
         @Nullable QueuedTransfer queuedTransfer = hopperManager.getSkyHopperProcessor().getQueuedTransfer();
         while(queuedTransfer != null) {
             long now = System.currentTimeMillis();
-            Location sourceLocation = queuedTransfer.sourceLocation();
-            Location destinationLocation = queuedTransfer.destinationLocation();
+            ImmutableLocation sourceLocation = queuedTransfer.sourceLocation();
+            ImmutableLocation destinationLocation = queuedTransfer.destinationLocation();
             SkyHopper sourceSkyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(sourceLocation);
             SkyHopper destinationSkyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(destinationLocation);
 

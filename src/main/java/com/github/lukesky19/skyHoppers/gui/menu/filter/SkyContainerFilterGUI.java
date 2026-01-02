@@ -19,15 +19,16 @@ package com.github.lukesky19.skyHoppers.gui.menu.filter;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.config.GUIConfigManager;
-import com.github.lukesky19.skyHoppers.config.data.gui.ButtonConfig;
-import com.github.lukesky19.skyHoppers.config.data.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.config.data.button.ButtonConfig;
+import com.github.lukesky19.skyHoppers.config.data.gui.FilterGUIConfig;
 import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
-import com.github.lukesky19.skyHoppers.gui.menu.links.LinksGUI;
+import com.github.lukesky19.skyHoppers.gui.menu.skycontainer.SkyContainerGUI;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.Filterable.FilterType;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.format.FormatUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
@@ -37,7 +38,6 @@ import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -64,7 +64,7 @@ public class SkyContainerFilterGUI extends SkyHopperGUI {
     private final @NotNull SkyHopper skyHopper;
     private final @NotNull SkyContainer skyContainer;
 
-    private final @Nullable GUIConfig guiConfig;
+    private final @Nullable FilterGUIConfig guiConfig;
 
     private int itemNum = 0;
     private int added = 0;
@@ -73,32 +73,32 @@ public class SkyContainerFilterGUI extends SkyHopperGUI {
      * Constructor
      * @param skyHoppers A {@link SkyHoppers} instance.
      * @param guiManager A {@link GUIManager} instance.
-     * @param location The {@link Location} of the {@link SkyHopper}.
+     * @param location The {@link ImmutableLocation} of the {@link SkyHopper}.
      * @param skyHopper The {@link SkyHopper} the GUI is associated with.
      * @param player The {@link Player} viewing the GUI.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param hopperManager A {@link SkyHopperManager} instance.
      * @param skyContainer The {@link SkyContainer} being modified.
-     * @param linksGUI The {@link LinksGUI} the Player came from.
+     * @param skyContainerGUI The {@link SkyContainerGUI} the Player came from.
      */
     public SkyContainerFilterGUI(
             @NotNull SkyHoppers skyHoppers,
             @NotNull GUIManager guiManager,
-            @NotNull Location location,
+            @NotNull ImmutableLocation location,
             @NotNull SkyHopper skyHopper,
             @NotNull Player player,
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull SkyHopperManager hopperManager,
             @NotNull SkyContainer skyContainer,
-            @NotNull LinksGUI linksGUI) {
-        super(skyHoppers, guiManager, player, location, linksGUI);
+            @NotNull SkyContainerGUI skyContainerGUI) {
+        super(skyHoppers, guiManager, player, location, skyContainerGUI);
 
         this.hopperManager = hopperManager;
 
         this.skyHopper = skyHopper;
         this.skyContainer = skyContainer;
 
-        guiConfig = guiConfigManager.getGuiConfig("output_filter.yml");
+        guiConfig = guiConfigManager.getOutputFilterGUIConfig();
     }
 
     /**

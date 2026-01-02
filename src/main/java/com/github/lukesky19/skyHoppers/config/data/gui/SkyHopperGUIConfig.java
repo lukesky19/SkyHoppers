@@ -27,14 +27,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
- * he GUI configuration for only upgrade GUIs.
+ * The GUI configuration for the main SkyHopper GUI.
  * @param configVersion The config version of the file.
  * @param guiType The gui type for this GUI.
  * @param name The name of this GUI.
  * @param entries The items to display inside the GUI.
  */
 @ConfigSerializable
-public record UpgradeGUIConfig(
+public record SkyHopperGUIConfig(
         @Nullable String configVersion,
         @Nullable GUIType guiType,
         @Nullable String name,
@@ -45,28 +45,34 @@ public record UpgradeGUIConfig(
     }
 
     /**
-     * The possible items that can be displayed inside GUIs.
-     * NOTE: Not all are available in every GUI.
-     * @param filler The filler item configuration.
-     * @param exit The exit item configuration.
-     * @param increase The increase item configuration.
-     * @param increaseMax The increase max item configuration.
-     * @param upgrade The upgrade item configuration.
-     * @param upgradeMax The upgrade max item configuration.
-     * @param decrease The decrease item configuration.
-     * @param decreaseMin The decrease min item configuration.
+     * The buttons to display in the GUI.
+     * @param filler The filler item configuration
+     * @param exit The exit item configuration
+     * @param hopperEnabled The hopper enabled item configuration
+     * @param hopperDisabled The hopper disabled item configuration
+     * @param particlesEnabled The particles enabled item configuration
+     * @param particlesDisabled The particles disabled item configuration
+     * @param link The link item configuration
+     * @param filter The filter item configuration
+     * @param upgrades The upgrades item configuration
+     * @param visualize The visualization item configuration
+     * @param members The members item configuration
+     * @param info The info item configuration
      * @param dummyButtons A {@link List} of {@link ButtonConfig}s to display in the GUI.
      */
     @ConfigSerializable
     public record Buttons(
             @NotNull ItemStackConfig filler,
             @NotNull ButtonConfig exit,
-            @NotNull ButtonConfig increase,
-            @NotNull ButtonConfig increaseMax,
-            @NotNull ButtonConfig upgrade,
-            @NotNull ButtonConfig upgradeMax,
-            @NotNull ButtonConfig decrease,
-            @NotNull ButtonConfig decreaseMin,
+            @NotNull ButtonConfig hopperEnabled,
+            @NotNull ButtonConfig hopperDisabled,
+            @NotNull ButtonConfig particlesEnabled,
+            @NotNull ButtonConfig particlesDisabled,
+            @NotNull ButtonConfig link,
+            @NotNull ButtonConfig filter,
+            @NotNull ButtonConfig upgrades,
+            @NotNull ButtonConfig visualize,
+            @NotNull ButtonConfig members,
+            @NotNull ButtonConfig info,
             @NotNull List<ButtonConfig> dummyButtons) {}
 }
-

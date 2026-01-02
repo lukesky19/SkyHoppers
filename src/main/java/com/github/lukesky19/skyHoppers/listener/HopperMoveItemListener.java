@@ -21,6 +21,7 @@ import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.task.data.QueuedTransfer;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
@@ -69,13 +70,16 @@ public class HopperMoveItemListener implements Listener {
         InventoryHolder destinationHolder = destinationInventory.getHolder(false);
 
         if(!(initiatorInventory.getHolder(false) instanceof Container initiatorContainer)) return;
+        ImmutableLocation initiatorLocation = ImmutableLocation.fromBukkitLocation(initiatorContainer.getLocation());
 
         if(sourceHolder instanceof Container sourceContainer) {
-            @Nullable SkyHopper initiatorSkyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(initiatorContainer.getLocation());
-            @Nullable SkyHopper sourceSkyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(sourceContainer.getLocation());
+            ImmutableLocation sourceLocation = ImmutableLocation.fromBukkitLocation(sourceContainer.getLocation());
+            @Nullable SkyHopper initiatorSkyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(initiatorLocation);
+            @Nullable SkyHopper sourceSkyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(sourceLocation);
 
             if(destinationHolder instanceof Container destinationContainer) {
-                @Nullable SkyHopper destinationSkyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(destinationContainer.getLocation());
+                ImmutableLocation destinationLocation = ImmutableLocation.fromBukkitLocation(destinationContainer.getLocation());
+                @Nullable SkyHopper destinationSkyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(destinationLocation);
 
                 if((sourceSkyHopper == null && destinationSkyHopper == null) || initiatorSkyHopper == null) return;
 
@@ -98,7 +102,7 @@ public class HopperMoveItemListener implements Listener {
 
                             if(sourceSkyHopper.getLocation() == null) return;
 
-                            hopperManager.getSkyHopperProcessor().queueQueuedTransfer(new QueuedTransfer(sourceContainer.getLocation(), destinationContainer.getLocation(), false, true));
+                            hopperManager.getSkyHopperProcessor().queueQueuedTransfer(new QueuedTransfer(sourceLocation, destinationLocation, false, true));
                         }
                     } else if(initiatorSkyHopper.equals(destinationSkyHopper)) {
                         if(destinationSkyHopper.getNextSuctionTime() < System.currentTimeMillis()) {
@@ -111,7 +115,7 @@ public class HopperMoveItemListener implements Listener {
 
                             if(destinationSkyHopper.getLocation() == null) return;
 
-                            hopperManager.getSkyHopperProcessor().queueQueuedTransfer(new QueuedTransfer(sourceContainer.getLocation(), destinationContainer.getLocation(), false, false));
+                            hopperManager.getSkyHopperProcessor().queueQueuedTransfer(new QueuedTransfer(sourceLocation, destinationLocation, false, false));
                         }
                     }
                 } else if(sourceSkyHopper != null) {
@@ -120,7 +124,7 @@ public class HopperMoveItemListener implements Listener {
                     if(sourceSkyHopper.getNextTransferTime() < System.currentTimeMillis()) {
                         if(sourceSkyHopper.getLocation() == null) return;
 
-                        hopperManager.getSkyHopperProcessor().queueQueuedTransfer(new QueuedTransfer(sourceContainer.getLocation(), destinationContainer.getLocation(), false, true));
+                        hopperManager.getSkyHopperProcessor().queueQueuedTransfer(new QueuedTransfer(sourceLocation, destinationLocation, false, true));
                     }
                 } else {
                     if(!destinationSkyHopper.isSkyHopperEnabled()) return;
@@ -128,7 +132,7 @@ public class HopperMoveItemListener implements Listener {
                     if (destinationSkyHopper.getNextSuctionTime() < System.currentTimeMillis()) {
                         if(destinationSkyHopper.getLocation() == null) return;
 
-                        hopperManager.getSkyHopperProcessor().queueQueuedTransfer(new QueuedTransfer(sourceContainer.getLocation(), destinationContainer.getLocation(), true, false));
+                        hopperManager.getSkyHopperProcessor().queueQueuedTransfer(new QueuedTransfer(sourceLocation, destinationLocation, true, false));
                     }
                 }
             } else if(destinationHolder instanceof DoubleChest) {
@@ -145,21 +149,22 @@ public class HopperMoveItemListener implements Listener {
                 BlockState destinationState = sourceContainer.getBlock().getRelative(blockFace).getState(false);
 
                 if(destinationState instanceof Container destinationContainer) {
-                    Location destinationLocation = destinationContainer.getLocation();
+                    ImmutableLocation destinationLocation = ImmutableLocation.fromBukkitLocation(destinationContainer.getLocation());
 
                     inventoryMoveItemEvent.setCancelled(true);
                     if(plugin.areSkyHoppersPaused()) return;
                     if(!initiatorSkyHopper.isSkyHopperEnabled()) return;
 
-                    hopperManager.getSkyHopperProcessor().queueQueuedTransfer(new QueuedTransfer(sourceContainer.getLocation(), destinationLocation, false, true));
+                    hopperManager.getSkyHopperProcessor().queueQueuedTransfer(new QueuedTransfer(sourceLocation, destinationLocation, false, true));
                 }
             }
         } else if(sourceHolder instanceof DoubleChest doubleChest) {
             if(!(doubleChest.getLeftSide(false) instanceof Container leftContainer
                     && doubleChest.getRightSide(false) instanceof Container rightContainer)) return;
 
-            @Nullable Location destinationLocation = destinationInventory.getLocation();
-            if(destinationLocation == null) return;
+            @Nullable Location bukkitDestinationLocation = destinationInventory.getLocation();
+            if(bukkitDestinationLocation == null) return;
+            ImmutableLocation destinationLocation = ImmutableLocation.fromBukkitLocation(bukkitDestinationLocation);
             SkyHopper destinationSkyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(destinationLocation);
             if(destinationSkyHopper == null) return;
 
@@ -169,14 +174,15 @@ public class HopperMoveItemListener implements Listener {
             if(plugin.areSkyHoppersPaused()) return;
 
             if(destinationSkyHopper.getNextSuctionTime() < System.currentTimeMillis()) {
-                Location skyHopperLocation = destinationSkyHopper.getLocation();
+                @Nullable ImmutableLocation skyHopperLocation = destinationSkyHopper.getLocation();
                 if(skyHopperLocation == null) return;
-                Location containerLocation = new Location(skyHopperLocation.getWorld(), skyHopperLocation.x(), skyHopperLocation.y() + 1, skyHopperLocation.z());
+                ImmutableLocation leftLocation = ImmutableLocation.fromBukkitLocation(leftContainer.getLocation());
+                ImmutableLocation rightLocation = ImmutableLocation.fromBukkitLocation(rightContainer.getLocation());
 
-                if(containerLocation.equals(leftContainer.getLocation())) {
-                    hopperManager.getSkyHopperProcessor().queueQueuedTransfer(new QueuedTransfer(leftContainer.getLocation(), destinationLocation, true, false));
-                } else if(containerLocation.equals(rightContainer.getLocation())) {
-                    hopperManager.getSkyHopperProcessor().queueQueuedTransfer(new QueuedTransfer(rightContainer.getLocation(), destinationLocation, true, false));
+                if(skyHopperLocation.equals(leftLocation)) {
+                    hopperManager.getSkyHopperProcessor().queueQueuedTransfer(new QueuedTransfer(leftLocation, destinationLocation, true, false));
+                } else if(skyHopperLocation.equals(rightLocation)) {
+                    hopperManager.getSkyHopperProcessor().queueQueuedTransfer(new QueuedTransfer(rightLocation, destinationLocation, true, false));
                 }
             }
         }

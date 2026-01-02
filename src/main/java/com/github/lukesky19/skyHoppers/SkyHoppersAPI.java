@@ -21,6 +21,7 @@ import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.Filterable.FilterType;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.ItemType;
@@ -82,7 +83,7 @@ public class SkyHoppersAPI {
             boolean particles,
             @Nullable UUID owner,
             @NotNull List<UUID> members,
-            @Nullable Location location,
+            @Nullable ImmutableLocation location,
             @NotNull List<SkyContainer> linkedContainers,
             @NotNull FilterType filterType,
             @NotNull List<ItemType> filterItems,

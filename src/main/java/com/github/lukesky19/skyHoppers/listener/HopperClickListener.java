@@ -29,6 +29,7 @@ import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.Filterable.FilterType;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -56,7 +57,7 @@ public class HopperClickListener implements Listener {
     private final @NotNull HookManager hookManager;
     private final @NotNull GUIManager guiManager;
 
-    private final @NotNull Map<UUID, Location> linkingPlayers = new HashMap<>();
+    private final @NotNull Map<UUID, ImmutableLocation> linkingPlayers = new HashMap<>();
 
     /**
      * Constructor
@@ -99,22 +100,22 @@ public class HopperClickListener implements Listener {
      * @param player The Player linking.
      * @param location The Location of the SkyHopper being linked to.
      */
-    public void addLinkingPlayer(@NotNull Player player, @NotNull Location location) {
+    public void addLinkingPlayer(@NotNull Player player, @NotNull ImmutableLocation location) {
         linkingPlayers.put(player.getUniqueId(), location);
     }
 
     /**
      * Disables any players in linking mode for a particular {@link Location}
-     * @param location The {@link Location} of the SkyHopper being linked to.
+     * @param location The {@link ImmutableLocation} of the SkyHopper being linked to.
      */
-    public void disableLinkingForLocation(@NotNull Location location) {
+    public void disableLinkingForLocation(@NotNull ImmutableLocation location) {
         Locale locale = localeManager.getLocale();
 
-        Iterator<Map.Entry<UUID, Location>> iterator = linkingPlayers.entrySet().iterator();
+        Iterator<Map.Entry<UUID, ImmutableLocation>> iterator = linkingPlayers.entrySet().iterator();
         while(iterator.hasNext()) {
-            Map.Entry<UUID, Location> entry = iterator.next();
+            Map.Entry<UUID, ImmutableLocation> entry = iterator.next();
             UUID uuid = entry.getKey();
-            Location iteratorLocation = entry.getValue();
+            ImmutableLocation iteratorLocation = entry.getValue();
 
             if(iteratorLocation.equals(location)) {
                 iterator.remove();
@@ -140,11 +141,12 @@ public class HopperClickListener implements Listener {
         Block block = playerInteractEvent.getClickedBlock();
         if(block == null || !playerInteractEvent.hasBlock()) return;
         Location location = block.getLocation();
+        ImmutableLocation eventLocation = ImmutableLocation.fromBukkitLocation(location);
 
         // Extra check for if there is a SkyHopper at the location, but it isn't loaded.
         // This should be kept due to an issue where locations weren't saved properly in Version 1.1.0.0 to 1.1.1.1.
-        if(!hopperManager.getSkyHopperDataManager().isSkyHopperLoaded(location)) {
-            hopperManager.getSkyHopperProcessor().loadSkyHopperAtLocationDirectly(location);
+        if(!hopperManager.getSkyHopperDataManager().isSkyHopperLoaded(eventLocation)) {
+            hopperManager.getSkyHopperProcessor().loadSkyHopperAtLocationDirectly(eventLocation);
         }
 
         if(isPlayerLinking(uuid)) {
@@ -166,7 +168,8 @@ public class HopperClickListener implements Listener {
 
             playerInteractEvent.setCancelled(true);
 
-            SkyHopper targetSkyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(container.getLocation());
+            ImmutableLocation containerLocation = ImmutableLocation.fromBukkitLocation(container.getLocation());
+            SkyHopper targetSkyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(containerLocation);
             if(targetSkyHopper != null
                     && targetSkyHopper.getLocation() != null
                     && linkingSkyHopper.getLocation() != null
@@ -183,12 +186,12 @@ public class HopperClickListener implements Listener {
                 while(iterator.hasNext()) {
                     SkyContainer skyContainer = iterator.next();
 
-                    if(skyContainer.getLocation().equals(container.getLocation())) {
+                    if(skyContainer.getLocation().equals(containerLocation)) {
                         iterator.remove();
 
                         hopperManager.getSkyHopperSaver().saveSkyHopper(linkingSkyHopper);
 
-                        guiManager.refreshGUIsByLocation(location);
+                        guiManager.refreshGUIsByLocation(eventLocation);
 
                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.containerUnlinked()));
 
@@ -198,11 +201,11 @@ public class HopperClickListener implements Listener {
             }
 
             if(linkingSkyHopper.getLinkedContainers().size() != linkingSkyHopper.getMaxContainers()) {
-                linkingSkyHopper.addLinkedContainer(new SkyContainer(container.getLocation(), FilterType.NONE, new ArrayList<>()));
+                linkingSkyHopper.addLinkedContainer(new SkyContainer(containerLocation, FilterType.NONE, new ArrayList<>()), true);
 
                 hopperManager.getSkyHopperSaver().saveSkyHopper(linkingSkyHopper);
 
-                guiManager.refreshGUIsByLocation(location);
+                guiManager.refreshGUIsByLocation(eventLocation);
 
                 player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.containerLinked()));
             } else {
@@ -210,8 +213,9 @@ public class HopperClickListener implements Listener {
             }
         } else {
             if (!(block.getState(false) instanceof Hopper hopperBlock)) return;
+            ImmutableLocation immutableLocation = ImmutableLocation.fromBukkitLocation(hopperBlock.getLocation());
 
-            SkyHopper skyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(hopperBlock.getLocation());
+            SkyHopper skyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(immutableLocation);
             if(skyHopper == null || player.isSneaking()) return;
 
             playerInteractEvent.setCancelled(true);
@@ -224,7 +228,7 @@ public class HopperClickListener implements Listener {
             if(player.hasPermission("skyhoppers.admin")
                     || (skyHopper.getOwner() != null && skyHopper.getOwner().equals(player.getUniqueId()))
                     || skyHopper.getMembers().contains(player.getUniqueId())) {
-                HopperGUI hopperGUI = new HopperGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager, this);
+                HopperGUI hopperGUI = new HopperGUI(skyHoppers, guiManager, eventLocation, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hookManager, this);
 
                 boolean creationResult = hopperGUI.create();
                 if(!creationResult) {

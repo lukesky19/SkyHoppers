@@ -19,14 +19,15 @@ package com.github.lukesky19.skyHoppers.gui.menu.filter;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.config.GUIConfigManager;
-import com.github.lukesky19.skyHoppers.config.data.gui.ButtonConfig;
-import com.github.lukesky19.skyHoppers.config.data.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.config.data.button.ButtonConfig;
+import com.github.lukesky19.skyHoppers.config.data.gui.FilterGUIConfig;
 import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
 import com.github.lukesky19.skyHoppers.gui.menu.HopperGUI;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.Filterable.FilterType;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.format.FormatUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
@@ -36,7 +37,6 @@ import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -62,7 +62,7 @@ public class SkyHopperFilterGUI extends SkyHopperGUI {
 
     private final @NotNull SkyHopper skyHopper;
 
-    private final @Nullable GUIConfig guiConfig;
+    private final @Nullable FilterGUIConfig guiConfig;
 
     private int itemNum = 0;
     private int added = 0;
@@ -71,7 +71,7 @@ public class SkyHopperFilterGUI extends SkyHopperGUI {
      * Constructor
      * @param skyHoppers A {@link SkyHoppers} instance.
      * @param guiManager A {@link GUIManager} instance.
-     * @param location The {@link Location} of the {@link SkyHopper}.
+     * @param location The {@link ImmutableLocation} of the {@link SkyHopper}.
      * @param skyHopper The {@link SkyHopper}.
      * @param player The {@link Player} viewing the GUI.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
@@ -81,7 +81,7 @@ public class SkyHopperFilterGUI extends SkyHopperGUI {
     public SkyHopperFilterGUI(
             @NotNull SkyHoppers skyHoppers,
             @NotNull GUIManager guiManager,
-            @NotNull Location location,
+            @NotNull ImmutableLocation location,
             @NotNull SkyHopper skyHopper,
             @NotNull Player player,
             @NotNull GUIConfigManager guiConfigManager,
@@ -93,7 +93,7 @@ public class SkyHopperFilterGUI extends SkyHopperGUI {
 
         this.skyHopper = skyHopper;
 
-        guiConfig = guiConfigManager.getGuiConfig("input_filter.yml");
+        guiConfig = guiConfigManager.getInputFilterGUIConfig();
     }
 
     /**

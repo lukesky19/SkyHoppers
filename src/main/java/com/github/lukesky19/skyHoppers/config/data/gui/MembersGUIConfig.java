@@ -27,14 +27,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
- * he GUI configuration for only upgrade GUIs.
+ * The GUI configuration for the members GUI.
  * @param configVersion The config version of the file.
  * @param guiType The gui type for this GUI.
  * @param name The name of this GUI.
  * @param entries The items to display inside the GUI.
  */
 @ConfigSerializable
-public record UpgradeGUIConfig(
+public record MembersGUIConfig(
         @Nullable String configVersion,
         @Nullable GUIType guiType,
         @Nullable String name,
@@ -45,28 +45,22 @@ public record UpgradeGUIConfig(
     }
 
     /**
-     * The possible items that can be displayed inside GUIs.
-     * NOTE: Not all are available in every GUI.
-     * @param filler The filler item configuration.
-     * @param exit The exit item configuration.
-     * @param increase The increase item configuration.
-     * @param increaseMax The increase max item configuration.
-     * @param upgrade The upgrade item configuration.
-     * @param upgradeMax The upgrade max item configuration.
-     * @param decrease The decrease item configuration.
-     * @param decreaseMin The decrease min item configuration.
+     * The buttons to display in the GUI.
+     * @param filler The filler item configuration
+     * @param previousPage The previous page item configuration
+     * @param exit The exit item configuration
+     * @param nextPage The next page item configuration
+     * @param add The add item configuration
+     * @param playerHead The player head item configuration
      * @param dummyButtons A {@link List} of {@link ButtonConfig}s to display in the GUI.
      */
     @ConfigSerializable
     public record Buttons(
             @NotNull ItemStackConfig filler,
+            @NotNull ButtonConfig previousPage,
             @NotNull ButtonConfig exit,
-            @NotNull ButtonConfig increase,
-            @NotNull ButtonConfig increaseMax,
-            @NotNull ButtonConfig upgrade,
-            @NotNull ButtonConfig upgradeMax,
-            @NotNull ButtonConfig decrease,
-            @NotNull ButtonConfig decreaseMin,
+            @NotNull ButtonConfig nextPage,
+            @NotNull ButtonConfig add,
+            @NotNull ButtonConfig playerHead,
             @NotNull List<ButtonConfig> dummyButtons) {}
 }
-

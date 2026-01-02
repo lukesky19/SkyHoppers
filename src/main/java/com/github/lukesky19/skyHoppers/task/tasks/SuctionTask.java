@@ -65,14 +65,14 @@ public class SuctionTask extends BukkitRunnable {
         for(SkyHopper currentSkyHopper : hopperManager.getSkyHoppersList()) {
             if(currentSkyHopper == null
                     || currentSkyHopper.getLocation() == null
-                    || !currentSkyHopper.getLocation().isChunkLoaded()
+                    || currentSkyHopper.getLocation().isChunkUnloaded()
                     || currentSkyHopper.getNextSuctionTime() > System.currentTimeMillis()
                     || !currentSkyHopper.isSkyHopperEnabled()
                     || !(currentSkyHopper.getLocation().getBlock().getState(false) instanceof Hopper hopper))
                 continue;
 
             final double suctionRange = currentSkyHopper.getSuctionRange() + 0.5;
-            Location centered = currentSkyHopper.getLocation().clone().add(0.5, 0.5, 0.5);
+            Location centered = currentSkyHopper.getLocation().toBukkitLocation().add(0.5, 0.5, 0.5);
 
             List<Item> groundItems = centered.getNearbyEntities(suctionRange, suctionRange, suctionRange).stream().filter(entity -> entity instanceof Item).map(entity -> (Item) entity).toList();
             if(groundItems.isEmpty()) continue;

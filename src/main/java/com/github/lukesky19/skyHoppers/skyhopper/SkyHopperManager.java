@@ -24,6 +24,7 @@ import com.github.lukesky19.skyHoppers.database.DatabaseManager;
 import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.HopperKeys;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Location;
@@ -148,10 +149,10 @@ public class SkyHopperManager {
     /**
      * Is there a SkyHopper at the {@link Location} provided?
      * This checks based on location and does not consider if the SkyHopper is loaded or not.
-     * @param location The {@link Location} to check.
+     * @param location The {@link ImmutableLocation} to check.
      * @return true if there is a SkyHopper at that location, otherwise false.
      */
-    public boolean isLocationSkyHopper(@NotNull Location location) {
+    public boolean isLocationSkyHopper(@NotNull ImmutableLocation location) {
         return getSkyHopperDataManager().isLocationSkyHopper(location);
     }
 }

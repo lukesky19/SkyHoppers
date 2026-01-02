@@ -19,6 +19,7 @@ package com.github.lukesky19.skyHoppers.listener;
 
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -55,10 +56,11 @@ public class EntityExplodeListener implements Listener {
         while(iterator.hasNext()) {
             Block block = iterator.next();
             Location location = block.getLocation();
+            ImmutableLocation immutableLocation = ImmutableLocation.fromBukkitLocation(location);
 
-            SkyHopper skyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(location);
+            SkyHopper skyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(immutableLocation);
             if(skyHopper == null) {
-                if(hopperManager.isLocationSkyHopper(location)) {
+                if(hopperManager.isLocationSkyHopper(immutableLocation)) {
                     iterator.remove();
                 }
 

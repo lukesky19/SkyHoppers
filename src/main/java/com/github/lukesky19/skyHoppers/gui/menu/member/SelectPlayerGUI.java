@@ -20,12 +20,13 @@ package com.github.lukesky19.skyHoppers.gui.menu.member;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.config.GUIConfigManager;
-import com.github.lukesky19.skyHoppers.config.data.gui.ButtonConfig;
-import com.github.lukesky19.skyHoppers.config.data.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.config.data.button.ButtonConfig;
+import com.github.lukesky19.skyHoppers.config.data.gui.SelectPlayerGUIConfig;
 import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
@@ -35,7 +36,6 @@ import com.github.lukesky19.skylib.api.player.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -60,7 +60,7 @@ public class SelectPlayerGUI extends SkyHopperGUI {
 
     private final @NotNull SkyHopper skyHopper;
 
-    private final @Nullable GUIConfig guiConfig;
+    private final @Nullable SelectPlayerGUIConfig guiConfig;
 
     private int playerNum = 0;
     private int added = 0;
@@ -69,7 +69,7 @@ public class SelectPlayerGUI extends SkyHopperGUI {
      * Constructor
      * @param skyHoppers A {@link SkyHoppers} instance.
      * @param guiManager A {@link GUIManager} instance.
-     * @param location The {@link Location} of the {@link SkyHopper}.
+     * @param location The {@link ImmutableLocation} of the {@link SkyHopper}.
      * @param skyHopper The {@link SkyHopper} the GUI is associated with.
      * @param player The {@link Player} viewing the GUI.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
@@ -79,7 +79,7 @@ public class SelectPlayerGUI extends SkyHopperGUI {
     public SelectPlayerGUI(
             @NotNull SkyHoppers skyHoppers,
             @NotNull GUIManager guiManager,
-            @NotNull Location location,
+            @NotNull ImmutableLocation location,
             @NotNull SkyHopper skyHopper,
             @NotNull Player player,
             @NotNull GUIConfigManager guiConfigManager,
@@ -91,7 +91,7 @@ public class SelectPlayerGUI extends SkyHopperGUI {
 
         this.skyHopper = skyHopper;
 
-        guiConfig = guiConfigManager.getGuiConfig("select_player.yml");
+        guiConfig = guiConfigManager.getSelectPlayerGUIConfig();
     }
 
     /**
@@ -100,19 +100,19 @@ public class SelectPlayerGUI extends SkyHopperGUI {
      */
     public boolean create() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the members.yml GUI due to invalid GUI configuration."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the select player GUI due to invalid GUI configuration."));
             return false;
         }
 
         GUIType guiType = guiConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the members.yml GUI due to an invalid GUIType"));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the select player GUI due to an invalid GUIType"));
             return false;
         }
 
         String guiName = guiConfig.name();
         if(guiName == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the members.yml GUI due to an invalid gui name."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the select player GUI due to an invalid gui name."));
             return false;
         }
 

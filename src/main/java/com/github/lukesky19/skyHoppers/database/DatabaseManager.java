@@ -20,8 +20,8 @@ package com.github.lukesky19.skyHoppers.database;
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.database.table.HoppersTable;
 import com.github.lukesky19.skyHoppers.database.table.VersionsTable;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skylib.api.database.AbstractDatabaseManager;
-import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.jetbrains.annotations.NotNull;
@@ -89,11 +89,10 @@ public class DatabaseManager extends AbstractDatabaseManager {
                     int z = resultSet.getInt("z");
 
                     World world = skyHoppers.getServer().getWorld(worldName);
-                    if(world == null) {
-                        world = WorldCreator.name(worldName).createWorld();
-                    }
+                    if(world == null) world = WorldCreator.name(worldName).createWorld();
+                    if(world == null) continue;
 
-                    futureList.add(hoppersTable.addSkyHopperLocation(new Location(world, x, y, z)));
+                    futureList.add(hoppersTable.addSkyHopperLocation(new ImmutableLocation(world, x, y, z)));
                 }
             } catch (SQLException e) {
                 throw new RuntimeException(e);

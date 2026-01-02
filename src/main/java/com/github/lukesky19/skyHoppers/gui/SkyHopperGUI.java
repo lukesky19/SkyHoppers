@@ -18,6 +18,7 @@
 package com.github.lukesky19.skyHoppers.gui;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skyHoppers.util.LocationUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
@@ -25,7 +26,6 @@ import com.github.lukesky19.skylib.api.gui.GUIType;
 import com.github.lukesky19.skylib.api.gui.abstracts.ButtonGUI;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -71,9 +71,9 @@ public abstract class SkyHopperGUI extends ButtonGUI<LocationUUIDKey> {
      */
     protected final @NotNull UUID uuid;
     /**
-     * The {@link Location} the GUI is associated with. This is the location of the SkyHopper.
+     * The {@link ImmutableLocation} the GUI is associated with. This is the location of the SkyHopper.
      */
-    protected final @NotNull Location location;
+    protected final @NotNull ImmutableLocation location;
     /**
      * The {@link InventoryView} associated with this GUI.
      */
@@ -92,14 +92,14 @@ public abstract class SkyHopperGUI extends ButtonGUI<LocationUUIDKey> {
      * @param skyHoppers A {@link SkyHoppers} instance.
      * @param guiManager The {@link GUIManager} that is used to track open GUIs.
      * @param player The {@link Player} associated with the created GUI.
-     * @param location The {@link Location} of the SkyHopper the GUI is for.
+     * @param location The {@link ImmutableLocation} of the SkyHopper the GUI is for.
      * @param previousGUI The previous {@link SkyHopperGUI} opened before opening this one.
      */
     public SkyHopperGUI(
             @NotNull SkyHoppers skyHoppers,
             @NotNull GUIManager guiManager,
             @NotNull Player player,
-            @NotNull Location location,
+            @NotNull ImmutableLocation location,
             @Nullable SkyHopperGUI previousGUI) {
         super(skyHoppers, guiManager, new LocationUUIDKey(location, player.getUniqueId()), player);
         this.skyHoppers = skyHoppers;

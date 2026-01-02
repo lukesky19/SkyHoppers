@@ -17,6 +17,7 @@
 */
 package com.github.lukesky19.skyHoppers.config.data.gui;
 
+import com.github.lukesky19.skyHoppers.config.data.button.ButtonConfig;
 import com.github.lukesky19.skylib.api.gui.GUIType;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import com.github.lukesky19.skylib.libs.configurate.objectmapping.ConfigSerializable;
@@ -26,21 +27,25 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
- * The GUI configuration for non-upgrade GUIs.
+ * The GUI configuration for the select player GUI.
  * @param configVersion The config version of the file.
  * @param guiType The gui type for this GUI.
  * @param name The name of this GUI.
  * @param entries The items to display inside the GUI.
  */
 @ConfigSerializable
-public record GUIConfig(
+public record SelectPlayerGUIConfig(
         @Nullable String configVersion,
         @Nullable GUIType guiType,
         @Nullable String name,
-        @NotNull Buttons entries) {
+        @NotNull Buttons entries) implements IGUIConfig {
+    @Override
+    public @Nullable String getConfigVersion() {
+        return configVersion;
+    }
+
     /**
-     * The possible items that can be displayed inside GUIs.
-     * NOTE: Not all are available in every GUI.
+     * The buttons to display in the GUI.
      * @param filler The filler item configuration
      * @param previousPage The previous page item configuration
      * @param exit The exit item configuration

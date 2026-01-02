@@ -15,22 +15,22 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package com.github.lukesky19.skyHoppers.gui.menu.links;
+package com.github.lukesky19.skyHoppers.gui.menu.skycontainer;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.config.GUIConfigManager;
 import com.github.lukesky19.skyHoppers.config.LocaleManager;
 import com.github.lukesky19.skyHoppers.config.data.Locale;
-import com.github.lukesky19.skyHoppers.config.data.gui.ButtonConfig;
-import com.github.lukesky19.skyHoppers.config.data.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.config.data.button.ButtonConfig;
+import com.github.lukesky19.skyHoppers.config.data.gui.LinkedContainersGUIConfig;
 import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
 import com.github.lukesky19.skyHoppers.gui.menu.HopperGUI;
-import com.github.lukesky19.skyHoppers.gui.menu.filter.SkyContainerFilterGUI;
 import com.github.lukesky19.skyHoppers.listener.HopperClickListener;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.format.FormatUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
@@ -40,7 +40,6 @@ import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import org.bukkit.Location;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -59,7 +58,7 @@ import java.util.Optional;
 /**
  * This class lets Players manage their linked containers.
  */
-public class LinksGUI extends SkyHopperGUI {
+public class LinkedContainersGUI extends SkyHopperGUI {
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
 
@@ -68,7 +67,7 @@ public class LinksGUI extends SkyHopperGUI {
 
     private final @NotNull SkyHopper skyHopper;
 
-    private final @Nullable GUIConfig guiConfig;
+    private final @Nullable LinkedContainersGUIConfig guiConfig;
 
     private int containerNum = 0;
     private int added = 0;
@@ -77,7 +76,7 @@ public class LinksGUI extends SkyHopperGUI {
      * Constructor
      * @param skyHoppers A {@link SkyHoppers} instance.
      * @param guiManager A {@link GUIManager} instance.
-     * @param location The {@link Location} of the {@link SkyHopper}.
+     * @param location The {@link ImmutableLocation} of the {@link SkyHopper}.
      * @param skyHopper The {@link SkyHopper}.
      * @param player The {@link Player} viewing the GUI.
      * @param localeManager A {@link LocaleManager} instance.
@@ -86,10 +85,10 @@ public class LinksGUI extends SkyHopperGUI {
      * @param hopperClickListener A {@link HopperClickListener} instance.
      * @param hopperGUI The {@link HopperGUI} the Player came from.
      */
-    public LinksGUI(
+    public LinkedContainersGUI(
             @NotNull SkyHoppers skyHoppers,
             @NotNull GUIManager guiManager,
-            @NotNull Location location,
+            @NotNull ImmutableLocation location,
             @NotNull SkyHopper skyHopper,
             @NotNull Player player,
             @NotNull LocaleManager localeManager,
@@ -106,7 +105,7 @@ public class LinksGUI extends SkyHopperGUI {
 
         this.skyHopper = skyHopper;
 
-        guiConfig = guiConfigManager.getGuiConfig("links.yml");
+        guiConfig = guiConfigManager.getLinkedContainersGUIConfig();
     }
 
     /**
@@ -270,7 +269,7 @@ public class LinksGUI extends SkyHopperGUI {
             for(int i = 0; i <= guiSize - 10; i++) {
                 if(maxLinkedContainers >= containerNum) {
                     SkyContainer skyContainer = skyHopper.getLinkedContainers().get(containerNum);
-                    Location linkedLocation = skyContainer.getLocation();
+                    ImmutableLocation linkedLocation = skyContainer.getLocation();
 
                     GUIButton.Builder guiButtonBuilder = new GUIButton.Builder();
                     ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
@@ -294,6 +293,8 @@ public class LinksGUI extends SkyHopperGUI {
                     }
 
                     List<TagResolver.Single> placeholders = List.of(
+                            Placeholder.parsed("priority", String.valueOf(skyContainer.getPriority())),
+                            Placeholder.parsed("world", linkedLocation.getWorld().getName()),
                             Placeholder.parsed("x", String.valueOf(linkedLocation.getX())),
                             Placeholder.parsed("y", String.valueOf(linkedLocation.getY())),
                             Placeholder.parsed("z", String.valueOf(linkedLocation.getZ())));
@@ -317,32 +318,32 @@ public class LinksGUI extends SkyHopperGUI {
                                         guiManager.removeOpenGUI(identifier);
                                     }, 1L);
 
-                                    SkyContainerFilterGUI outputFilterGUI = new SkyContainerFilterGUI(skyHoppers, guiManager, location, skyHopper, player, guiConfigManager, hopperManager, skyContainer, this);
+                                    SkyContainerGUI skyContainerGUI = new SkyContainerGUI(skyHoppers, guiManager, location, skyHopper, skyContainer, player, localeManager, guiConfigManager, hopperManager, this);
 
-                                    boolean creationResult = outputFilterGUI.create();
+                                    boolean creationResult = skyContainerGUI.create();
                                     if(!creationResult) {
                                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                                         return;
                                     }
 
-                                    boolean updateResult = outputFilterGUI.update();
+                                    boolean updateResult = skyContainerGUI.update();
                                     if(!updateResult) {
                                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                                         return;
                                     }
 
-                                    boolean openResult = outputFilterGUI.open();
+                                    boolean openResult = skyContainerGUI.open();
                                     if(!openResult) {
                                         player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
                                     }
                                 }
 
                                 case RIGHT, SHIFT_RIGHT -> {
-                                    skyHopper.removeLinkedContainer(skyContainer);
+                                    skyHopper.removeLinkedContainer(skyContainer, true);
 
                                     hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
-                                    guiManager.closeOutputFilterGUIs(location);
+                                    guiManager.closeSkyContainerRelatedGUIs(location);
 
                                     guiManager.refreshGUIsByLocation(location);
 

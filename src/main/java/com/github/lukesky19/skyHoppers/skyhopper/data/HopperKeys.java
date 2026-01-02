@@ -114,7 +114,11 @@ public enum HopperKeys {
     /**
      * The key that stores the maximum number of linked containers allowed for the {@link SkyHopper}.
      */
-    MAX_CONTAINERS;
+    MAX_CONTAINERS,
+    /**
+     * The key thet stores the {@link SkyContainer}'s priority.
+     */
+    PRIORITY;
 
     /**
      * The {@link NamespacedKey} for the {@link SkyHopper} or {@link SkyContainer} setting.

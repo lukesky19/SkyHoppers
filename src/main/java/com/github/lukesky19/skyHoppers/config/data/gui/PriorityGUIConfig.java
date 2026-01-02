@@ -27,14 +27,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /**
- * he GUI configuration for only upgrade GUIs.
+ * The GUI configuration for the priority GUI.
  * @param configVersion The config version of the file.
  * @param guiType The gui type for this GUI.
  * @param name The name of this GUI.
- * @param entries The items to display inside the GUI.
+ * @param entries The button configurations to display inside the GUI.
  */
 @ConfigSerializable
-public record UpgradeGUIConfig(
+public record PriorityGUIConfig(
         @Nullable String configVersion,
         @Nullable GUIType guiType,
         @Nullable String name,
@@ -45,16 +45,12 @@ public record UpgradeGUIConfig(
     }
 
     /**
-     * The possible items that can be displayed inside GUIs.
-     * NOTE: Not all are available in every GUI.
-     * @param filler The filler item configuration.
-     * @param exit The exit item configuration.
-     * @param increase The increase item configuration.
-     * @param increaseMax The increase max item configuration.
-     * @param upgrade The upgrade item configuration.
-     * @param upgradeMax The upgrade max item configuration.
-     * @param decrease The decrease item configuration.
-     * @param decreaseMin The decrease min item configuration.
+     * The button configurations that are displayed inside the priority GUI.
+     * @param filler The filler item configuration
+     * @param exit The exit item configuration
+     * @param increase The configuration for the increase priority button.
+     * @param decrease The configuration for the decrease priority button.
+     * @param priority The configuration to view the current priority.
      * @param dummyButtons A {@link List} of {@link ButtonConfig}s to display in the GUI.
      */
     @ConfigSerializable
@@ -62,11 +58,7 @@ public record UpgradeGUIConfig(
             @NotNull ItemStackConfig filler,
             @NotNull ButtonConfig exit,
             @NotNull ButtonConfig increase,
-            @NotNull ButtonConfig increaseMax,
-            @NotNull ButtonConfig upgrade,
-            @NotNull ButtonConfig upgradeMax,
+            @NotNull ButtonConfig priority,
             @NotNull ButtonConfig decrease,
-            @NotNull ButtonConfig decreaseMin,
             @NotNull List<ButtonConfig> dummyButtons) {}
 }
-

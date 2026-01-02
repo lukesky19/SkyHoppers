@@ -15,20 +15,17 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package com.github.lukesky19.skyHoppers.task.data;
+package com.github.lukesky19.skyHoppers.config.data.gui;
 
-import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
-import org.jetbrains.annotations.NotNull;
+import javax.annotation.Nullable;
 
 /**
- * Contains the data necessary to complete a transfer from the HopperMoveItemEvent for SkyHoppers.
- * @param sourceLocation The location of the source container.
- * @param destinationLocation The Location of the destination container.
- * @param isSuction Whether the transfer occurred from a suction or a transfer.
- * @param initiatorIsSource Whether the source container initiated the transfer or not.
+ * This interface is used to define a method to get the configuration version of the config.
  */
-public record QueuedTransfer(
-        @NotNull ImmutableLocation sourceLocation,
-        @NotNull ImmutableLocation destinationLocation,
-        boolean isSuction,
-        boolean initiatorIsSource) {}
+public interface IGUIConfig {
+    /**
+     * Get the config version.
+     * @return The config version or null.
+     */
+    @Nullable String getConfigVersion();
+}

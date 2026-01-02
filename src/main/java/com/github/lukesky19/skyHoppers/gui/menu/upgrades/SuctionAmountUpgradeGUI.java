@@ -23,7 +23,7 @@ import com.github.lukesky19.skyHoppers.config.LocaleManager;
 import com.github.lukesky19.skyHoppers.config.SettingsManager;
 import com.github.lukesky19.skyHoppers.config.data.Locale;
 import com.github.lukesky19.skyHoppers.config.data.Settings;
-import com.github.lukesky19.skyHoppers.config.data.gui.ButtonConfig;
+import com.github.lukesky19.skyHoppers.config.data.button.ButtonConfig;
 import com.github.lukesky19.skyHoppers.config.data.gui.UpgradeGUIConfig;
 import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
@@ -31,6 +31,7 @@ import com.github.lukesky19.skyHoppers.hook.HookManager;
 import com.github.lukesky19.skyHoppers.hook.impl.vault.EconomyHook;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
@@ -38,7 +39,6 @@ import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -70,7 +70,7 @@ public class SuctionAmountUpgradeGUI extends SkyHopperGUI {
      * Constructor
      * @param skyHoppers A {@link SkyHoppers} instance.
      * @param guiManager A {@link GUIManager} instance.
-     * @param location The {@link Location} of the {@link SkyHopper}.
+     * @param location The {@link ImmutableLocation} of the {@link SkyHopper}.
      * @param skyHopper The {@link SkyHopper}.
      * @param player The {@link Player} viewing the GUI.
      * @param settingsManager A {@link SettingsManager} instance.
@@ -83,7 +83,7 @@ public class SuctionAmountUpgradeGUI extends SkyHopperGUI {
     public SuctionAmountUpgradeGUI(
             @NotNull SkyHoppers skyHoppers,
             @NotNull GUIManager guiManager,
-            @NotNull Location location,
+            @NotNull ImmutableLocation location,
             @NotNull SkyHopper skyHopper,
             @NotNull Player player,
             @NotNull SettingsManager settingsManager,
@@ -101,7 +101,7 @@ public class SuctionAmountUpgradeGUI extends SkyHopperGUI {
 
         this.skyHopper = skyHopper;
 
-        guiConfig = guiConfigManager.getUpgradeConfig("suction_amount.yml");
+        guiConfig = guiConfigManager.getSuctionAmountUpgradeGUIConfig();
     }
 
     /**

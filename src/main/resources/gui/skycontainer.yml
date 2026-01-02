@@ -1,0 +1,42 @@
+config-version: 1.0.0.0
+gui-type: CHEST_27
+name: "<#99ff99><bold>SkyContainer Settings</bold></#99ff99>"
+entries:
+    filler:
+        item-type: GRAY_STAINED_GLASS_PANE
+        name: " "
+        lore: [ ]
+    exit:
+        slot: 22
+        item:
+            item-type: BARRIER
+            name: "<white><bold>Exit SkyContainer Settings</bold></white>"
+            lore:
+                - ' <white>|</white> <gray>Click to close</gray>'
+                - " <white>|</white> <gray>the SkyContainer's settings.</gray>"
+    filter:
+        slot: 11
+        item:
+            item-type: PAPER
+            name: "<#99ff99><bold>Manage Filter</bold></#99ff99>"
+            lore:
+                - " <white>|</white> <gray>Click to manage the SkyContainer's filter.</gray>"
+    priority:
+        slot: 13
+        item:
+            item-type: REDSTONE_TORCH
+            name: "<#99ff99><bold>Manage Priority</bold></#99ff99>"
+            lore:
+                - " <white>|</white> <gray>Click to manage the SkyContainer's priority.</gray>"
+    info:
+        slot: 15
+        item:
+            item-type: OAK_SIGN
+            name: "<#99ff99><bold>SkyContainer Info</bold></#99ff99>"
+            lore:
+                - " <white>| <#99ff99><bold>Filter Type</bold></#99ff99> <gray>:</gray> <white><filter_type></white>"
+                - " <white>| <#99ff99><bold>World</bold></#99ff99> <gray>:</gray> <white><world></white>"
+                - " <white>| <#99ff99><bold>X Coordinate</bold></#99ff99> <gray>:</gray> <white><x></white>"
+                - " <white>| <#99ff99><bold>Y Coordinate</bold></#99ff99> <gray>:</gray> <white><y></white>"
+                - " <white>| <#99ff99><bold>Z Coordinate</bold></#99ff99> <gray>:</gray> <white><z></white>"
+                - " <white>| <#99ff99><bold>Priority</bold></#99ff99> <gray>:</gray> <white><priority></white>"

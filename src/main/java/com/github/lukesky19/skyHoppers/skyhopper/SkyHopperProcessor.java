@@ -27,6 +27,7 @@ import com.github.lukesky19.skyHoppers.skyhopper.data.HopperKeys;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.task.data.QueuedTransfer;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skyHoppers.util.PluginUtils;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.registry.RegistryUtil;
@@ -105,9 +106,9 @@ public class SkyHopperProcessor {
      */
     public void loadSkyHoppersInChunk(@NotNull Chunk chunk) {
         // Retrieve SkyHoppers for the specific chunk
-        List<Location> locationList = skyHopperManager.getSkyHopperDataManager().getLocationsInChunk(chunk.getWorld(), chunk.getX(), chunk.getZ());
+        List<ImmutableLocation> locationList = skyHopperManager.getSkyHopperDataManager().getLocationsInChunk(chunk.getWorld(), chunk.getX(), chunk.getZ());
 
-        for(Location location : locationList) {
+        for(ImmutableLocation location : locationList) {
             loadSkyHopperAtLocation(location);
         }
     }
@@ -116,7 +117,7 @@ public class SkyHopperProcessor {
      * Attempt to load the SkyHopper at the provided {@link Location}.
      * @param location The {@link Location} of the SkyHopper to load.
      */
-    public void loadSkyHopperAtLocation(@NotNull Location location) {
+    public void loadSkyHopperAtLocation(@NotNull ImmutableLocation location) {
         // Check if the location is a SkyHopper
         if(!skyHopperManager.isLocationSkyHopper(location)) return;
         // Check if the SkyHopper is already loaded
@@ -127,11 +128,11 @@ public class SkyHopperProcessor {
 
     /**
      * Loads a {@link SkyHopper} from the location provided directly if possible.
-     * @param location The {@link Location} of the SkyHopper.
+     * @param location The {@link ImmutableLocation} of the SkyHopper.
      */
-    public void loadSkyHopperAtLocationDirectly(@NotNull Location location) {
+    public void loadSkyHopperAtLocationDirectly(@NotNull ImmutableLocation location) {
         // Check if the block at the location is a hopper
-        if(!(location.getBlock().getState(false) instanceof Hopper hopper)) return;
+        if(!(location.getBlockState() instanceof Hopper hopper)) return;
 
         // Get the PersistentDataContainer
         PersistentDataContainer pdc = hopper.getPersistentDataContainer();
@@ -165,7 +166,7 @@ public class SkyHopperProcessor {
         int chunkZ = chunk.getZ();
 
         // Retrieve SkyHopper locations for the specific chunk
-        List<Location> locationList = skyHopperDataManager.getLocationsInChunk(chunk.getWorld(), chunkX, chunkZ);
+        List<ImmutableLocation> locationList = skyHopperDataManager.getLocationsInChunk(chunk.getWorld(), chunkX, chunkZ);
 
         locationList.forEach(location -> skyHopperDataManager.clearSkyHopper(location, chunkX, chunkZ));
     }
@@ -176,7 +177,7 @@ public class SkyHopperProcessor {
      * @param pdc The {@link PersistentDataContainer} to load from.
      * @return A {@link SkyHopper} or null.
      */
-    public @Nullable SkyHopper loadSkyHopper(@Nullable Location location, @NotNull PersistentDataContainer pdc) {
+    public @Nullable SkyHopper loadSkyHopper(@Nullable ImmutableLocation location, @NotNull PersistentDataContainer pdc) {
         @Nullable Settings settings = settingsManager.getSettings();
         @NotNull Locale locale = localeManager.getLocale();
 
@@ -276,7 +277,7 @@ public class SkyHopperProcessor {
                     BlockState linkedBlockState = deserializedLocation.getBlock().getState(false);
 
                     if (linkedBlockState instanceof Container linkedContainer) {
-                        skyHopper.addLinkedContainer(new SkyContainer(linkedContainer.getLocation(), Filterable.FilterType.NONE, new ArrayList<>()));
+                        skyHopper.addLinkedContainer(new SkyContainer(ImmutableLocation.fromBukkitLocation(linkedContainer.getLocation()), Filterable.FilterType.NONE, new ArrayList<>()), false);
                     }
                 }
             }
@@ -305,11 +306,14 @@ public class SkyHopperProcessor {
                         List<ItemType> linkedContainerFilterItems = filterItemNames != null ? new ArrayList<>(filterItemNames.stream().map(itemName -> RegistryUtil.getItemType(logger, itemName)).filter(Optional::isPresent).map(Optional::get).toList()) : new ArrayList<>();
 
                         // Create the SkyContainer and add it to the list
-                        skyHopper.addLinkedContainer(new SkyContainer(linkedLocation, outputFilterType, linkedContainerFilterItems));
+                        skyHopper.addLinkedContainer(new SkyContainer(ImmutableLocation.fromBukkitLocation(linkedLocation), outputFilterType, linkedContainerFilterItems), false);
                     }
                 });
             }
         }
+
+        // Sort linked containers
+        skyHopper.sortLinkedContainers();
 
         // Transfer Speed
         double pdcTransferSpeed = pdc.getOrDefault(HopperKeys.TRANSFER_SPEED.getKey(), PersistentDataType.DOUBLE, settings.skyHopperConfig().startingTransferSpeed());
@@ -410,12 +414,18 @@ public class SkyHopperProcessor {
                         // Parse the item names into ItemTypes.
                         List<ItemType> linkedContainerFilterItems = filterItemNames != null ? new ArrayList<>(filterItemNames.stream().map(itemName -> RegistryUtil.getItemType(logger, itemName)).filter(Optional::isPresent).map(Optional::get).toList()) : new ArrayList<>();
 
+                        // Get the SkyContainer's priority or 1 if not set
+                        int priority = linkedPDC.getOrDefault(HopperKeys.PRIORITY.getKey(), PersistentDataType.INTEGER, 1);
+
                         // Create the SkyContainer and add it to the list
-                        skyHopper.addLinkedContainer(new SkyContainer(linkedLocation, outputFilterType, linkedContainerFilterItems));
+                        skyHopper.addLinkedContainer(new SkyContainer(ImmutableLocation.fromBukkitLocation(linkedLocation), outputFilterType, linkedContainerFilterItems, priority), false);
                     }
                 });
             }
         }
+
+        // Sort linked containers
+        skyHopper.sortLinkedContainers();
 
         // Transfer Speed
         double pdcTransferSpeed = pdc.getOrDefault(HopperKeys.TRANSFER_SPEED.getKey(), PersistentDataType.DOUBLE, settings.skyHopperConfig().startingTransferSpeed());

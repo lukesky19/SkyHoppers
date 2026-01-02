@@ -26,10 +26,10 @@ import com.github.lukesky19.skyHoppers.hook.HookManager;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperDataManager;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.player.PlayerUtil;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
-import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.block.Hopper;
@@ -85,11 +85,10 @@ public class BlockBreakListener implements Listener {
             return;
         }
 
-        Location hopperLocation = hopper.getLocation().clone();
-
-        SkyHopper skyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(hopperLocation);
+        ImmutableLocation immutableLocation = ImmutableLocation.fromBukkitLocation(hopper.getLocation());
+        SkyHopper skyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(immutableLocation);
         if(skyHopper == null) {
-            if(hopperManager.isLocationSkyHopper(hopperLocation)) {
+            if(hopperManager.isLocationSkyHopper(immutableLocation)) {
                 player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperNotLoaded()));
                 blockBreakEvent.setCancelled(true);
             }
@@ -97,7 +96,7 @@ public class BlockBreakListener implements Listener {
             return;
         }
 
-        if(hookManager.canNotBuild(player, hopperLocation)) {
+        if(hookManager.canNotBuild(player, immutableLocation.toBukkitLocation())) {
             player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.noBuild()));
             blockBreakEvent.setCancelled(true);
             return;
@@ -105,7 +104,7 @@ public class BlockBreakListener implements Listener {
 
         if(player.hasPermission("skyhoppers.admin") || (skyHopper.getOwner() != null && skyHopper.getOwner().equals(player.getUniqueId())) || skyHopper.getMembers().contains(player.getUniqueId())) {
             // Delete the hopper's data
-            hopperManager.getSkyHopperDataManager().removeSkyHopper(hopperLocation);
+            hopperManager.getSkyHopperDataManager().removeSkyHopper(immutableLocation);
 
             player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperBroken()));
 
@@ -128,7 +127,7 @@ public class BlockBreakListener implements Listener {
                 if(dropToInventory) {
                     PlayerUtil.giveItem(player.getInventory(), itemStack, itemStack.getAmount(), player.getLocation());
                 } else {
-                    hopper.getWorld().dropItemNaturally(hopperLocation, itemStack);
+                    hopper.getWorld().dropItemNaturally(immutableLocation.toBukkitLocation(), itemStack);
                 }
             }
 
@@ -141,7 +140,7 @@ public class BlockBreakListener implements Listener {
                 }
             }
 
-            hopperClickListener.disableLinkingForLocation(hopperLocation);
+            hopperClickListener.disableLinkingForLocation(immutableLocation);
         } else {
             player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.noBreak()));
             blockBreakEvent.setCancelled(true);

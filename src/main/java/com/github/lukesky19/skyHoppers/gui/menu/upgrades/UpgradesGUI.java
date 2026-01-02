@@ -23,20 +23,20 @@ import com.github.lukesky19.skyHoppers.config.LocaleManager;
 import com.github.lukesky19.skyHoppers.config.SettingsManager;
 import com.github.lukesky19.skyHoppers.config.data.Locale;
 import com.github.lukesky19.skyHoppers.config.data.Settings;
-import com.github.lukesky19.skyHoppers.config.data.gui.ButtonConfig;
-import com.github.lukesky19.skyHoppers.config.data.gui.GUIConfig;
+import com.github.lukesky19.skyHoppers.config.data.button.ButtonConfig;
+import com.github.lukesky19.skyHoppers.config.data.gui.SelectUpgradeGUIConfig;
 import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
 import com.github.lukesky19.skyHoppers.gui.menu.HopperGUI;
 import com.github.lukesky19.skyHoppers.hook.HookManager;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
-import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -61,13 +61,13 @@ public class UpgradesGUI extends SkyHopperGUI {
 
     private final @NotNull SkyHopper skyHopper;
 
-    private final @Nullable GUIConfig guiConfig;
+    private final @Nullable SelectUpgradeGUIConfig guiConfig;
 
     /**
      * Constructor
      * @param skyHoppers A {@link SkyHoppers} instance.
      * @param guiManager A {@link GUIManager} instance.
-     * @param location The {@link Location} of the {@link SkyHopper}.
+     * @param location The {@link ImmutableLocation} of the {@link SkyHopper}.
      * @param skyHopper The {@link SkyHopper}.
      * @param player The {@link Player} viewing the GUI.
      * @param settingsManager A {@link SettingsManager} instance.
@@ -80,7 +80,7 @@ public class UpgradesGUI extends SkyHopperGUI {
     public UpgradesGUI(
             @NotNull SkyHoppers skyHoppers,
             @NotNull GUIManager guiManager,
-            @NotNull Location location,
+            @NotNull ImmutableLocation location,
             @NotNull SkyHopper skyHopper,
             @NotNull Player player,
             @NotNull SettingsManager settingsManager,
@@ -99,7 +99,7 @@ public class UpgradesGUI extends SkyHopperGUI {
 
         this.skyHopper = skyHopper;
 
-        guiConfig = guiConfigManager.getGuiConfig("upgrades.yml");
+        guiConfig = guiConfigManager.getUpgradesGUIConfig();
     }
 
     /**
@@ -108,19 +108,19 @@ public class UpgradesGUI extends SkyHopperGUI {
      */
     public boolean create() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the input_filter.yml GUI due to invalid GUI configuration."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the upgrades GUI due to invalid GUI configuration."));
             return false;
         }
 
         GUIType guiType = guiConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the input_filter.yml GUI due to an invalid GUIType"));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the upgrades GUI due to an invalid GUIType"));
             return false;
         }
 
         String guiName = guiConfig.name();
         if(guiName == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the input_filter.yml GUI due to an invalid gui name."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the upgrades GUI due to an invalid gui name."));
             return false;
         }
 

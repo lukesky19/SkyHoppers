@@ -17,7 +17,7 @@
 */
 package com.github.lukesky19.skyHoppers.skyhopper.data;
 
-import org.bukkit.Location;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,34 +29,82 @@ import java.util.Set;
  * Contains the data for a SkyHopper's linked container.
  */
 public class SkyContainer extends Filterable {
-    private final @NotNull Location location;
+    private final @NotNull ImmutableLocation location;
+    private int priority = 1;
 
     /**
      * Constructor
-     * @param location The {@link Location} of the linked container.
+     * @param location The {@link ImmutableLocation} of the linked container.
      * @param filterType The {@link FilterType} for the linked container.
      */
-    public SkyContainer(@NotNull Location location, @NotNull FilterType filterType) {
+    public SkyContainer(@NotNull ImmutableLocation location, @NotNull FilterType filterType) {
         super(filterType, new ArrayList<>());
         this.location = location;
     }
 
     /**
      * Constructor
-     * @param location The {@link Location} of the linked container.
+     * @param location The {@link ImmutableLocation} of the linked container.
      * @param filterType The {@link FilterType} for the linked container.
      * @param filterItems The {@link Set} of {@link ItemType}s that are filtered.
      */
-    public SkyContainer(@NotNull Location location, @NotNull FilterType filterType, @NotNull List<ItemType> filterItems) {
+    public SkyContainer(@NotNull ImmutableLocation location, @NotNull FilterType filterType, @NotNull List<ItemType> filterItems) {
         super(filterType, filterItems);
         this.location = location;
     }
 
     /**
-     * Get the {@link Location} of the linked container.
-     * @return A copy of the {@link Location} of the linked container.
+     * Constructor
+     * @param location The {@link ImmutableLocation} of the linked container.
+     * @param filterType The {@link FilterType} for the linked container.
+     * @param filterItems The {@link Set} of {@link ItemType}s that are filtered.
+     * @param priority The {@link SkyContainer}'s priority.
      */
-    public @NotNull Location getLocation() {
-        return new Location(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    public SkyContainer(@NotNull ImmutableLocation location, @NotNull FilterType filterType, @NotNull List<ItemType> filterItems, int priority) {
+        super(filterType, filterItems);
+        this.location = location;
+        this.priority = priority;
+    }
+
+    /**
+     * Get the {@link ImmutableLocation} of the linked container.
+     * @return The {@link ImmutableLocation} of the linked container.
+     */
+    public @NotNull ImmutableLocation getLocation() {
+        return location;
+    }
+
+    /**
+     * Get the priority of the linked container.
+     * @return The priority. 1 is highest priority.
+     */
+    public int getPriority() {
+        return priority;
+    }
+
+    /**
+     * Set the priority of the linked container.
+     * @param priority The priority. 1 is the highest priority.
+     */
+    public void setPriority(int priority) {
+        this.priority = Math.max(1, priority);
+    }
+
+    /**
+     * Increases the priority of the linked container. Does nothing if already the highest priority (1)
+     */
+    public void increasePriority() {
+        if(priority == 1) return;
+
+        priority--;
+    }
+
+    /**
+     * Decreases the priority of the linked container. Does nothing if already the lowest priority (2147483647)
+     */
+    public void decreasePriority() {
+        if(priority == Integer.MAX_VALUE) return;
+
+        priority++;
     }
 }

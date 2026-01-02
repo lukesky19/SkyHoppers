@@ -23,6 +23,7 @@ import com.github.lukesky19.skyHoppers.hook.impl.rosestacker.RoseStackerHook;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.transfer.impl.entity.ItemEntityToInventoryTransfer;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import org.bukkit.Color;
 import org.bukkit.Particle;
 import org.bukkit.block.Hopper;
@@ -67,9 +68,10 @@ public class HopperPickupItemListener implements Listener {
         // If the inventory is not that of a Hopper, do nothing.
         if (!(inventoryPickupItemEvent.getInventory().getHolder(false) instanceof Hopper hopper)) return;
         if(inventoryPickupItemEvent.getInventory().getLocation() == null) return;
+        ImmutableLocation location = ImmutableLocation.fromBukkitLocation(inventoryPickupItemEvent.getInventory().getLocation());
 
         // Get the SkyHopper for the given location
-        SkyHopper skyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(inventoryPickupItemEvent.getInventory().getLocation());
+        SkyHopper skyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(location);
         // If no SkyHopper exists at that location, do nothing
         if(skyHopper == null || skyHopper.getLocation() == null) return;
 

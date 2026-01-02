@@ -23,7 +23,7 @@ import com.github.lukesky19.skyHoppers.config.LocaleManager;
 import com.github.lukesky19.skyHoppers.config.SettingsManager;
 import com.github.lukesky19.skyHoppers.config.data.Locale;
 import com.github.lukesky19.skyHoppers.config.data.Settings;
-import com.github.lukesky19.skyHoppers.config.data.gui.ButtonConfig;
+import com.github.lukesky19.skyHoppers.config.data.button.ButtonConfig;
 import com.github.lukesky19.skyHoppers.config.data.gui.UpgradeGUIConfig;
 import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
@@ -31,6 +31,7 @@ import com.github.lukesky19.skyHoppers.hook.HookManager;
 import com.github.lukesky19.skyHoppers.hook.impl.vault.EconomyHook;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
 import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
@@ -83,7 +84,7 @@ public class SuctionRangeUpgradeGUI extends SkyHopperGUI {
     public SuctionRangeUpgradeGUI(
             @NotNull SkyHoppers skyHoppers,
             @NotNull GUIManager guiManager,
-            @NotNull Location location,
+            @NotNull ImmutableLocation location,
             @NotNull SkyHopper skyHopper,
             @NotNull Player player,
             @NotNull SettingsManager settingsManager,
@@ -101,7 +102,7 @@ public class SuctionRangeUpgradeGUI extends SkyHopperGUI {
 
         this.skyHopper = skyHopper;
 
-        guiConfig = guiConfigManager.getUpgradeConfig("suction_range.yml");
+        guiConfig = guiConfigManager.getSuctionRangeUpgradeGUIConfig();
     }
 
     /**

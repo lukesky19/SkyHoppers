@@ -18,7 +18,11 @@
 package com.github.lukesky19.skyHoppers.gui;
 
 import com.github.lukesky19.skyHoppers.gui.menu.filter.SkyContainerFilterGUI;
+import com.github.lukesky19.skyHoppers.gui.menu.skycontainer.PriorityGUI;
+import com.github.lukesky19.skyHoppers.gui.menu.skycontainer.SkyContainerGUI;
+import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skyHoppers.util.LocationUUIDKey;
 import com.github.lukesky19.skylib.api.gui.interfaces.BaseGUI;
 import com.github.lukesky19.skylib.api.gui.interfaces.IGUIManager;
@@ -34,7 +38,7 @@ import java.util.UUID;
  * This class manages open GUIs for SkyHoppers.
  */
 public class GUIManager implements IGUIManager<LocationUUIDKey> {
-    private final @NotNull Map<Location, Map<UUID, BaseGUI<LocationUUIDKey>>> openGUIsByLocationAndPlayer = new HashMap<>();
+    private final @NotNull Map<ImmutableLocation, Map<UUID, BaseGUI<LocationUUIDKey>>> openGUIsByLocationAndPlayer = new HashMap<>();
 
     /**
      * Constructor
@@ -90,9 +94,9 @@ public class GUIManager implements IGUIManager<LocationUUIDKey> {
 
     /**
      * Refresh all guis with the same location.
-     * @param location The {@link Location}.
+     * @param location The {@link ImmutableLocation}.
      */
-    public void refreshGUIsByLocation(@NotNull Location location) {
+    public void refreshGUIsByLocation(@NotNull ImmutableLocation location) {
         openGUIsByLocationAndPlayer.entrySet()
                 .stream()
                 .filter(entry -> entry.getKey().equals(location))
@@ -117,15 +121,20 @@ public class GUIManager implements IGUIManager<LocationUUIDKey> {
     }
 
     /**
-     * Closes any open {@link SkyContainerFilterGUI}s for the provided {@link SkyHopper}'s {@link Location}.
-     * @param location The {@link Location} of the {@link SkyHopper}.
+     * Closes any open GUIS related to a {@link SkyContainer} for the provided {@link SkyHopper}'s {@link ImmutableLocation}.
+     * @param location The {@link ImmutableLocation} of the {@link SkyHopper}.
      */
-    public void closeOutputFilterGUIs(@NotNull Location location) {
+    public void closeSkyContainerRelatedGUIs(@NotNull ImmutableLocation location) {
         openGUIsByLocationAndPlayer.entrySet()
                 .stream()
                 .filter(entry -> entry.getKey().equals(location))
                 .map(Map.Entry::getValue)
                 .map(Map::values)
+                .map(collection -> collection.stream()
+                        .filter(baseGUI ->
+                                baseGUI instanceof SkyContainerGUI
+                                        || baseGUI instanceof PriorityGUI
+                                        || baseGUI instanceof SkyContainerFilterGUI))
                 .forEach(collection -> collection.forEach(BaseGUI::close));
     }
 
@@ -133,7 +142,7 @@ public class GUIManager implements IGUIManager<LocationUUIDKey> {
      * Close any open {@link SkyHopperGUI}s for the {@link Location} provided.
      * @param location The {@link Location} of the {@link SkyHopper} to close GUIs for.
      */
-    public void closeOpenGUIsForLocation(@NotNull Location location) {
+    public void closeOpenGUIsForLocation(@NotNull ImmutableLocation location) {
         openGUIsByLocationAndPlayer.entrySet()
                 .stream()
                 .filter(entry -> entry.getKey().equals(location))

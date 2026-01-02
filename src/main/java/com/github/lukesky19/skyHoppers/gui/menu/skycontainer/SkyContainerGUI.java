@@ -1,6 +1,6 @@
 /*
     SkyHoppers adds upgradable hoppers that can suction items, transfer items wirelessly to linked containers.
-    Copyright (C) 2025  lukeskywlker19
+    Copyright (C) 2024  lukeskywlker19
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published
@@ -15,19 +15,19 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-package com.github.lukesky19.skyHoppers.gui.menu.member;
+package com.github.lukesky19.skyHoppers.gui.menu.skycontainer;
 
-import com.destroystokyo.paper.profile.PlayerProfile;
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.config.GUIConfigManager;
 import com.github.lukesky19.skyHoppers.config.LocaleManager;
 import com.github.lukesky19.skyHoppers.config.data.Locale;
 import com.github.lukesky19.skyHoppers.config.data.button.ButtonConfig;
-import com.github.lukesky19.skyHoppers.config.data.gui.MembersGUIConfig;
+import com.github.lukesky19.skyHoppers.config.data.gui.SkyContainerGUIConfig;
 import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
-import com.github.lukesky19.skyHoppers.gui.menu.HopperGUI;
+import com.github.lukesky19.skyHoppers.gui.menu.filter.SkyContainerFilterGUI;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
@@ -35,72 +35,69 @@ import com.github.lukesky19.skylib.api.gui.GUIButton;
 import com.github.lukesky19.skylib.api.gui.GUIType;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
 import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
-import com.github.lukesky19.skylib.api.player.PlayerUtil;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 /**
- * This class lets Players manage the players who can access this SkyHopper.
+ * This GUI lets the player select what they would like to change related to a linked container.
+ * Currently only the filter and priority.
  */
-public class MembersGUI extends SkyHopperGUI {
+public class SkyContainerGUI extends SkyHopperGUI {
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
     private final @NotNull SkyHopperManager hopperManager;
 
     private final @NotNull SkyHopper skyHopper;
+    private final @NotNull SkyContainer skyContainer;
 
-    private final @Nullable MembersGUIConfig guiConfig;
-
-    private int playerNum = 0;
-    private int added = 0;
+    private final @Nullable SkyContainerGUIConfig guiConfig;
 
     /**
      * Constructor
      * @param skyHoppers A {@link SkyHoppers} instance.
      * @param guiManager A {@link GUIManager} instance.
-     * @param location The {@link ImmutableLocation} of the {@link SkyHopper}.
+     * @param location The {@link Location} of the {@link SkyHopper}.
      * @param skyHopper The {@link SkyHopper} the GUI is associated with.
+     * @param skyContainer The {@link SkyContainer} the GUI is associated with.
      * @param player The {@link Player} viewing the GUI.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param hopperManager A {@link SkyHopperManager} instance.
-     * @param hopperGUI The {@link HopperGUI} the player came from.
+     * @param linkedContainersGUI The {@link LinkedContainersGUI} to return to when this GUI is closed.
      */
-    public MembersGUI(
+    public SkyContainerGUI(
             @NotNull SkyHoppers skyHoppers,
             @NotNull GUIManager guiManager,
             @NotNull ImmutableLocation location,
             @NotNull SkyHopper skyHopper,
+            @NotNull SkyContainer skyContainer,
             @NotNull Player player,
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull SkyHopperManager hopperManager,
-            @NotNull HopperGUI hopperGUI) {
-        super(skyHoppers, guiManager, player, location, hopperGUI);
+            @NotNull LinkedContainersGUI linkedContainersGUI) {
+        super(skyHoppers, guiManager, player, location, linkedContainersGUI);
 
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
         this.hopperManager = hopperManager;
 
         this.skyHopper = skyHopper;
+        this.skyContainer = skyContainer;
 
-        guiConfig = guiConfigManager.getMembersGUIConfig();
+        guiConfig = guiConfigManager.getSkyContainerGUIConfig();
     }
 
     /**
@@ -109,19 +106,19 @@ public class MembersGUI extends SkyHopperGUI {
      */
     public boolean create() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the members.yml GUI due to invalid GUI configuration."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the hopper.yml GUI due to invalid GUI configuration."));
             return false;
         }
 
         GUIType guiType = guiConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the members.yml GUI due to an invalid GUIType"));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the hopper.yml GUI due to an invalid GUIType"));
             return false;
         }
 
         String guiName = guiConfig.name();
         if(guiName == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the members.yml GUI due to an invalid gui name."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the hopper.yml GUI due to an invalid gui name."));
             return false;
         }
 
@@ -134,30 +131,36 @@ public class MembersGUI extends SkyHopperGUI {
     @Override
     public boolean update() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to decorate the GUI due to invalid configuration for the members GUI."));
-            if(isOpen) close();
-            return false;
-        }
-
-        if(inventoryView == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to update the members GUI as the InventoryView was not created."));
-            if(isOpen) close();
+            logger.warn(AdventureUtil.deserialize("Unable to decorate the GUI due to invalid configuration for the hopper.yml GUI."));
             return false;
         }
 
         clearButtons();
 
-        int guiSize = inventoryView.getTopInventory().getSize();
-        int membersCount = skyHopper.getMembers().size() - 1;
+        if(inventoryView == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to update the main hopper GUI as the InventoryView was not created."));
+            if(isOpen) close();
+            return false;
+        }
 
+        // GUI Size
+        int guiSize = inventoryView.getTopInventory().getSize();
+
+        // Filler
         createFiller(guiSize);
+
         // Dummy Buttons
         createDummyButtons();
-        createMemberButtons(guiSize, membersCount);
-        createNextPageButton(guiSize, membersCount);
-        createPreviousPageButton(guiSize);
-        createAddMemberButton();
+
+        createFilterButton();
+
+        createPriorityButton();
+
+        // Exit Button
         createExitButton();
+
+        // Info Button
+        createInfoButton();
 
         return super.update();
     }
@@ -167,10 +170,31 @@ public class MembersGUI extends SkyHopperGUI {
      */
     @Override
     public boolean refresh() {
-        playerNum = 0;
-        added = 0;
+        return this.update();
+    }
 
-        return update();
+    /**
+     * If the previous GUI is not null, close the GUI with {@link InventoryCloseEvent.Reason#OPEN_NEW}.
+     * Otherwise, close the GUI with {@link InventoryCloseEvent.Reason#UNLOADED}.
+     * You should use {@link #unload(boolean)} if the plugin is being disabled, and you are trying to close open GUIs.
+     */
+    @Override
+    public void close() {
+        skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
+            guiManager.removeOpenGUI(identifier);
+
+            this.isOpen = false;
+
+            if(previousGUI != null) {
+                player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
+
+                previousGUI.refresh();
+
+                previousGUI.open();
+            } else {
+                player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
+            }
+        }, 1L);
     }
 
     /**
@@ -186,7 +210,7 @@ public class MembersGUI extends SkyHopperGUI {
         isOpen = false;
 
         if(previousGUI != null) {
-            previousGUI.update();
+            previousGUI.refresh();
 
             previousGUI.open();
         }
@@ -249,214 +273,16 @@ public class MembersGUI extends SkyHopperGUI {
     }
 
     /**
-     * Creates the buttons for all Players who can access this {@link SkyHopper}.
-     * @param guiSize The size of this GUI.
-     * @param membersCount The number of members who can access this {@link SkyHopper}.
+     * Creates the filter Button.
      */
-    private void createMemberButtons(int guiSize, int membersCount) {
-        List<UUID> membersList = skyHopper.getMembers();
-
-        assert guiConfig != null;
-        ItemStackConfig itemStackConfig = guiConfig.entries().playerHead().item();
-
-        if(guiSize - 10 >= 17) {
-            for (int i = 0; i <= guiSize - 10; i++) {
-                if(membersCount >= playerNum) {
-                    UUID memberId = membersList.get(playerNum);
-                    PlayerProfile profile = PlayerUtil.getCachedPlayerProfile(memberId);
-                    String playerName = "<red><bold>Player Name Not Found</bold></red>";
-
-                    if(profile == null) {
-                        OfflinePlayer offlinePlayer = skyHoppers.getServer().getOfflinePlayer(memberId);
-                        if(offlinePlayer.getName() != null) {
-                            playerName = offlinePlayer.getName();
-                        }
-                    } else {
-                        if(profile.getName() != null) {
-                            playerName = profile.getName();
-                        }
-                    }
-
-                    ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-                    itemStackBuilder.setItemType(ItemType.PLAYER_HEAD);
-
-                    if(itemStackConfig.name() != null) {
-                        List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("player_name", playerName));
-
-                        itemStackBuilder.setName(AdventureUtil.deserialize(itemStackConfig.name(), placeholders));
-                    }
-
-                    List<Component> lore = itemStackConfig.lore().stream().map(AdventureUtil::deserialize).toList();
-                    List<ItemFlag> itemFlags = itemStackConfig.itemFlags().stream().map(ItemFlag::valueOf).toList();
-
-                    itemStackBuilder.setLore(lore);
-                    itemFlags.forEach(itemStackBuilder::addItemFlag);
-
-                    itemStackBuilder.setPlayer(player);
-
-                    Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
-                    if(optionalItemStack.isPresent()) {
-                        GUIButton.Builder buttonBuilder = new GUIButton.Builder();
-
-                        buttonBuilder.setItemStack(optionalItemStack.get());
-
-                        buttonBuilder.setAction(inventoryClickEvent -> {
-                            skyHopper.removeMember(memberId);
-
-                            hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
-
-                            guiManager.refreshGUIsByLocation(location);
-
-                            added = 0;
-                            playerNum = 0;
-
-                            update();
-                        });
-
-                        setButton(i, buttonBuilder.build());
-
-                        added++;
-                        playerNum++;
-                    } else {
-                        logger.warn(AdventureUtil.deserialize("Failed to create the ItemStack for a member button."));
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * Creates the next page button if needed
-     */
-    private void createNextPageButton(int guiSize, int membersCount) {
-        if(added > guiSize - 10 && (playerNum - 1) < membersCount) {
-            assert guiConfig != null;
-            ButtonConfig buttonConfig = guiConfig.entries().nextPage();
-
-            if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to create the next page button in the members gui due to no slot configured."));
-                return;
-            }
-
-            ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-            itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
-            Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
-
-            if(optionalItemStack.isPresent()) {
-                GUIButton.Builder builder = new GUIButton.Builder();
-
-                builder.setItemStack(optionalItemStack.get());
-
-                builder.setAction(event -> {
-                    added = 0;
-                    update();
-                });
-
-                setButton(buttonConfig.slot(), builder.build());
-            }
-        }
-    }
-
-    /**
-     * Creates the previous page button if needed
-     */
-    private void createPreviousPageButton(int guiSize) {
-        if(playerNum > guiSize - 9) {
-            assert guiConfig != null;
-            ButtonConfig buttonConfig = guiConfig.entries().previousPage();
-            if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to create the previous page button in the members gui due to no slot configured."));
-                return;
-            }
-
-            ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-            itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
-            Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
-
-            if(optionalItemStack.isPresent()) {
-                GUIButton.Builder builder = new GUIButton.Builder();
-
-                builder.setItemStack(optionalItemStack.get());
-
-                builder.setAction(event -> {
-                    if (playerNum > (guiSize - 9) + added) {
-                        playerNum -= (guiSize - 9) + added;
-                    } else {
-                        playerNum -= added;
-                    }
-
-                    added = 0;
-
-                    update();
-                });
-
-                setButton(buttonConfig.slot(), builder.build());
-            }
-        }
-    }
-
-    /**
-     * Creates the button to add a Player to access this SkyHopper.
-     */
-    private void createAddMemberButton() {
+    private void createFilterButton() {
         Locale locale = localeManager.getLocale();
 
         assert guiConfig != null;
-        ButtonConfig buttonConfig = guiConfig.entries().add();
+        ButtonConfig buttonConfig = guiConfig.entries().filter();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the add member button in the members gui due to no slot configured."));
-            return;
-        }
-
-        ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
-        Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
-
-        if(optionalItemStack.isPresent()) {
-            GUIButton.Builder buttonBuilder = new GUIButton.Builder();
-
-            buttonBuilder.setItemStack(optionalItemStack.get());
-
-            buttonBuilder.setAction(event -> {
-                skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
-                        player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
-
-                guiManager.removeOpenGUI(identifier);
-
-                SelectPlayerGUI selectPlayerGUI = new SelectPlayerGUI(skyHoppers, guiManager, location, skyHopper, player, guiConfigManager, hopperManager, this);
-
-                boolean creationResult = selectPlayerGUI.create();
-                if(!creationResult) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
-                    return;
-                }
-
-                boolean updateResult = selectPlayerGUI.update();
-                if(!updateResult) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
-                    return;
-                }
-
-                boolean openResult = selectPlayerGUI.open();
-                if(!openResult) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
-                }
-            });
-
-            setButton(buttonConfig.slot(), buttonBuilder.build());
-        }
-    }
-
-    /**
-     * Creates the Exit button.
-     */
-    private void createExitButton() {
-        assert guiConfig != null;
-        ButtonConfig buttonConfig = guiConfig.entries().exit();
-
-        if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the exit button in the members gui due to no slot configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the filter button in the sky container GUI due to no slot configured."));
             return;
         }
 
@@ -469,7 +295,151 @@ public class MembersGUI extends SkyHopperGUI {
 
             builder.setItemStack(optionalItemStack.get());
 
-            builder.setAction(event -> close());
+            builder.setAction(event -> {
+                skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
+                    player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
+
+                    guiManager.removeOpenGUI(identifier);
+                }, 1L);
+
+                SkyContainerFilterGUI outputFilterGUI = new SkyContainerFilterGUI(skyHoppers, guiManager, location, skyHopper, player, guiConfigManager, hopperManager, skyContainer, this);
+
+                boolean creationResult = outputFilterGUI.create();
+                if(!creationResult) {
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                    return;
+                }
+
+                boolean updateResult = outputFilterGUI.update();
+                if(!updateResult) {
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                    return;
+                }
+
+                boolean openResult = outputFilterGUI.open();
+                if(!openResult) {
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                }
+            });
+
+            setButton(buttonConfig.slot(), builder.build());
+        }
+    }
+
+    /**
+     * Creates the priority Button.
+     */
+    private void createPriorityButton() {
+        Locale locale = localeManager.getLocale();
+
+        assert guiConfig != null;
+        ButtonConfig buttonConfig = guiConfig.entries().priority();
+
+        if(buttonConfig.slot() == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to create the priority button in the sky container gui due to no slot configured."));
+            return;
+        }
+
+        ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
+        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
+        Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+
+        if(optionalItemStack.isPresent()) {
+            GUIButton.Builder builder = new GUIButton.Builder();
+
+            builder.setItemStack(optionalItemStack.get());
+
+            builder.setAction(event -> {
+                skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
+                    player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
+
+                    guiManager.removeOpenGUI(identifier);
+                }, 1L);
+
+                PriorityGUI priorityGUI = new PriorityGUI(skyHoppers, guiManager, location, skyHopper, skyContainer, player, guiConfigManager, this);
+
+                boolean creationResult = priorityGUI.create();
+                if(!creationResult) {
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                    return;
+                }
+
+                boolean updateResult = priorityGUI.update();
+                if(!updateResult) {
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                    return;
+                }
+
+                boolean openResult = priorityGUI.open();
+                if(!openResult) {
+                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                }
+            });
+
+            setButton(buttonConfig.slot(), builder.build());
+        }
+    }
+
+    /**
+     * Creates the Exit button.
+     */
+    private void createExitButton() {
+        assert guiConfig != null;
+        ButtonConfig buttonConfig = guiConfig.entries().exit();
+
+        if(buttonConfig.slot() == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to create the exit button due to no slot configured."));
+            return;
+        }
+
+        ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
+        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
+        Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+
+        if(optionalItemStack.isPresent()) {
+            GUIButton.Builder builder = new GUIButton.Builder();
+
+            builder.setItemStack(optionalItemStack.get());
+
+            builder.setAction(event ->
+                    skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, this::close, 1L));
+
+            setButton(buttonConfig.slot(), builder.build());
+        }
+    }
+
+    /**
+     * Creates the info button.
+     */
+    private void createInfoButton() {
+        assert guiConfig != null;
+        ButtonConfig buttonConfig = guiConfig.entries().info();
+
+        if(buttonConfig.slot() == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to create the info button for the sky container gui due to no slot configured."));
+            return;
+        }
+
+        skyContainer.getFilterType();
+        skyContainer.getLocation();
+        skyContainer.getPriority();
+
+        List<TagResolver.Single> lorePlaceholders = List.of(
+                Placeholder.parsed("filter_type", skyHopper.getFilterType().name()),
+                Placeholder.parsed("world", skyContainer.getLocation().getWorld().getName()),
+                Placeholder.parsed("x", String.valueOf(skyContainer.getLocation().getX())),
+                Placeholder.parsed("y", String.valueOf(skyContainer.getLocation().getY())),
+                Placeholder.parsed("z", String.valueOf(skyContainer.getLocation().getZ())),
+                Placeholder.parsed("priority", String.valueOf(skyContainer.getPriority())));
+
+        ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
+        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, lorePlaceholders);
+        Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+
+        if(optionalItemStack.isPresent()) {
+            GUIButton.Builder builder = new GUIButton.Builder();
+
+            builder.setItemStack(optionalItemStack.get());
 
             setButton(buttonConfig.slot(), builder.build());
         }
@@ -483,7 +453,7 @@ public class MembersGUI extends SkyHopperGUI {
 
         guiConfig.entries().dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the members GUI due to an invalid slot."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the main hopper GUI due to an invalid slot."));
                 return;
             }
 

@@ -20,6 +20,7 @@ package com.github.lukesky19.skyHoppers.task.tasks;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skyHoppers.util.PluginUtils;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -33,7 +34,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class HopperViewTask extends BukkitRunnable {
     private final @NotNull SkyHopperManager hopperManager;
-    private final @NotNull Location location;
+    private final @NotNull ImmutableLocation location;
     private final @NotNull Player player;
     private int ticks = 0;
 
@@ -45,7 +46,7 @@ public class HopperViewTask extends BukkitRunnable {
      */
     public HopperViewTask(
             @NotNull SkyHopperManager hopperManager,
-            @NotNull Location location,
+            @NotNull ImmutableLocation location,
             @NotNull Player player) {
         this.hopperManager = hopperManager;
         this.location = location;
@@ -71,14 +72,14 @@ public class HopperViewTask extends BukkitRunnable {
 
         double range = suctionRange + 0.5;
         if (skyHopper.getLocation() != null) {
-            var hopperCorner1 = skyHopper.getLocation().clone();
+            var hopperCorner1 = skyHopper.getLocation().toBukkitLocation().clone();
             var hopperCorner2 = hopperCorner1.clone().add(1, 1, 1);
             PluginUtils.getHollowCube(hopperCorner1, hopperCorner2, 0.5).stream()
                     .filter(loc -> loc.getWorld() != null)
                     .forEach(location -> player.spawnParticle(Particle.DUST, location.clone(), 1, 0.0, 0.0, 0.0, new Particle.DustOptions(Color.LIME, 1)));
 
             for(SkyContainer skyContainer : skyHopper.getLinkedContainers()) {
-                Location corner1 = skyContainer.getLocation().clone();
+                Location corner1 = skyContainer.getLocation().toBukkitLocation().clone();
                 Location corner2 = corner1.clone().add(1, 1, 1);
                 PluginUtils.getHollowCube(corner1, corner2, 0.5).stream()
                         .filter(loc -> loc.getWorld() != null)
@@ -86,7 +87,7 @@ public class HopperViewTask extends BukkitRunnable {
             }
 
             // Visualize Suction Range
-            Location centered = skyHopper.getLocation().clone().add(0.5, 0.5, 0.5);
+            Location centered = skyHopper.getLocation().toBukkitLocation().clone().add(0.5, 0.5, 0.5);
             Location min = centered.clone().subtract(range, range, range);
             Location max = centered.clone().add(range, range, range);
 

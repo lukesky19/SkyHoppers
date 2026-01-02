@@ -18,12 +18,14 @@
 package com.github.lukesky19.skyHoppers.skyhopper.data;
 
 import com.github.lukesky19.skyHoppers.config.data.Settings;
+import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,8 +42,8 @@ public class SkyHopper extends Filterable {
     private @Nullable UUID owner;
     private final @NotNull List<@NotNull UUID> members = new ArrayList<>();
 
-    // Location
-    private @Nullable Location location;
+    // ImmutableLocation
+    private @Nullable ImmutableLocation location;
 
     // Linked Containers
     private final @NotNull List<@NotNull SkyContainer> linkedContainers = new ArrayList<>();
@@ -100,7 +102,7 @@ public class SkyHopper extends Filterable {
      * @param particles Are particles enabled for this SkyHopper?
      * @param owner The {@link UUID} of the owner of this SkyHopper.
      * @param members The {@link List} of {@link UUID} that can also access this SkyHopper.
-     * @param location The {@link Location} of the SkyHopper.
+     * @param location The {@link ImmutableLocation} of the SkyHopper.
      * @param linkedContainers The {@link List} of {@link SkyContainer}s that are linked to this SkyHopper.
      * @param filterType The {@link FilterType} of the SkyHopper.
      * @param filterItems The {@link List} of {@link ItemType} that are filtered.
@@ -124,7 +126,7 @@ public class SkyHopper extends Filterable {
             boolean particles,
             @Nullable UUID owner,
             @NotNull List<UUID> members,
-            @Nullable Location location,
+            @Nullable ImmutableLocation location,
             @NotNull List<SkyContainer> linkedContainers,
             @NotNull FilterType filterType,
             @NotNull List<ItemType> filterItems,
@@ -149,11 +151,7 @@ public class SkyHopper extends Filterable {
         this.owner = owner;
         this.members.addAll(members);
 
-        if(location != null) {
-            this.location = new Location(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
-        } else {
-            this.location = null;
-        }
+        this.location = location;
 
         this.linkedContainers.addAll(linkedContainers);
         this.transferSpeed = transferSpeed;
@@ -276,42 +274,41 @@ public class SkyHopper extends Filterable {
     }
 
     /**
-     * Get the {@link Location} of the SkyHopper.
-     * @return A copy of the {@link Location} of the SkyHopper.
+     * Get the {@link ImmutableLocation} of the SkyHopper.
+     * @return A copy of the {@link ImmutableLocation} of the SkyHopper.
      */
-    public @Nullable Location getLocation() {
-        if(location == null) return null;
-
-        return new Location(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    public @Nullable ImmutableLocation getLocation() {
+        return location;
     }
 
     /**
-     * Set the {@link Location} of the SkyHopper. Will create a copy of the {@link Location} provided before using,
-     * @param location The new {@link Location} of the SkyHopper.
+     * Set the {@link ImmutableLocation} of the SkyHopper. Will create a copy of the {@link Location} provided before using,
+     * @param location The new {@link ImmutableLocation} of the SkyHopper.
      */
-    public void setLocation(@Nullable Location location) {
-        if(location != null) {
-            this.location = new Location(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
-            return;
-        }
-
-        this.location = null;
+    public void setLocation(@Nullable ImmutableLocation location) {
+        this.location = location;
     }
 
     /**
      * Add a {@link SkyContainer} to the linked containers.
      * @param skyContainer The {@link SkyContainer} to add.
+     * @param sort Should the list of linked containers be sorted? You should generally always use true here unless manually sorting using {@link #sortLinkedContainers()}.
      */
-    public void addLinkedContainer(@NotNull SkyContainer skyContainer) {
+    public void addLinkedContainer(@NotNull SkyContainer skyContainer, boolean sort) {
         linkedContainers.add(skyContainer);
+
+        if(sort) linkedContainers.sort(Comparator.comparingInt(SkyContainer::getPriority));
     }
 
     /**
      * Remove a {@link SkyContainer} from the linked containers.
      * @param skyContainer The {@link SkyContainer} to remove.
+     * @param sort Should the list of linked containers be sorted? You should generally always use true here unless manually sorting using {@link #sortLinkedContainers()}.
      */
-    public void removeLinkedContainer(@NotNull SkyContainer skyContainer) {
+    public void removeLinkedContainer(@NotNull SkyContainer skyContainer, boolean sort) {
         linkedContainers.remove(skyContainer);
+
+        if(sort) linkedContainers.sort(Comparator.comparingInt(SkyContainer::getPriority));
     }
 
     /**
@@ -324,11 +321,18 @@ public class SkyHopper extends Filterable {
 
     /**
      * Get the {@link SkyContainer} linked this SkyHopper at the given {@link Location}.
-     * @param location The {@link Location} to get the {@link SkyContainer} at.
+     * @param location The {@link ImmutableLocation} to get the {@link SkyContainer} at.
      * @return A {@link SkyContainer} or null if none is linked at the provided location.
      */
-    public @Nullable SkyContainer getSkyContainerByLocation(@NotNull Location location) {
+    public @Nullable SkyContainer getSkyContainerByLocation(@NotNull ImmutableLocation location) {
         return linkedContainers.stream().filter(skyContainer -> skyContainer.getLocation().equals(location)).findFirst().orElse(null);
+    }
+
+    /**
+     * Sorts the linked containers by their priority.
+     */
+    public void sortLinkedContainers() {
+        linkedContainers.sort(Comparator.comparingInt(SkyContainer::getPriority));
     }
 
     /**
