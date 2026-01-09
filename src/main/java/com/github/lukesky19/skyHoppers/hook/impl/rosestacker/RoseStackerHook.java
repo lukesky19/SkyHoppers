@@ -84,8 +84,9 @@ public class RoseStackerHook implements Hook {
      * @return The item amount.
      */
     public int getItemAmount(Item item) {
-        @Nullable StackedItem stackedItem = RoseStackerAPI.getInstance().getStackedItem(item);
+        if(roseStackerAPI == null) return item.getItemStack().getAmount();
 
+        @Nullable StackedItem stackedItem = roseStackerAPI.getStackedItem(item);
         if(stackedItem != null) return stackedItem.getStackSize();
 
         return item.getItemStack().getAmount();
@@ -97,8 +98,13 @@ public class RoseStackerHook implements Hook {
      * @param amount The item amount to set.
      */
     public void setItemAmount(Item item, int amount) {
-        @Nullable StackedItem stackedItem = RoseStackerAPI.getInstance().getStackedItem(item);
-        if (stackedItem != null) {
+        if(roseStackerAPI == null) {
+            item.getItemStack().setAmount(amount);
+            return;
+        }
+
+        @Nullable StackedItem stackedItem = roseStackerAPI.getStackedItem(item);
+        if(stackedItem != null) {
             stackedItem.setStackSize(amount);
             return;
         }
