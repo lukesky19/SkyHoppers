@@ -64,10 +64,11 @@ public class ItemEntityToInventoryTransfer extends TransferLogic {
             @NotNull Inventory destinationInventory,
             int amount) {
         int amountTransferredOrDestroyed = 0;
-        int minAmount = Math.min(groundItemAmount, amount);
+        int amountToTransfer = Math.min(groundItemAmount, amount);
+        amountToTransfer = Math.min(groundStack.getMaxStackSize(), amountToTransfer);
 
         // SkyHopper Filter Check
-        @NotNull FilterResult skyHopperFilterResult = processFilter(roseStackerHook, groundItem, groundItemType, groundItemAmount, destinationSkyHopper, minAmount);
+        @NotNull FilterResult skyHopperFilterResult = processFilter(roseStackerHook, groundItem, groundItemType, groundItemAmount, destinationSkyHopper, amountToTransfer);
         if(skyHopperFilterResult.destroyed() > 0) {
             amount -= skyHopperFilterResult.destroyed();
             groundItemAmount -= skyHopperFilterResult.destroyed();
@@ -79,19 +80,20 @@ public class ItemEntityToInventoryTransfer extends TransferLogic {
 
         for(int destinationSlot = 0; destinationSlot < destinationInventory.getSize(); destinationSlot++) {
             @Nullable ItemStack destinationStack = destinationInventory.getItem(destinationSlot);
-            minAmount = Math.min(groundItemAmount, amount);
+            amountToTransfer = Math.min(groundItemAmount, amount);
+            amountToTransfer = Math.min(groundStack.getMaxStackSize(), amountToTransfer);
 
             if(destinationStack != null && !destinationStack.isEmpty()) {
                 if(!destinationStack.isSimilar(groundStack)) continue;
                 int destinationStackMaxSize = destinationStack.getMaxStackSize();
                 if(destinationStack.getAmount() >= destinationStackMaxSize) continue;
 
-                final int result = destinationStack.getAmount() + minAmount;
+                final int result = destinationStack.getAmount() + amountToTransfer;
 
                 if(result <= groundStackMaxSize) {
                     destinationStack.setAmount(result);
 
-                    int updatedAmount = groundItemAmount - minAmount;
+                    int updatedAmount = groundItemAmount - amountToTransfer;
 
                     if(updatedAmount > 0) {
                         roseStackerHook.setItemAmount(groundItem, updatedAmount);
@@ -99,12 +101,12 @@ public class ItemEntityToInventoryTransfer extends TransferLogic {
                         groundItem.remove();
                     }
 
-                    amountTransferredOrDestroyed += minAmount;
-                    groundItemAmount -= minAmount;
-                    amount -= minAmount;
+                    amountTransferredOrDestroyed += amountToTransfer;
+                    groundItemAmount -= amountToTransfer;
+                    amount -= amountToTransfer;
                 } else {
                     int leftover = result - destinationStackMaxSize;
-                    int transferred = minAmount - leftover;
+                    int transferred = amountToTransfer - leftover;
                     int updatedAmount = groundItemAmount - transferred;
 
                     amountTransferredOrDestroyed += transferred;
@@ -115,18 +117,17 @@ public class ItemEntityToInventoryTransfer extends TransferLogic {
 
                     roseStackerHook.setItemAmount(groundItem, updatedAmount);
                 }
-
             } else {
                 ItemStack cloneItem = groundStack.clone();
-                cloneItem.setAmount(minAmount);
+                cloneItem.setAmount(amountToTransfer);
 
                 destinationInventory.setItem(destinationSlot, cloneItem);
 
-                int updatedAmount = groundItemAmount - minAmount;
+                int updatedAmount = groundItemAmount - amountToTransfer;
 
-                amountTransferredOrDestroyed += minAmount;
-                groundItemAmount -= minAmount;
-                amount -= minAmount;
+                amountTransferredOrDestroyed += amountToTransfer;
+                groundItemAmount -= amountToTransfer;
+                amount -= amountToTransfer;
 
                 roseStackerHook.setItemAmount(groundItem, updatedAmount);
             }
