@@ -1,8 +1,11 @@
+# DO NOT TOUCH! This is used to update the config file format if needed.
 config-version: 1.2.0.0
+# The locale file to use.
 locale: en_US
 # Should SkyHoppers be added to the player's inventory directly when broken?
 # This includes the contents of the Hopper as well.
 drop-to-inventory: false
+# Settings related to SkyHoppers.
 sky-hopper-config:
     # Starting upgrade numbers
     # Default: 10
@@ -17,7 +20,7 @@ sky-hopper-config:
     starting-suction-range: 1
     # Default: 1
     starting-max-containers: 1
-    # The SkyHopper item's name and lore.
+    # The SkyHopper item configuration.
     item:
         item-type: minecraft:hopper
         name: '<#99ff99><bold>SkyHopper</bold></#99ff99>'
@@ -44,6 +47,10 @@ sky-hopper-config:
     placeholders:
         enabled: "<green>Enabled</green>"
         disabled: "<red>Disabled</red>"
+# Settings related to linked containers.
+sky-container-config:
+    starting-linked-container-priority: 1
+# SkyHopper upgrade prices.
 upgrades:
     transfer-speed:
         upgrades:

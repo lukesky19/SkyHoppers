@@ -205,6 +205,7 @@ public class SettingsManager {
                         settings.dropToInventory(),
                         settings.disabledHooks(),
                         newSkyHopperConfig,
+                        new Settings.SkyContainerConfig(1),
                         settings.upgrades());
 
                 saveSettings();

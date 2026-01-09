@@ -267,6 +267,9 @@ public class SkyHopperProcessor {
             pdcMembers.forEach(skyHopper::addMember);
         }
 
+        // Calculate the starting linked container priority
+        int startingPriority = settingsManager.getSettings() != null ? settingsManager.getSettings().skyContainerConfig().startingLinkedContainerPriority() : 1;
+
         // Get the legacy linked container
         if(pdc.has(HopperKeys.LINKED.getKey())) {
             final String serializedLocation = pdc.get(HopperKeys.LINKED.getKey(), PersistentDataType.STRING);
@@ -277,7 +280,7 @@ public class SkyHopperProcessor {
                     BlockState linkedBlockState = deserializedLocation.getBlock().getState(false);
 
                     if (linkedBlockState instanceof Container linkedContainer) {
-                        skyHopper.addLinkedContainer(new SkyContainer(ImmutableLocation.fromBukkitLocation(linkedContainer.getLocation()), Filterable.FilterType.NONE, new ArrayList<>()), false);
+                        skyHopper.addLinkedContainer(new SkyContainer(ImmutableLocation.fromBukkitLocation(linkedContainer.getLocation()), Filterable.FilterType.NONE, new ArrayList<>(), startingPriority), false);
                     }
                 }
             }
@@ -306,7 +309,7 @@ public class SkyHopperProcessor {
                         List<ItemType> linkedContainerFilterItems = filterItemNames != null ? new ArrayList<>(filterItemNames.stream().map(itemName -> RegistryUtil.getItemType(logger, itemName)).filter(Optional::isPresent).map(Optional::get).toList()) : new ArrayList<>();
 
                         // Create the SkyContainer and add it to the list
-                        skyHopper.addLinkedContainer(new SkyContainer(ImmutableLocation.fromBukkitLocation(linkedLocation), outputFilterType, linkedContainerFilterItems), false);
+                        skyHopper.addLinkedContainer(new SkyContainer(ImmutableLocation.fromBukkitLocation(linkedLocation), outputFilterType, linkedContainerFilterItems, startingPriority), false);
                     }
                 });
             }
@@ -392,6 +395,9 @@ public class SkyHopperProcessor {
             pdcMembers.forEach(skyHopper::addMember);
         }
 
+        // Calculate the starting linked container priority
+        int startingPriority = settingsManager.getSettings() != null ? Math.max(settingsManager.getSettings().skyContainerConfig().startingLinkedContainerPriority(), 1) : 1;
+
         // Get the linked containers (modern)
         if(pdc.has(HopperKeys.LINKS.getKey())) {
             List<PersistentDataContainer> pdcList = pdc.get(HopperKeys.LINKS.getKey(), PersistentDataType.LIST.listTypeFrom(PersistentDataType.TAG_CONTAINER));
@@ -414,8 +420,8 @@ public class SkyHopperProcessor {
                         // Parse the item names into ItemTypes.
                         List<ItemType> linkedContainerFilterItems = filterItemNames != null ? new ArrayList<>(filterItemNames.stream().map(itemName -> RegistryUtil.getItemType(logger, itemName)).filter(Optional::isPresent).map(Optional::get).toList()) : new ArrayList<>();
 
-                        // Get the SkyContainer's priority or 1 if not set
-                        int priority = linkedPDC.getOrDefault(HopperKeys.PRIORITY.getKey(), PersistentDataType.INTEGER, 1);
+                        // Get the SkyContainer's priority or the default priority if not set
+                        int priority = linkedPDC.getOrDefault(HopperKeys.PRIORITY.getKey(), PersistentDataType.INTEGER, startingPriority);
 
                         // Create the SkyContainer and add it to the list
                         skyHopper.addLinkedContainer(new SkyContainer(ImmutableLocation.fromBukkitLocation(linkedLocation), outputFilterType, linkedContainerFilterItems, priority), false);

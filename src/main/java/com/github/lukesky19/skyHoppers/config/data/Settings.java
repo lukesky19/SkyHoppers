@@ -32,6 +32,7 @@ import java.util.Map;
  * @param dropToInventory Should SkyHoppers when broken be added to the player's inventory directly?
  * @param disabledHooks A list of disabled hooks.
  * @param skyHopperConfig The configuration for the SkyHopper ItemStack and starting upgrades.
+ * @param skyContainerConfig The record the contains the configuration for linked containers.
  * @param upgrades The configuration for the SkyHopper upgrades.
  */
 @ConfigSerializable
@@ -41,8 +42,8 @@ public record Settings(
         boolean dropToInventory,
         @NotNull List<String> disabledHooks,
         @NotNull SkyHopperConfig skyHopperConfig,
+        @NotNull SkyContainerConfig skyContainerConfig,
         @NotNull Upgrades upgrades) {
-
     /**
      * The configuration for the SkyHopper ItemStack.
      * @param startingTransferSpeed The starting transfer speed.
@@ -64,6 +65,13 @@ public record Settings(
             int startingMaxContainers,
             @NotNull ItemStackConfig item,
             @NotNull Placeholders placeholders) {}
+
+    /**
+     * This record contains configuration related to linked containers (SkyContainers).
+     * @param startingLinkedContainerPriority The starting priority of linked containers.
+     */
+    @ConfigSerializable
+    public record SkyContainerConfig(int startingLinkedContainerPriority) {}
 
     /**
      * Configuration for the Strings to be displayed when a SkyHopper or SkyHopper particles are enabled or disabled.
