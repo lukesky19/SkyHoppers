@@ -117,6 +117,38 @@ public class SettingsManager {
     }
 
     /**
+     * Get the configured highest priority or 1 if settings are invalid.
+     * @return The configured highest priority or 1 if settings are invalid.
+     */
+    public int getHighestPriority() {
+        return settings != null ? settings.skyContainerConfig().highestPriority() : 1;
+    }
+
+    /**
+     * Get the configured highest priority or 255 if settings are invalid.
+     * @return The configured highest priority or 255 if settings are invalid.
+     */
+    public int getLowestPriority() {
+        return settings != null ? settings.skyContainerConfig().lowestPriority() : 255;
+    }
+
+    /**
+     * Get the starting priority clamped to the highest and lowest priority values.
+     * If the settings are invalid, the starting priority is 1.
+     * @return The starting priority.
+     */
+    public int getStartingPriority() {
+        if(settings == null) return 1;
+
+        int highestPriority = getHighestPriority();
+        int lowestPriority = getLowestPriority();
+        int startingPriority = settings.skyContainerConfig().startingPriority();
+
+        // Return the priority clamped to the highest and lowest priorities
+        return Math.max(highestPriority, Math.min(lowestPriority, startingPriority));
+    }
+
+    /**
      * Reloads the plugin's settings.
      */
     public void reload() {
@@ -205,7 +237,7 @@ public class SettingsManager {
                         settings.dropToInventory(),
                         settings.disabledHooks(),
                         newSkyHopperConfig,
-                        new Settings.SkyContainerConfig(1),
+                        new Settings.SkyContainerConfig(1, 1, 256),
                         settings.upgrades());
 
                 saveSettings();

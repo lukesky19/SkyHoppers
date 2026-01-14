@@ -20,6 +20,7 @@ package com.github.lukesky19.skyHoppers.gui.menu.skycontainer;
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.config.GUIConfigManager;
 import com.github.lukesky19.skyHoppers.config.LocaleManager;
+import com.github.lukesky19.skyHoppers.config.SettingsManager;
 import com.github.lukesky19.skyHoppers.config.data.Locale;
 import com.github.lukesky19.skyHoppers.config.data.button.ButtonConfig;
 import com.github.lukesky19.skyHoppers.config.data.gui.LinkedContainersGUIConfig;
@@ -59,13 +60,11 @@ import java.util.Optional;
  * This class lets Players manage their linked containers.
  */
 public class LinkedContainersGUI extends SkyHopperGUI {
+    private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
 
-    private final @NotNull SkyHopperManager hopperManager;
     private final @NotNull HopperClickListener hopperClickListener;
-
-    private final @NotNull SkyHopper skyHopper;
 
     private final @Nullable LinkedContainersGUIConfig guiConfig;
 
@@ -79,6 +78,7 @@ public class LinkedContainersGUI extends SkyHopperGUI {
      * @param location The {@link ImmutableLocation} of the {@link SkyHopper}.
      * @param skyHopper The {@link SkyHopper}.
      * @param player The {@link Player} viewing the GUI.
+     * @param settingsManager A {@link SettingsManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param hopperManager A {@link SkyHopperManager} instance.
@@ -91,19 +91,18 @@ public class LinkedContainersGUI extends SkyHopperGUI {
             @NotNull ImmutableLocation location,
             @NotNull SkyHopper skyHopper,
             @NotNull Player player,
+            @NotNull SettingsManager settingsManager,
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull SkyHopperManager hopperManager,
             @NotNull HopperClickListener hopperClickListener,
             @NotNull HopperGUI hopperGUI) {
-        super(skyHoppers, guiManager, player, location, hopperGUI);
+        super(skyHoppers, guiManager, player, skyHopper, location, hopperManager, hopperGUI);
 
+        this.settingsManager = settingsManager;
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
-        this.hopperManager = hopperManager;
         this.hopperClickListener = hopperClickListener;
-
-        this.skyHopper = skyHopper;
 
         guiConfig = guiConfigManager.getLinkedContainersGUIConfig();
     }
@@ -175,25 +174,6 @@ public class LinkedContainersGUI extends SkyHopperGUI {
         containerNum = 0;
 
         return update();
-    }
-
-    /**
-     * Handles when the player closes the GUI.
-     * @param inventoryCloseEvent An InventoryCloseEvent
-     */
-    @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
-
-        guiManager.removeOpenGUI(identifier);
-
-        isOpen = false;
-
-        if(previousGUI != null) {
-            previousGUI.update();
-
-            previousGUI.open();
-        }
     }
 
     /**
@@ -318,7 +298,7 @@ public class LinkedContainersGUI extends SkyHopperGUI {
                                         guiManager.removeOpenGUI(identifier);
                                     }, 1L);
 
-                                    SkyContainerGUI skyContainerGUI = new SkyContainerGUI(skyHoppers, guiManager, location, skyHopper, skyContainer, player, localeManager, guiConfigManager, hopperManager, this);
+                                    SkyContainerGUI skyContainerGUI = new SkyContainerGUI(skyHoppers, guiManager, location, skyHopper, skyContainer, player, settingsManager, localeManager, guiConfigManager, hopperManager, this);
 
                                     boolean creationResult = skyContainerGUI.create();
                                     if(!creationResult) {
@@ -340,8 +320,6 @@ public class LinkedContainersGUI extends SkyHopperGUI {
 
                                 case RIGHT, SHIFT_RIGHT -> {
                                     skyHopper.removeLinkedContainer(skyContainer, true);
-
-                                    hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                                     guiManager.closeSkyContainerRelatedGUIs(location);
 

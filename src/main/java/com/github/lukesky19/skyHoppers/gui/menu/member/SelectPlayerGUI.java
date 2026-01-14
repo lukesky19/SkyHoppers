@@ -39,7 +39,6 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemFlag;
@@ -56,10 +55,6 @@ import java.util.UUID;
  * This class lets Players add an Online Player to the SkyHopper's member list.
  */
 public class SelectPlayerGUI extends SkyHopperGUI {
-    private final @NotNull SkyHopperManager hopperManager;
-
-    private final @NotNull SkyHopper skyHopper;
-
     private final @Nullable SelectPlayerGUIConfig guiConfig;
 
     private int playerNum = 0;
@@ -85,11 +80,7 @@ public class SelectPlayerGUI extends SkyHopperGUI {
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull SkyHopperManager hopperManager,
             @NotNull MembersGUI membersGUI) {
-        super(skyHoppers, guiManager, player, location, membersGUI);
-
-        this.hopperManager = hopperManager;
-
-        this.skyHopper = skyHopper;
+        super(skyHoppers, guiManager, player, skyHopper, location, hopperManager, membersGUI);
 
         guiConfig = guiConfigManager.getSelectPlayerGUIConfig();
     }
@@ -161,25 +152,6 @@ public class SelectPlayerGUI extends SkyHopperGUI {
         added = 0;
 
         return update();
-    }
-
-    /**
-     * Handles when the player closes the GUI.
-     * @param inventoryCloseEvent An InventoryCloseEvent
-     */
-    @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
-
-        guiManager.removeOpenGUI(identifier);
-
-        isOpen = false;
-
-        if(previousGUI != null) {
-            previousGUI.update();
-
-            previousGUI.open();
-        }
     }
 
     /**
@@ -296,8 +268,6 @@ public class SelectPlayerGUI extends SkyHopperGUI {
 
                     buttonBuilder.setAction(inventoryClickEvent -> {
                         skyHopper.addMember(onlinePlayerId);
-
-                        hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                         guiManager.refreshGUIsByLocation(location);
 

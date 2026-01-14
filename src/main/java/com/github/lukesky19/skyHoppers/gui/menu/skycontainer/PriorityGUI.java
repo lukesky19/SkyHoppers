@@ -19,10 +19,13 @@ package com.github.lukesky19.skyHoppers.gui.menu.skycontainer;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.config.GUIConfigManager;
+import com.github.lukesky19.skyHoppers.config.SettingsManager;
+import com.github.lukesky19.skyHoppers.config.data.Settings;
 import com.github.lukesky19.skyHoppers.config.data.button.ButtonConfig;
 import com.github.lukesky19.skyHoppers.config.data.gui.PriorityGUIConfig;
 import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.gui.SkyHopperGUI;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
@@ -35,7 +38,6 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -49,7 +51,8 @@ import java.util.Optional;
  * This GUI lets player's change the priority of a linked container.
  */
 public class PriorityGUI extends SkyHopperGUI {
-    private final @NotNull SkyHopper skyHopper;
+    private final @NotNull SettingsManager settingsManager;
+
     private final @NotNull SkyContainer skyContainer;
 
     private final @Nullable PriorityGUIConfig guiConfig;
@@ -62,7 +65,9 @@ public class PriorityGUI extends SkyHopperGUI {
      * @param skyHopper The {@link SkyHopper}.
      * @param skyContainer The {@link SkyContainer}.
      * @param player The {@link Player} viewing the GUI.
+     * @param settingsManager A {@link SettingsManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
+     * @param hopperManager A {@link SkyHopperManager} instance.
      * @param skyContainerGUI The {@link SkyContainerGUI} the Player came from.
      */
     public PriorityGUI(
@@ -72,11 +77,14 @@ public class PriorityGUI extends SkyHopperGUI {
             @NotNull SkyHopper skyHopper,
             @NotNull SkyContainer skyContainer,
             @NotNull Player player,
+            @NotNull SettingsManager settingsManager,
             @NotNull GUIConfigManager guiConfigManager,
+            @NotNull SkyHopperManager hopperManager,
             @NotNull SkyContainerGUI skyContainerGUI) {
-        super(skyHoppers, guiManager, player, location, skyContainerGUI);
+        super(skyHoppers, guiManager, player, skyHopper, location, hopperManager, skyContainerGUI);
 
-        this.skyHopper = skyHopper;
+        this.settingsManager = settingsManager;
+
         this.skyContainer = skyContainer;
 
         guiConfig = guiConfigManager.getPriorityGUIConfig();
@@ -134,31 +142,15 @@ public class PriorityGUI extends SkyHopperGUI {
         createDummyButtons();
 
         createIncreaseButton();
-        createPriorityButton();
+        createCurrentPriorityButton();
         createDecreaseButton();
+        createHighestPriorityButton();
+        createLowestPriorityButton();
+        createDefaultPriorityButton();
 
         createExitButton();
 
         return super.update();
-    }
-
-    /**
-     * Handles when the player closes the GUI.
-     * @param inventoryCloseEvent An InventoryCloseEvent
-     */
-    @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
-
-        guiManager.removeOpenGUI(identifier);
-
-        isOpen = false;
-
-        if(previousGUI != null) {
-            previousGUI.update();
-
-            previousGUI.open();
-        }
     }
 
     /**
@@ -222,7 +214,7 @@ public class PriorityGUI extends SkyHopperGUI {
      */
     private void createIncreaseButton() {
         if(guiConfig == null) return;
-        ButtonConfig buttonConfig = guiConfig.entries().increase();
+        ButtonConfig buttonConfig = guiConfig.entries().increasePriority();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to create the increase button in the priority gui due to no slot configured."));
@@ -239,6 +231,8 @@ public class PriorityGUI extends SkyHopperGUI {
             guiButtonBuilder.setItemStack(optionalItemStack.get());
 
             guiButtonBuilder.setAction(inventoryClickEvent -> {
+                if(skyContainer.getPriority() == settingsManager.getHighestPriority()) return;
+
                 skyContainer.increasePriority();
 
                 skyHopper.sortLinkedContainers();
@@ -255,7 +249,7 @@ public class PriorityGUI extends SkyHopperGUI {
      */
     private void createDecreaseButton() {
         if(guiConfig == null) return;
-        ButtonConfig buttonConfig = guiConfig.entries().decrease();
+        ButtonConfig buttonConfig = guiConfig.entries().decreasePriority();
 
         if(buttonConfig.slot() == null) {
             logger.warn(AdventureUtil.deserialize("Unable to create the decrease button in the priority gui due to no slot configured."));
@@ -272,6 +266,8 @@ public class PriorityGUI extends SkyHopperGUI {
             guiButtonBuilder.setItemStack(optionalItemStack.get());
 
             guiButtonBuilder.setAction(inventoryClickEvent -> {
+                if(skyContainer.getPriority() == settingsManager.getLowestPriority()) return;
+
                 skyContainer.decreasePriority();
 
                 skyHopper.sortLinkedContainers();
@@ -284,14 +280,14 @@ public class PriorityGUI extends SkyHopperGUI {
     }
 
     /**
-     * Creates the priority button. Displays current priority
+     * Creates the current priority button.
      */
-    private void createPriorityButton() {
+    private void createCurrentPriorityButton() {
         if(guiConfig == null) return;
-        ButtonConfig buttonConfig = guiConfig.entries().priority();
+        ButtonConfig buttonConfig = guiConfig.entries().currentPriority();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the priority button in the priority gui due to no slot configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the current priority button in the priority gui due to no slot configured."));
             return;
         }
 
@@ -305,6 +301,111 @@ public class PriorityGUI extends SkyHopperGUI {
             GUIButton.Builder guiButtonBuilder = new GUIButton.Builder();
 
             guiButtonBuilder.setItemStack(optionalItemStack.get());
+
+            setButton(buttonConfig.slot(), guiButtonBuilder.build());
+        }
+    }
+
+    /**
+     * Creates the highest priority button.
+     */
+    private void createHighestPriorityButton() {
+        if(guiConfig == null) return;
+        ButtonConfig buttonConfig = guiConfig.entries().highestPriority();
+
+        if(buttonConfig.slot() == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to create the highest priority button in the priority gui due to no slot configured."));
+            return;
+        }
+
+        ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
+        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
+        Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+
+        if(optionalItemStack.isPresent()) {
+            GUIButton.Builder guiButtonBuilder = new GUIButton.Builder();
+
+            guiButtonBuilder.setItemStack(optionalItemStack.get());
+
+            guiButtonBuilder.setAction(inventoryClickEvent -> {
+                skyContainer.setPriority(settingsManager.getHighestPriority());
+
+                skyHopper.sortLinkedContainers();
+
+                guiManager.refreshGUIsByLocation(identifier.location());
+            });
+
+            setButton(buttonConfig.slot(), guiButtonBuilder.build());
+        }
+    }
+
+    /**
+     * Creates the highest priority button.
+     */
+    private void createLowestPriorityButton() {
+        if(guiConfig == null) return;
+        ButtonConfig buttonConfig = guiConfig.entries().lowestPriority();
+
+        if(buttonConfig.slot() == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to create the lowest priority button in the priority gui due to no slot configured."));
+            return;
+        }
+
+        ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
+        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
+        Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+
+        if(optionalItemStack.isPresent()) {
+            GUIButton.Builder guiButtonBuilder = new GUIButton.Builder();
+
+            guiButtonBuilder.setItemStack(optionalItemStack.get());
+
+            guiButtonBuilder.setAction(inventoryClickEvent -> {
+                @Nullable Settings settings = settingsManager.getSettings();
+                int lowestPriority = settings != null ? settings.skyContainerConfig().lowestPriority() : 255;
+
+                skyContainer.setPriority(lowestPriority);
+
+                skyHopper.sortLinkedContainers();
+
+                guiManager.refreshGUIsByLocation(identifier.location());
+            });
+
+            setButton(buttonConfig.slot(), guiButtonBuilder.build());
+        }
+    }
+
+    /**
+     * Creates the default priority button.
+     */
+    private void createDefaultPriorityButton() {
+        if(guiConfig == null) return;
+        ButtonConfig buttonConfig = guiConfig.entries().defaultPriority();
+
+        if(buttonConfig.slot() == null) {
+            logger.warn(AdventureUtil.deserialize("Unable to create the default priority button in the priority gui due to no slot configured."));
+            return;
+        }
+
+        ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
+        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
+        Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
+
+        if(optionalItemStack.isPresent()) {
+            GUIButton.Builder guiButtonBuilder = new GUIButton.Builder();
+
+            guiButtonBuilder.setItemStack(optionalItemStack.get());
+
+            guiButtonBuilder.setAction(inventoryClickEvent -> {
+                @Nullable Settings settings = settingsManager.getSettings();
+                int defaultPriority = settings != null ? settings.skyContainerConfig().startingPriority() : 1;
+
+                skyContainer.setPriority(defaultPriority);
+
+                skyHopper.sortLinkedContainers();
+
+                guiManager.refreshGUIsByLocation(identifier.location());
+            });
 
             setButton(buttonConfig.slot(), guiButtonBuilder.build());
         }

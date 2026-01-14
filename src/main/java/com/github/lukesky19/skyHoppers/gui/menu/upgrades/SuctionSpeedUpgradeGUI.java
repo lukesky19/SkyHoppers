@@ -42,7 +42,6 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -60,10 +59,7 @@ import java.util.TreeMap;
 public class SuctionSpeedUpgradeGUI extends SkyHopperGUI {
     private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
-    private final @NotNull SkyHopperManager hopperManager;
     private final @NotNull HookManager hookManager;
-
-    private final @NotNull SkyHopper skyHopper;
 
     private final @Nullable UpgradeGUIConfig guiConfig;
 
@@ -93,14 +89,11 @@ public class SuctionSpeedUpgradeGUI extends SkyHopperGUI {
             @NotNull SkyHopperManager hopperManager,
             @NotNull HookManager hookManager,
             @NotNull UpgradesGUI upgradesGUI) {
-        super(skyHoppers, guiManager, player, location, upgradesGUI);
+        super(skyHoppers, guiManager, player, skyHopper, location, hopperManager, upgradesGUI);
 
         this.settingsManager = settingsManager;
         this.localeManager = localeManager;
-        this.hopperManager = hopperManager;
         this.hookManager = hookManager;
-
-        this.skyHopper = skyHopper;
 
         guiConfig = guiConfigManager.getSuctionSpeedUpgradeGUIConfig();
     }
@@ -174,25 +167,6 @@ public class SuctionSpeedUpgradeGUI extends SkyHopperGUI {
         createUpgradeButton(upgrades);
 
         return super.update();
-    }
-
-    /**
-     * Handles when the player closes the GUI.
-     * @param inventoryCloseEvent An InventoryCloseEvent
-     */
-    @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
-
-        guiManager.removeOpenGUI(identifier);
-
-        isOpen = false;
-
-        if(previousGUI != null) {
-            previousGUI.update();
-
-            previousGUI.open();
-        }
     }
 
     /**
@@ -312,8 +286,6 @@ public class SuctionSpeedUpgradeGUI extends SkyHopperGUI {
                 buttonBuilder.setAction(inventoryClickEvent -> {
                     skyHopper.setSuctionSpeed(upgrade.getKey());
 
-                    hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
-
                     guiManager.refreshGUIsByLocation(location);
 
                     update();
@@ -376,8 +348,6 @@ public class SuctionSpeedUpgradeGUI extends SkyHopperGUI {
 
                 buttonBuilder.setAction(inventoryClickEvent -> {
                     skyHopper.setSuctionSpeed(upgrade.getKey());
-
-                    hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                     guiManager.refreshGUIsByLocation(location);
 
@@ -457,8 +427,6 @@ public class SuctionSpeedUpgradeGUI extends SkyHopperGUI {
                         skyHopper.setMaxSuctionSpeed(upgradeSpeed);
 
                         player.sendMessage(AdventureUtil.deserialize(player, locale.prefix() + locale.suctionSpeedUpgrade(), messagePlaceholders));
-
-                        hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                         guiManager.refreshGUIsByLocation(location);
 

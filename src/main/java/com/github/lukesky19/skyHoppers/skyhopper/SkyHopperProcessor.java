@@ -268,7 +268,7 @@ public class SkyHopperProcessor {
         }
 
         // Calculate the starting linked container priority
-        int startingPriority = settingsManager.getSettings() != null ? settingsManager.getSettings().skyContainerConfig().startingLinkedContainerPriority() : 1;
+        int startingPriority = settingsManager.getStartingPriority();
 
         // Get the legacy linked container
         if(pdc.has(HopperKeys.LINKED.getKey())) {
@@ -395,8 +395,10 @@ public class SkyHopperProcessor {
             pdcMembers.forEach(skyHopper::addMember);
         }
 
-        // Calculate the starting linked container priority
-        int startingPriority = settingsManager.getSettings() != null ? Math.max(settingsManager.getSettings().skyContainerConfig().startingLinkedContainerPriority(), 1) : 1;
+        // Get the highest, lowest, and default priorities
+        int highestPriority = settingsManager.getHighestPriority();
+        int lowestPriority = settingsManager.getLowestPriority();
+        int startingPriority = settingsManager.getStartingPriority();
 
         // Get the linked containers (modern)
         if(pdc.has(HopperKeys.LINKS.getKey())) {
@@ -422,6 +424,8 @@ public class SkyHopperProcessor {
 
                         // Get the SkyContainer's priority or the default priority if not set
                         int priority = linkedPDC.getOrDefault(HopperKeys.PRIORITY.getKey(), PersistentDataType.INTEGER, startingPriority);
+                        // Clamp the priority to the highest and lowest priorities
+                        priority = Math.max(highestPriority, Math.min(lowestPriority, priority));
 
                         // Create the SkyContainer and add it to the list
                         skyHopper.addLinkedContainer(new SkyContainer(ImmutableLocation.fromBukkitLocation(linkedLocation), outputFilterType, linkedContainerFilterItems, priority), false);

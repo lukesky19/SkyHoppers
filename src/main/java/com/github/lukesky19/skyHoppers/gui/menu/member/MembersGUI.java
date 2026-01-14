@@ -61,9 +61,6 @@ import java.util.UUID;
 public class MembersGUI extends SkyHopperGUI {
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
-    private final @NotNull SkyHopperManager hopperManager;
-
-    private final @NotNull SkyHopper skyHopper;
 
     private final @Nullable MembersGUIConfig guiConfig;
 
@@ -92,13 +89,10 @@ public class MembersGUI extends SkyHopperGUI {
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull SkyHopperManager hopperManager,
             @NotNull HopperGUI hopperGUI) {
-        super(skyHoppers, guiManager, player, location, hopperGUI);
+        super(skyHoppers, guiManager, player, skyHopper, location, hopperManager, hopperGUI);
 
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
-        this.hopperManager = hopperManager;
-
-        this.skyHopper = skyHopper;
 
         guiConfig = guiConfigManager.getMembersGUIConfig();
     }
@@ -171,25 +165,6 @@ public class MembersGUI extends SkyHopperGUI {
         added = 0;
 
         return update();
-    }
-
-    /**
-     * Handles when the player closes the GUI.
-     * @param inventoryCloseEvent An InventoryCloseEvent
-     */
-    @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
-
-        guiManager.removeOpenGUI(identifier);
-
-        isOpen = false;
-
-        if(previousGUI != null) {
-            previousGUI.update();
-
-            previousGUI.open();
-        }
     }
 
     /**
@@ -302,8 +277,6 @@ public class MembersGUI extends SkyHopperGUI {
 
                         buttonBuilder.setAction(inventoryClickEvent -> {
                             skyHopper.removeMember(memberId);
-
-                            hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                             guiManager.refreshGUIsByLocation(location);
 

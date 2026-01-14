@@ -41,7 +41,6 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -59,10 +58,7 @@ import java.util.TreeMap;
 public class LinksUpgradeGUI extends SkyHopperGUI {
     private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
-    private final @NotNull SkyHopperManager hopperManager;
     private final @NotNull HookManager hookManager;
-
-    private final @NotNull SkyHopper skyHopper;
 
     private final @Nullable UpgradeGUIConfig guiConfig;
 
@@ -92,14 +88,11 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
             @NotNull SkyHopperManager hopperManager,
             @NotNull HookManager hookManager,
             @NotNull UpgradesGUI upgradesGUI) {
-        super(skyHoppers, guiManager, player, location, upgradesGUI);
+        super(skyHoppers, guiManager, player, skyHopper, location, hopperManager, upgradesGUI);
 
         this.settingsManager = settingsManager;
         this.localeManager = localeManager;
-        this.hopperManager = hopperManager;
         this.hookManager = hookManager;
-
-        this.skyHopper = skyHopper;
 
         guiConfig = guiConfigManager.getLinksUpgradeGUIConfig();
     }
@@ -171,25 +164,6 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
         createUpgradeButton(upgrades);
 
         return super.update();
-    }
-
-    /**
-     * Handles when the player closes the GUI.
-     * @param inventoryCloseEvent An InventoryCloseEvent
-     */
-    @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
-
-        guiManager.removeOpenGUI(identifier);
-
-        isOpen = false;
-
-        if(previousGUI != null) {
-            previousGUI.update();
-
-            previousGUI.open();
-        }
     }
 
     /**
@@ -321,11 +295,8 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
                         economyHook.removeFromBalance(player, upgradePrice);
 
                         skyHopper.setMaxContainers(upgradeAmount);
-                        skyHopper.setMaxContainers(upgradeAmount);
 
                         player.sendMessage(AdventureUtil.deserialize(player, locale.prefix() + locale.maxLinksUpgrade(), messagePlaceholders));
-
-                        hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                         guiManager.refreshGUIsByLocation(location);
 

@@ -7,25 +7,40 @@ entries:
         name: " "
         lore: [ ]
     exit:
-        slot: 22
+        slot: 49
         item:
-            item-type: BARRIER
-            name: "<white><bold>Exit SkyContainer Settings</bold></white>"
+            item-type: barrier
+            name: "<white><bold>Exit Priority Settings</bold></white>"
             lore:
                 - ' <white>|</white> <gray>Click to close</gray>'
                 - " <white>|</white> <gray>the SkyContainer's settings.</gray>"
-    increase:
-        slot: 11
+    increase-priority:
+        slot: 20
         item:
-            item-type: LIME_DYE
+            item-type: lime_dye
             name: "<#99ff99><bold>Increase Priority</bold></#99ff99>"
-    priority:
-        slot: 13
+    current-priority:
+        slot: 22
         item:
             item-type: REDSTONE_TORCH
             name: "<#99ff99><bold>Current Priority:</bold></#99ff99> <white><priority></white>"
-    decrease:
-        slot: 15
+    decrease-priority:
+        slot: 24
         item:
-            item-type: RED_DYE
+            item-type: red_dye
             name: "<#99ff99><bold>Decrease Priority</bold></#99ff99>"
+    highest-priority:
+        slot: 29
+        item:
+            item-type: lime_concrete
+            name: "<#99ff99><bold>Highest Priority</bold></#99ff99>"
+    default-priority:
+        slot: 31
+        item:
+            item-type: white_concrete
+            name: "<#99ff99><bold>Default Priority</bold></#99ff99>"
+    lowest-priority:
+        slot: 33
+        item:
+            item-type: red_concrete
+            name: "<#99ff99><bold>Lowest Priority</bold></#99ff99>"

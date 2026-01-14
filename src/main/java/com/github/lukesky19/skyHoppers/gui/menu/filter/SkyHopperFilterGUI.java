@@ -40,7 +40,6 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemFlag;
@@ -58,10 +57,6 @@ import java.util.Optional;
  * This class lets Players manage a SkyHopper's filter items and filter type.
  */
 public class SkyHopperFilterGUI extends SkyHopperGUI {
-    private final @NotNull SkyHopperManager hopperManager;
-
-    private final @NotNull SkyHopper skyHopper;
-
     private final @Nullable FilterGUIConfig guiConfig;
 
     private int itemNum = 0;
@@ -87,11 +82,7 @@ public class SkyHopperFilterGUI extends SkyHopperGUI {
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull SkyHopperManager hopperManager,
             @NotNull HopperGUI hopperGUI) {
-        super(skyHoppers, guiManager, player, location, hopperGUI);
-
-        this.hopperManager = hopperManager;
-
-        this.skyHopper = skyHopper;
+        super(skyHoppers, guiManager, player, skyHopper, location, hopperManager, hopperGUI);
 
         guiConfig = guiConfigManager.getInputFilterGUIConfig();
     }
@@ -102,19 +93,19 @@ public class SkyHopperFilterGUI extends SkyHopperGUI {
      */
     public boolean create() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the input_filter.yml GUI due to invalid GUI configuration."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the SkyHopper filter GUI due to invalid GUI configuration."));
             return false;
         }
 
         GUIType guiType = guiConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the input_filter.yml GUI due to an invalid GUIType"));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the SkyHopper filter GUI due to an invalid GUIType"));
             return false;
         }
 
         String guiName = guiConfig.name();
         if(guiName == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the input_filter.yml GUI due to an invalid gui name."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the SkyHopper filter GUI due to an invalid gui name."));
             return false;
         }
 
@@ -127,13 +118,13 @@ public class SkyHopperFilterGUI extends SkyHopperGUI {
     @Override
     public boolean update() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to decorate the GUI due to invalid configuration for the input filter GUI."));
+            logger.warn(AdventureUtil.deserialize("Unable to decorate the GUI due to invalid configuration for the SkyHopper filter GUI."));
             if(isOpen) close();
             return false;
         }
 
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to update the input filter GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtil.deserialize("Unable to update the SkyHopper filter GUI as the InventoryView was not created."));
             if(isOpen) close();
             return false;
         }
@@ -163,25 +154,6 @@ public class SkyHopperFilterGUI extends SkyHopperGUI {
         itemNum = 0;
 
         return update();
-    }
-
-    /**
-     * Handles when the player closes the GUI.
-     * @param inventoryCloseEvent An InventoryCloseEvent
-     */
-    @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
-
-        guiManager.removeOpenGUI(identifier);
-
-        isOpen = false;
-
-        if(previousGUI != null) {
-            previousGUI.update();
-
-            previousGUI.open();
-        }
     }
 
     /**
@@ -225,8 +197,6 @@ public class SkyHopperFilterGUI extends SkyHopperGUI {
 
         // Add the ItemType to the filter
         skyHopper.addFilterItem(itemType);
-
-        hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
         guiManager.refreshGUIsByLocation(location);
 
@@ -305,8 +275,6 @@ public class SkyHopperFilterGUI extends SkyHopperGUI {
                             if(currentItemType != null) {
                                 skyHopper.removeFilterItem(currentItemType);
 
-                                hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
-
                                 guiManager.refreshGUIsByLocation(location);
 
                                 added = 0;
@@ -336,7 +304,7 @@ public class SkyHopperFilterGUI extends SkyHopperGUI {
             assert guiConfig != null;
             ButtonConfig buttonConfig = guiConfig.entries().nextPage();
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to create the next page button in the input filter gui due to no slot configured."));
+                logger.warn(AdventureUtil.deserialize("Unable to create the next page button in the SkyHopper filter gui due to no slot configured."));
                 return;
             }
 
@@ -367,7 +335,7 @@ public class SkyHopperFilterGUI extends SkyHopperGUI {
             assert guiConfig != null;
             ButtonConfig buttonConfig = guiConfig.entries().previousPage();
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to create the previous page button in the input filter gui due to no slot configured."));
+                logger.warn(AdventureUtil.deserialize("Unable to create the previous page button in the SkyHopper filter gui due to no slot configured."));
                 return;
             }
 
@@ -406,7 +374,7 @@ public class SkyHopperFilterGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().filter();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the filter button in the input filter gui due to no slot configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the filter button in the SkyHopper filter gui due to no slot configured."));
             return;
         }
 
@@ -425,8 +393,6 @@ public class SkyHopperFilterGUI extends SkyHopperGUI {
             builder.setAction(event -> {
                 FilterType updatedFilterType = getUpdatedFilterType(skyHopper);
                 skyHopper.setFilterType(updatedFilterType);
-
-                hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                 guiManager.refreshGUIsByLocation(location);
 
@@ -448,7 +414,7 @@ public class SkyHopperFilterGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().exit();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the exit button in the input filter gui due to no slot configured."));
+            logger.warn(AdventureUtil.deserialize("Unable to create the exit button in the SkyHopper filter gui due to no slot configured."));
             return;
         }
 
@@ -475,7 +441,7 @@ public class SkyHopperFilterGUI extends SkyHopperGUI {
 
         guiConfig.entries().dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the input filter GUI due to an invalid slot."));
+                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the SkyHopper filter GUI due to an invalid slot."));
                 return;
             }
 

@@ -68,8 +68,6 @@ public class HopperGUI extends SkyHopperGUI {
     private final @NotNull HookManager hookManager;
     private final @NotNull HopperClickListener hopperClickListener;
 
-    private final @NotNull SkyHopper skyHopper;
-
     private final @Nullable SkyHopperGUIConfig guiConfig;
 
     /**
@@ -98,7 +96,7 @@ public class HopperGUI extends SkyHopperGUI {
             @NotNull SkyHopperManager hopperManager,
             @NotNull HookManager hookManager,
             @NotNull HopperClickListener hopperClickListener) {
-        super(skyHoppers, guiManager, player, location, null);
+        super(skyHoppers, guiManager, player, skyHopper, location, hopperManager, null);
 
         this.settingsManager = settingsManager;
         this.localeManager = localeManager;
@@ -106,8 +104,6 @@ public class HopperGUI extends SkyHopperGUI {
         this.hopperManager = hopperManager;
         this.hookManager = hookManager;
         this.hopperClickListener = hopperClickListener;
-
-        this.skyHopper = skyHopper;
 
         guiConfig = guiConfigManager.getHopperGUIConfig();
     }
@@ -211,19 +207,6 @@ public class HopperGUI extends SkyHopperGUI {
     }
 
     /**
-     * Handles when the player closes the GUI.
-     * @param inventoryCloseEvent An InventoryCloseEvent
-     */
-    @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
-
-        guiManager.removeOpenGUI(identifier);
-
-        this.isOpen = false;
-    }
-
-    /**
      * Handles when items are dragged across the bottom (player's) inventory.
      * This method does nothing.
      * @param inventoryDragEvent An {@link InventoryDragEvent}.
@@ -303,8 +286,6 @@ public class HopperGUI extends SkyHopperGUI {
             builder.setAction(event -> {
                 skyHopper.toggleEnabled();
 
-                hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
-
                 guiManager.refreshGUIsByLocation(location);
 
                 update();
@@ -337,8 +318,6 @@ public class HopperGUI extends SkyHopperGUI {
 
             builder.setAction(event -> {
                 skyHopper.toggleEnabled();
-
-                hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                 guiManager.refreshGUIsByLocation(location);
 
@@ -373,8 +352,6 @@ public class HopperGUI extends SkyHopperGUI {
             builder.setAction(event -> {
                 skyHopper.toggleParticles();
 
-                hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
-
                 guiManager.refreshGUIsByLocation(location);
 
                 update();
@@ -407,8 +384,6 @@ public class HopperGUI extends SkyHopperGUI {
 
             builder.setAction(event -> {
                 skyHopper.toggleParticles();
-
-                hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                 guiManager.refreshGUIsByLocation(location);
 
@@ -449,7 +424,7 @@ public class HopperGUI extends SkyHopperGUI {
                     guiManager.removeOpenGUI(identifier);
                 }, 1L);
 
-                LinkedContainersGUI linksGUI = new LinkedContainersGUI(skyHoppers, guiManager, location, skyHopper, player, localeManager, guiConfigManager, hopperManager, hopperClickListener, this);
+                LinkedContainersGUI linksGUI = new LinkedContainersGUI(skyHoppers, guiManager, location, skyHopper, player, settingsManager, localeManager, guiConfigManager, hopperManager, hopperClickListener, this);
 
                 boolean creationResult = linksGUI.create();
                 if(!creationResult) {

@@ -49,7 +49,9 @@ sky-hopper-config:
         disabled: "<red>Disabled</red>"
 # Settings related to linked containers.
 sky-container-config:
-    starting-linked-container-priority: 1
+    highest-priority: 1
+    starting-priority: 1
+    lowest-priority: 255
 # SkyHopper upgrade prices.
 upgrades:
     transfer-speed:

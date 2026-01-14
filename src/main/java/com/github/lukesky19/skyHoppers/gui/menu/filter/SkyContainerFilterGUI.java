@@ -41,7 +41,6 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemFlag;
@@ -59,9 +58,6 @@ import java.util.Optional;
  * This class lets Players manage a SkyContainer's filter items and filter type.
  */
 public class SkyContainerFilterGUI extends SkyHopperGUI {
-    private final @NotNull SkyHopperManager hopperManager;
-
-    private final @NotNull SkyHopper skyHopper;
     private final @NotNull SkyContainer skyContainer;
 
     private final @Nullable FilterGUIConfig guiConfig;
@@ -91,11 +87,8 @@ public class SkyContainerFilterGUI extends SkyHopperGUI {
             @NotNull SkyHopperManager hopperManager,
             @NotNull SkyContainer skyContainer,
             @NotNull SkyContainerGUI skyContainerGUI) {
-        super(skyHoppers, guiManager, player, location, skyContainerGUI);
+        super(skyHoppers, guiManager, player, skyHopper, location, hopperManager, skyContainerGUI);
 
-        this.hopperManager = hopperManager;
-
-        this.skyHopper = skyHopper;
         this.skyContainer = skyContainer;
 
         guiConfig = guiConfigManager.getOutputFilterGUIConfig();
@@ -124,25 +117,6 @@ public class SkyContainerFilterGUI extends SkyHopperGUI {
         }
 
         return create(guiType, guiName, List.of());
-    }
-
-    @Override
-    public void close() {
-        skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
-            guiManager.removeOpenGUI(identifier);
-
-            this.isOpen = false;
-
-            if(previousGUI != null) {
-                player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
-
-                previousGUI.refresh();
-
-                previousGUI.open();
-            } else {
-                player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
-            }
-        }, 1L);
     }
 
     /**
@@ -190,25 +164,6 @@ public class SkyContainerFilterGUI extends SkyHopperGUI {
     }
 
     /**
-     * Handles when the player closes the GUI.
-     * @param inventoryCloseEvent An InventoryCloseEvent
-     */
-    @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
-
-        guiManager.removeOpenGUI(identifier);
-
-        this.isOpen = false;
-
-        if(previousGUI != null) {
-            previousGUI.update();
-
-            previousGUI.open();
-        }
-    }
-
-    /**
      * Handles when items are dragged across the bottom (player's) inventory.
      * This method does nothing.
      * @param inventoryDragEvent An {@link InventoryDragEvent}.
@@ -249,8 +204,6 @@ public class SkyContainerFilterGUI extends SkyHopperGUI {
 
         // Add the ItemType to the filter
         skyContainer.addFilterItem(itemType);
-
-        hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
         guiManager.refreshGUIsByLocation(location);
 
@@ -326,8 +279,6 @@ public class SkyContainerFilterGUI extends SkyHopperGUI {
                             ItemType currentItemType = currentItem.getType().asItemType();
                             if(currentItemType != null) {
                                 skyContainer.removeFilterItem(currentItemType);
-
-                                hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                                 guiManager.refreshGUIsByLocation(location);
 
@@ -444,8 +395,6 @@ public class SkyContainerFilterGUI extends SkyHopperGUI {
             builder.setAction(event -> {
                 FilterType updatedFilterType = getUpdatedFilterType();
                 skyContainer.setFilterType(updatedFilterType);
-
-                hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
 
                 guiManager.refreshGUIsByLocation(location);
 

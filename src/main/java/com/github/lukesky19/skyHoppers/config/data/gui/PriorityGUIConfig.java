@@ -48,17 +48,23 @@ public record PriorityGUIConfig(
      * The button configurations that are displayed inside the priority GUI.
      * @param filler The filler item configuration
      * @param exit The exit item configuration
-     * @param increase The configuration for the increase priority button.
-     * @param decrease The configuration for the decrease priority button.
-     * @param priority The configuration to view the current priority.
+     * @param increasePriority The configuration for the increase priority button.
+     * @param currentPriority The configuration to view the current priority.
+     * @param decreasePriority The configuration for the decrease priority button.
+     * @param highestPriority The configuration for the button to set to the highest priority.
+     * @param lowestPriority The configuration for the button to set to the lowest priority.
+     * @param defaultPriority The configuration for the button to set the priority to the default/starting priority.
      * @param dummyButtons A {@link List} of {@link ButtonConfig}s to display in the GUI.
      */
     @ConfigSerializable
     public record Buttons(
             @NotNull ItemStackConfig filler,
             @NotNull ButtonConfig exit,
-            @NotNull ButtonConfig increase,
-            @NotNull ButtonConfig priority,
-            @NotNull ButtonConfig decrease,
+            @NotNull ButtonConfig increasePriority,
+            @NotNull ButtonConfig currentPriority,
+            @NotNull ButtonConfig decreasePriority,
+            @NotNull ButtonConfig highestPriority,
+            @NotNull ButtonConfig lowestPriority,
+            @NotNull ButtonConfig defaultPriority,
             @NotNull List<ButtonConfig> dummyButtons) {}
 }

@@ -68,10 +68,15 @@ public record Settings(
 
     /**
      * This record contains configuration related to linked containers (SkyContainers).
-     * @param startingLinkedContainerPriority The starting priority of linked containers.
+     * @param highestPriority The highest priority of linked containers.
+     * @param startingPriority The starting priority of linked containers.
+     * @param lowestPriority The lowest priority of linked containers.
      */
     @ConfigSerializable
-    public record SkyContainerConfig(int startingLinkedContainerPriority) {}
+    public record SkyContainerConfig(
+            int highestPriority,
+            int startingPriority,
+            int lowestPriority) {}
 
     /**
      * Configuration for the Strings to be displayed when a SkyHopper or SkyHopper particles are enabled or disabled.

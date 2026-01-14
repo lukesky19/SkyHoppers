@@ -20,6 +20,7 @@ package com.github.lukesky19.skyHoppers.gui.menu.skycontainer;
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.config.GUIConfigManager;
 import com.github.lukesky19.skyHoppers.config.LocaleManager;
+import com.github.lukesky19.skyHoppers.config.SettingsManager;
 import com.github.lukesky19.skyHoppers.config.data.Locale;
 import com.github.lukesky19.skyHoppers.config.data.button.ButtonConfig;
 import com.github.lukesky19.skyHoppers.config.data.gui.SkyContainerGUIConfig;
@@ -55,11 +56,10 @@ import java.util.Optional;
  * Currently only the filter and priority.
  */
 public class SkyContainerGUI extends SkyHopperGUI {
+    private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
-    private final @NotNull SkyHopperManager hopperManager;
 
-    private final @NotNull SkyHopper skyHopper;
     private final @NotNull SkyContainer skyContainer;
 
     private final @Nullable SkyContainerGUIConfig guiConfig;
@@ -72,6 +72,7 @@ public class SkyContainerGUI extends SkyHopperGUI {
      * @param skyHopper The {@link SkyHopper} the GUI is associated with.
      * @param skyContainer The {@link SkyContainer} the GUI is associated with.
      * @param player The {@link Player} viewing the GUI.
+     * @param settingsManager A {@link SettingsManager} instance.
      * @param localeManager A {@link LocaleManager} instance.
      * @param guiConfigManager A {@link GUIConfigManager} instance.
      * @param hopperManager A {@link SkyHopperManager} instance.
@@ -84,17 +85,17 @@ public class SkyContainerGUI extends SkyHopperGUI {
             @NotNull SkyHopper skyHopper,
             @NotNull SkyContainer skyContainer,
             @NotNull Player player,
+            @NotNull SettingsManager settingsManager,
             @NotNull LocaleManager localeManager,
             @NotNull GUIConfigManager guiConfigManager,
             @NotNull SkyHopperManager hopperManager,
             @NotNull LinkedContainersGUI linkedContainersGUI) {
-        super(skyHoppers, guiManager, player, location, linkedContainersGUI);
+        super(skyHoppers, guiManager, player, skyHopper, location, hopperManager, linkedContainersGUI);
 
+        this.settingsManager = settingsManager;
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
-        this.hopperManager = hopperManager;
 
-        this.skyHopper = skyHopper;
         this.skyContainer = skyContainer;
 
         guiConfig = guiConfigManager.getSkyContainerGUIConfig();
@@ -171,49 +172,6 @@ public class SkyContainerGUI extends SkyHopperGUI {
     @Override
     public boolean refresh() {
         return this.update();
-    }
-
-    /**
-     * If the previous GUI is not null, close the GUI with {@link InventoryCloseEvent.Reason#OPEN_NEW}.
-     * Otherwise, close the GUI with {@link InventoryCloseEvent.Reason#UNLOADED}.
-     * You should use {@link #unload(boolean)} if the plugin is being disabled, and you are trying to close open GUIs.
-     */
-    @Override
-    public void close() {
-        skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
-            guiManager.removeOpenGUI(identifier);
-
-            this.isOpen = false;
-
-            if(previousGUI != null) {
-                player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
-
-                previousGUI.refresh();
-
-                previousGUI.open();
-            } else {
-                player.closeInventory(InventoryCloseEvent.Reason.UNLOADED);
-            }
-        }, 1L);
-    }
-
-    /**
-     * Handles when the player closes the GUI.
-     * @param inventoryCloseEvent An InventoryCloseEvent
-     */
-    @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
-
-        guiManager.removeOpenGUI(identifier);
-
-        isOpen = false;
-
-        if(previousGUI != null) {
-            previousGUI.refresh();
-
-            previousGUI.open();
-        }
     }
 
     /**
@@ -356,7 +314,7 @@ public class SkyContainerGUI extends SkyHopperGUI {
                     guiManager.removeOpenGUI(identifier);
                 }, 1L);
 
-                PriorityGUI priorityGUI = new PriorityGUI(skyHoppers, guiManager, location, skyHopper, skyContainer, player, guiConfigManager, this);
+                PriorityGUI priorityGUI = new PriorityGUI(skyHoppers, guiManager, location, skyHopper, skyContainer, player, settingsManager, guiConfigManager, hopperManager, this);
 
                 boolean creationResult = priorityGUI.create();
                 if(!creationResult) {

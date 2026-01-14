@@ -201,10 +201,7 @@ public class HopperClickListener implements Listener {
             }
 
             if(linkingSkyHopper.getLinkedContainers().size() != linkingSkyHopper.getMaxContainers()) {
-                // Calculate the starting linked container priority
-                int startingPriority = settingsManager.getSettings() != null ? Math.max(settingsManager.getSettings().skyContainerConfig().startingLinkedContainerPriority(), 1) : 1;
-
-                linkingSkyHopper.addLinkedContainer(new SkyContainer(containerLocation, FilterType.NONE, new ArrayList<>(), startingPriority), true);
+                linkingSkyHopper.addLinkedContainer(new SkyContainer(containerLocation, FilterType.NONE, new ArrayList<>(), settingsManager.getStartingPriority()), true);
 
                 hopperManager.getSkyHopperSaver().saveSkyHopper(linkingSkyHopper);
 

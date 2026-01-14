@@ -56,10 +56,7 @@ public class UpgradesGUI extends SkyHopperGUI {
     private final @NotNull SettingsManager settingsManager;
     private final @NotNull LocaleManager localeManager;
     private final @NotNull GUIConfigManager guiConfigManager;
-    private final @NotNull SkyHopperManager hopperManager;
     private final @NotNull HookManager hookManager;
-
-    private final @NotNull SkyHopper skyHopper;
 
     private final @Nullable SelectUpgradeGUIConfig guiConfig;
 
@@ -89,15 +86,12 @@ public class UpgradesGUI extends SkyHopperGUI {
             @NotNull SkyHopperManager hopperManager,
             @NotNull HookManager hookManager,
             @NotNull HopperGUI hopperGUI) {
-        super(skyHoppers, guiManager, player, location, hopperGUI);
+        super(skyHoppers, guiManager, player, skyHopper, location, hopperManager, hopperGUI);
 
         this.settingsManager = settingsManager;
         this.localeManager = localeManager;
         this.guiConfigManager = guiConfigManager;
-        this.hopperManager = hopperManager;
         this.hookManager = hookManager;
-
-        this.skyHopper = skyHopper;
 
         guiConfig = guiConfigManager.getUpgradesGUIConfig();
     }
@@ -179,25 +173,6 @@ public class UpgradesGUI extends SkyHopperGUI {
         createExitButton();
 
         return super.update();
-    }
-
-    /**
-     * Handles when the player closes the GUI.
-     * @param inventoryCloseEvent An InventoryCloseEvent
-     */
-    @Override
-    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
-        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
-
-        guiManager.removeOpenGUI(identifier);
-
-        isOpen = false;
-
-        if(previousGUI != null) {
-            previousGUI.update();
-
-            previousGUI.open();
-        }
     }
 
     /**

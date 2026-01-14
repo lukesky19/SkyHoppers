@@ -18,6 +18,8 @@
 package com.github.lukesky19.skyHoppers.gui;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
+import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
+import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skyHoppers.util.LocationUUIDKey;
 import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
@@ -56,6 +58,10 @@ public abstract class SkyHopperGUI extends ButtonGUI<LocationUUIDKey> {
      * The {@link GUIManager} that the plugin is using to track open GUIs with.
      */
     protected final @NotNull GUIManager guiManager;
+    /**
+     * The {@link SkyHopperManager} that manages SkyHoppers.
+     */
+    protected final @NotNull SkyHopperManager hopperManager;
 
     /**
      * The {@link Map} to store the mapping of slots to {@link GUIButton}s for.
@@ -70,6 +76,10 @@ public abstract class SkyHopperGUI extends ButtonGUI<LocationUUIDKey> {
      * The {@link UUID} of the {@link Player}.
      */
     protected final @NotNull UUID uuid;
+    /**
+     * The {@link SkyHopper} the GUI is associated with.
+     */
+    protected final @NotNull SkyHopper skyHopper;
     /**
      * The {@link ImmutableLocation} the GUI is associated with. This is the location of the SkyHopper.
      */
@@ -92,21 +102,30 @@ public abstract class SkyHopperGUI extends ButtonGUI<LocationUUIDKey> {
      * @param skyHoppers A {@link SkyHoppers} instance.
      * @param guiManager The {@link GUIManager} that is used to track open GUIs.
      * @param player The {@link Player} associated with the created GUI.
+     * @param skyHopper The {@link SkyHopper} associated with the GUI.
      * @param location The {@link ImmutableLocation} of the SkyHopper the GUI is for.
+     * @param hopperManager A {@link SkyHopperManager} instance.
      * @param previousGUI The previous {@link SkyHopperGUI} opened before opening this one.
      */
     public SkyHopperGUI(
             @NotNull SkyHoppers skyHoppers,
             @NotNull GUIManager guiManager,
             @NotNull Player player,
+            @NotNull SkyHopper skyHopper,
             @NotNull ImmutableLocation location,
+            @NotNull SkyHopperManager hopperManager,
             @Nullable SkyHopperGUI previousGUI) {
         super(skyHoppers, guiManager, new LocationUUIDKey(location, player.getUniqueId()), player);
+
         this.skyHoppers = skyHoppers;
         this.logger = skyHoppers.getComponentLogger();
+
         this.guiManager = guiManager;
+        this.hopperManager = hopperManager;
+
         this.player = player;
         this.uuid = player.getUniqueId();
+        this.skyHopper = skyHopper;
         this.location = location;
         this.previousGUI = previousGUI;
     }
@@ -116,7 +135,7 @@ public abstract class SkyHopperGUI extends ButtonGUI<LocationUUIDKey> {
      * @return An {@link Optional} containing an {@link InventoryView}. If empty, that means {@link #create(GUIType, String, List)} was not called.
      */
     @Override
-    public @NotNull Optional<@NotNull InventoryView> getInventoryView() {
+    public @NotNull Optional<InventoryView> getInventoryView() {
         return Optional.ofNullable(inventoryView);
     }
 
@@ -185,12 +204,14 @@ public abstract class SkyHopperGUI extends ButtonGUI<LocationUUIDKey> {
         skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
             guiManager.removeOpenGUI(identifier);
 
+            hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
+
             this.isOpen = false;
 
             if(previousGUI != null) {
                 player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
 
-                previousGUI.update();
+                previousGUI.refresh();
 
                 previousGUI.open();
             } else {
@@ -257,8 +278,26 @@ public abstract class SkyHopperGUI extends ButtonGUI<LocationUUIDKey> {
         return true;
     }
 
+    /**
+     * Handles when the player closes the GUI. Saves the SkyHopper, removes the GUI as open, and opens the previous GUI if necessary.
+     * @param inventoryCloseEvent An InventoryCloseEvent
+     */
     @Override
-    public abstract void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent);
+    public void handleClose(@NotNull InventoryCloseEvent inventoryCloseEvent) {
+        if(inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.UNLOADED) || inventoryCloseEvent.getReason().equals(InventoryCloseEvent.Reason.OPEN_NEW)) return;
+
+        hopperManager.getSkyHopperSaver().saveSkyHopper(skyHopper);
+
+        guiManager.removeOpenGUI(identifier);
+
+        this.isOpen = false;
+
+        if(previousGUI != null) {
+            previousGUI.refresh();
+
+            previousGUI.open();
+        }
+    }
 
     @Override
     public abstract void handleBottomDrag(@NotNull InventoryDragEvent inventoryDragEvent);

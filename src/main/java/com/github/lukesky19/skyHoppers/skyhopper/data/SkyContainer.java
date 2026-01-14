@@ -76,7 +76,7 @@ public class SkyContainer extends Filterable {
 
     /**
      * Get the priority of the linked container.
-     * @return The priority. 1 is highest priority.
+     * @return The priority.
      */
     public int getPriority() {
         return priority;
@@ -84,27 +84,23 @@ public class SkyContainer extends Filterable {
 
     /**
      * Set the priority of the linked container.
-     * @param priority The priority. 1 is the highest priority.
+     * @param priority The priority.
      */
     public void setPriority(int priority) {
         this.priority = Math.max(1, priority);
     }
 
     /**
-     * Increases the priority of the linked container. Does nothing if already the highest priority (1)
+     * Increases the priority of the linked container.
      */
     public void increasePriority() {
-        if(priority == 1) return;
-
         priority--;
     }
 
     /**
-     * Decreases the priority of the linked container. Does nothing if already the lowest priority (2147483647)
+     * Decreases the priority of the linked container.
      */
     public void decreasePriority() {
-        if(priority == Integer.MAX_VALUE) return;
-
         priority++;
     }
 }
