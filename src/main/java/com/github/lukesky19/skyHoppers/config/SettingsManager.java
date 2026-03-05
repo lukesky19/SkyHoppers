@@ -205,7 +205,7 @@ public class SettingsManager {
                 ItemStackConfig oldItemStackConfig = oldSkyHopperConfig.item();
 
                 ItemStackConfig newItemStackConfig = new ItemStackConfig(
-                        Objects.requireNonNullElse(oldItemStackConfig.itemType(), ItemType.HOPPER.getKey().toString()),
+                        Objects.requireNonNullElse(oldItemStackConfig.itemType(), ItemType.HOPPER),
                         oldItemStackConfig.amount(),
                         oldItemStackConfig.maxStackSize(),
                         oldItemStackConfig.name(),

@@ -194,7 +194,7 @@ public class SelectPlayerGUI extends SkyHopperGUI {
         ItemStackConfig filler = guiConfig.entries().filler();
 
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-        itemStackBuilder.fromItemStackConfig(filler, null, null, List.of());
+        itemStackBuilder.fromItemStackConfig(filler, null, List.of());
         Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
         if(optionalItemStack.isPresent()) {
@@ -238,9 +238,9 @@ public class SelectPlayerGUI extends SkyHopperGUI {
                 itemStackBuilder.setItemType(ItemType.PLAYER_HEAD);
 
                 @NotNull OfflinePlayer offlinePlayer = skyHoppers.getServer().getOfflinePlayer(onlinePlayerId);
-                @Nullable PlayerProfile profile = PlayerUtil.getCachedPlayerProfile(onlinePlayerId);
+                PlayerProfile profile = PlayerUtil.getPlayerProfile(onlinePlayerId);
 
-                String playerName = profile != null ? profile.getName() : offlinePlayer.getName();
+                String playerName = profile.isComplete() ? profile.getName() : offlinePlayer.getName();
                 if(playerName == null) {
                     playerName = "<red><bold>Unknown Player</bold></red>";
                 }
@@ -301,7 +301,7 @@ public class SelectPlayerGUI extends SkyHopperGUI {
             }
 
             ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-            itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
+            itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, List.of());
             Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
             if(optionalItemStack.isPresent()) {
@@ -332,7 +332,7 @@ public class SelectPlayerGUI extends SkyHopperGUI {
             }
 
             ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-            itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
+            itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, List.of());
             Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
             if(optionalItemStack.isPresent()) {
@@ -370,7 +370,7 @@ public class SelectPlayerGUI extends SkyHopperGUI {
         }
 
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
+        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, List.of());
         Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
         if(optionalItemStack.isPresent()) {
@@ -398,7 +398,7 @@ public class SelectPlayerGUI extends SkyHopperGUI {
 
             ItemStackConfig itemStackConfig = buttonConfig.item();
             ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-            itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
+            itemStackBuilder.fromItemStackConfig(itemStackConfig, player, List.of());
             Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
             optionalItemStack.ifPresent(itemStack -> {
                 GUIButton.Builder builder = new GUIButton.Builder();

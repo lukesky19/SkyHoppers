@@ -207,7 +207,7 @@ public class MembersGUI extends SkyHopperGUI {
         ItemStackConfig filler = guiConfig.entries().filler();
 
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-        itemStackBuilder.fromItemStackConfig(filler, null, null, List.of());
+        itemStackBuilder.fromItemStackConfig(filler, null, List.of());
         Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
         if(optionalItemStack.isPresent()) {
@@ -238,17 +238,17 @@ public class MembersGUI extends SkyHopperGUI {
             for (int i = 0; i <= guiSize - 10; i++) {
                 if(membersCount >= playerNum) {
                     UUID memberId = membersList.get(playerNum);
-                    PlayerProfile profile = PlayerUtil.getCachedPlayerProfile(memberId);
+                    PlayerProfile profile = PlayerUtil.getPlayerProfile(memberId);
                     String playerName = "<red><bold>Player Name Not Found</bold></red>";
 
-                    if(profile == null) {
+                    if(profile.isComplete()) {
+                        if(profile.getName() != null) {
+                            playerName = profile.getName();
+                        }
+                    } else {
                         OfflinePlayer offlinePlayer = skyHoppers.getServer().getOfflinePlayer(memberId);
                         if(offlinePlayer.getName() != null) {
                             playerName = offlinePlayer.getName();
-                        }
-                    } else {
-                        if(profile.getName() != null) {
-                            playerName = profile.getName();
                         }
                     }
 
@@ -312,7 +312,7 @@ public class MembersGUI extends SkyHopperGUI {
             }
 
             ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-            itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
+            itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, List.of());
             Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
             if(optionalItemStack.isPresent()) {
@@ -343,7 +343,7 @@ public class MembersGUI extends SkyHopperGUI {
             }
 
             ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-            itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
+            itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, List.of());
             Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
             if(optionalItemStack.isPresent()) {
@@ -383,7 +383,7 @@ public class MembersGUI extends SkyHopperGUI {
         }
 
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
+        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, List.of());
         Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
         if(optionalItemStack.isPresent()) {
@@ -434,7 +434,7 @@ public class MembersGUI extends SkyHopperGUI {
         }
 
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
+        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, List.of());
         Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
         if(optionalItemStack.isPresent()) {
@@ -462,7 +462,7 @@ public class MembersGUI extends SkyHopperGUI {
 
             ItemStackConfig itemStackConfig = buttonConfig.item();
             ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-            itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
+            itemStackBuilder.fromItemStackConfig(itemStackConfig, player, List.of());
             Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
             optionalItemStack.ifPresent(itemStack -> {
                 GUIButton.Builder builder = new GUIButton.Builder();

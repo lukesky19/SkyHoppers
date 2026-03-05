@@ -100,7 +100,7 @@ public class SkyHopperCreator {
         placeholders.add(Placeholder.parsed("suction_range", String.valueOf(skyHopper.getSuctionRange())));
 
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(skyHoppers.getComponentLogger());
-        itemStackBuilder.fromItemStackConfig(itemStackConfig, null, null, placeholders);
+        itemStackBuilder.fromItemStackConfig(itemStackConfig, null, placeholders);
         Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
         ItemStack itemStack = null;

@@ -214,7 +214,7 @@ public class SkyContainerGUI extends SkyHopperGUI {
         ItemStackConfig filler = guiConfig.entries().filler();
 
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-        itemStackBuilder.fromItemStackConfig(filler, null, null, List.of());
+        itemStackBuilder.fromItemStackConfig(filler, null, List.of());
         Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
         if(optionalItemStack.isPresent()) {
@@ -245,7 +245,7 @@ public class SkyContainerGUI extends SkyHopperGUI {
         }
 
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
+        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, List.of());
         Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
         if(optionalItemStack.isPresent()) {
@@ -299,7 +299,7 @@ public class SkyContainerGUI extends SkyHopperGUI {
         }
 
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
+        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, List.of());
         Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
         if(optionalItemStack.isPresent()) {
@@ -351,7 +351,7 @@ public class SkyContainerGUI extends SkyHopperGUI {
         }
 
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
+        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, List.of());
         Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
         if(optionalItemStack.isPresent()) {
@@ -391,7 +391,7 @@ public class SkyContainerGUI extends SkyHopperGUI {
                 Placeholder.parsed("priority", String.valueOf(skyContainer.getPriority())));
 
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, lorePlaceholders);
+        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, lorePlaceholders);
         Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
         if(optionalItemStack.isPresent()) {
@@ -417,7 +417,7 @@ public class SkyContainerGUI extends SkyHopperGUI {
 
             ItemStackConfig itemStackConfig = buttonConfig.item();
             ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-            itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
+            itemStackBuilder.fromItemStackConfig(itemStackConfig, player, List.of());
             Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
             optionalItemStack.ifPresent(itemStack -> {
                 GUIButton.Builder builder = new GUIButton.Builder();

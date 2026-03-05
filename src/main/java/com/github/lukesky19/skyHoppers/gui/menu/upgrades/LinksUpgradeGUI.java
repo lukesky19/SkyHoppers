@@ -206,7 +206,7 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
         ItemStackConfig filler = guiConfig.entries().filler();
 
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-        itemStackBuilder.fromItemStackConfig(filler, null, null, List.of());
+        itemStackBuilder.fromItemStackConfig(filler, null, List.of());
         Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
         if(optionalItemStack.isPresent()) {
@@ -235,7 +235,7 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
         }
 
         ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
+        itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, List.of());
         Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
         if(optionalItemStack.isPresent()) {
@@ -274,7 +274,7 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
                     Placeholder.parsed("price", String.valueOf(upgradePrice)));
 
             ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-            itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, placeholders);
+            itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, placeholders);
             Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
             if(optionalItemStack.isPresent()) {
@@ -317,7 +317,7 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
             }
 
             ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-            itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, null, List.of());
+            itemStackBuilder.fromItemStackConfig(buttonConfig.item(), null, List.of());
             Optional<ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
 
             if(optionalItemStack.isPresent()) {
@@ -344,7 +344,7 @@ public class LinksUpgradeGUI extends SkyHopperGUI {
 
             ItemStackConfig itemStackConfig = buttonConfig.item();
             ItemStackBuilder itemStackBuilder = new ItemStackBuilder(logger);
-            itemStackBuilder.fromItemStackConfig(itemStackConfig, player, null, List.of());
+            itemStackBuilder.fromItemStackConfig(itemStackConfig, player, List.of());
             Optional<@NotNull ItemStack> optionalItemStack = itemStackBuilder.buildItemStack();
             optionalItemStack.ifPresent(itemStack -> {
                 GUIButton.Builder builder = new GUIButton.Builder();
