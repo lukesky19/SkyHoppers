@@ -30,7 +30,7 @@ import com.github.lukesky19.skyHoppers.skyhopper.data.Filterable.FilterType;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
@@ -122,7 +122,7 @@ public class HopperClickListener implements Listener {
 
                 Player player = skyHoppers.getServer().getPlayer(uuid);
                 if(player != null && player.isOnline() && player.isConnected()) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.linkingDisabled()));
+                    player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.linkingDisabled()));
                 }
             }
         }
@@ -153,7 +153,7 @@ public class HopperClickListener implements Listener {
             if (!(block.getState(false) instanceof Container container)) return;
 
             if (hookManager.canNotOpen(player, container.getLocation())) {
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.containerNoAccess()));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.containerNoAccess()));
 
                 playerInteractEvent.setCancelled(true);
 
@@ -176,7 +176,7 @@ public class HopperClickListener implements Listener {
                     && linkingSkyHopper.getLocation().equals(targetSkyHopper.getLocation())) {
                 linkingPlayers.remove(player.getUniqueId());
 
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.linkingDisabled()));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.linkingDisabled()));
 
                 return;
             }
@@ -193,7 +193,7 @@ public class HopperClickListener implements Listener {
 
                         guiManager.refreshGUIsByLocation(eventLocation);
 
-                        player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.containerUnlinked()));
+                        player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.containerUnlinked()));
 
                         return;
                     }
@@ -207,9 +207,9 @@ public class HopperClickListener implements Listener {
 
                 guiManager.refreshGUIsByLocation(eventLocation);
 
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.containerLinked()));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.containerLinked()));
             } else {
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.containerLinksMaxed()));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.containerLinksMaxed()));
             }
         } else {
             if (!(block.getState(false) instanceof Hopper hopperBlock)) return;
@@ -221,7 +221,7 @@ public class HopperClickListener implements Listener {
             playerInteractEvent.setCancelled(true);
 
             if(hookManager.canNotOpen(player, hopperBlock.getLocation())) {
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperNoAccess()));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.hopperNoAccess()));
                 return;
             }
 
@@ -232,22 +232,22 @@ public class HopperClickListener implements Listener {
 
                 boolean creationResult = hopperGUI.create();
                 if(!creationResult) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean updateResult = hopperGUI.update();
                 if(!updateResult) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean openResult = hopperGUI.open();
                 if(!openResult) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                 }
             } else {
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperNoAccess()));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.hopperNoAccess()));
             }
         }
     }

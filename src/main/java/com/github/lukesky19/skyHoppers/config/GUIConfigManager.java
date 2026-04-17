@@ -19,12 +19,14 @@ package com.github.lukesky19.skyHoppers.config;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.config.data.gui.*;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.common.platform.PlatformUtils;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
+import com.github.lukesky19.skylib.libs.configurate.yaml.NodeStyle;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -97,7 +99,7 @@ public class GUIConfigManager {
     private <T> @Nullable T loadConfiguration(@NotNull Path path, @NotNull Class<T> clazz, boolean isUpgrade) {
         saveDefaultConfig(path, isUpgrade);
 
-        YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(path);
+        YamlConfigurationLoader loader = createLoader(path);
 
         try {
             T config = loader.load().get(clazz);
@@ -112,7 +114,7 @@ public class GUIConfigManager {
 
             return config;
         } catch (ConfigurateException configurateException) {
-            logger.error(AdventureUtil.deserialize("Unable to load GUI config for record " + clazz.getName() + ". Error: " + configurateException.getMessage()));
+            logger.error(AdventureUtility.plain("Unable to load GUI config for record " + clazz.getName() + ". Error: " + configurateException.getMessage()));
             return null;
         }
     }
@@ -147,7 +149,7 @@ public class GUIConfigManager {
         @Nullable String version = config.getConfigVersion();
 
         if(version == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to check the config version in " + fileName + " as it is not configured."));
+            logger.warn(AdventureUtility.plain("Unable to check the config version in " + fileName + " as it is not configured."));
             return false;
         }
 
@@ -155,15 +157,15 @@ public class GUIConfigManager {
             if(version.equals("1.1.1.0")) {
                 return true;
             } else if(version.equals("1.1.0.0")) {
-                logger.info(AdventureUtil.deserialize("The gui configuration for " + fileName + " is outdated. Current version: " + version + ". Latest version: 1.1.1.0."));
-                logger.info(AdventureUtil.deserialize("This is a minor update that changes the lore of one of the button's lore with updated functionality."));
-                logger.info(AdventureUtil.deserialize("You may wish you update your configuration as well, but will continue to work regardless."));
+                logger.info(AdventureUtility.plain("The gui configuration for " + fileName + " is outdated. Current version: " + version + ". Latest version: 1.1.1.0."));
+                logger.info(AdventureUtility.plain("This is a minor update that changes the lore of one of the button's lore with updated functionality."));
+                logger.info(AdventureUtility.plain("You may wish you update your configuration as well, but will continue to work regardless."));
 
                 return true;
             } else {
-                logger.warn(AdventureUtil.deserialize("The gui configuration for " + fileName + " is outdated. Current version: " + version + ". Latest version: 1.1.0.0."));
-                logger.warn(AdventureUtil.deserialize("You should regenerate your " + fileName + " or migrate your " + fileName + " to the new version."));
-                logger.warn(AdventureUtil.deserialize("The GUI for " + fileName + " will not be able to open until this is corrected."));
+                logger.warn(AdventureUtility.plain("The gui configuration for " + fileName + " is outdated. Current version: " + version + ". Latest version: 1.1.0.0."));
+                logger.warn(AdventureUtility.plain("You should regenerate your " + fileName + " or migrate your " + fileName + " to the new version."));
+                logger.warn(AdventureUtility.plain("The GUI for " + fileName + " will not be able to open until this is corrected."));
 
                 return false;
             }
@@ -171,9 +173,9 @@ public class GUIConfigManager {
             return true;
         } else {
             if(!version.equals("1.1.0.0")) {
-                logger.warn(AdventureUtil.deserialize("The gui configuration for " + fileName + " is outdated. Current version: " + version + ". Latest version: 1.1.0.0."));
-                logger.warn(AdventureUtil.deserialize("You should regenerate your " + fileName + " or migrate your " + fileName + " to the new version."));
-                logger.warn(AdventureUtil.deserialize("The GUI for " + fileName + " will not be able to open until this is corrected."));
+                logger.warn(AdventureUtility.plain("The gui configuration for " + fileName + " is outdated. Current version: " + version + ". Latest version: 1.1.0.0."));
+                logger.warn(AdventureUtility.plain("You should regenerate your " + fileName + " or migrate your " + fileName + " to the new version."));
+                logger.warn(AdventureUtility.plain("The GUI for " + fileName + " will not be able to open until this is corrected."));
 
                 return false;
             }
@@ -325,5 +327,22 @@ public class GUIConfigManager {
      */
     public @Nullable PriorityGUIConfig getPriorityGUIConfig() {
         return priorityGUIConfig;
+    }
+
+    /**
+     * Create the {@link YamlConfigurationLoader} for the path provided.
+     * @apiNote {@link PlatformUtils#getSerializers()} are included by default.
+     * @param path The {@link Path}.
+     * @return The {@link YamlConfigurationLoader}.
+     */
+    protected @NonNull YamlConfigurationLoader createLoader(@NonNull Path path) {
+        return YamlConfigurationLoader.builder()
+                .path(path)
+                .nodeStyle(NodeStyle.BLOCK)
+                .indent(4)
+                .defaultOptions(configurationOptions ->
+                        configurationOptions.serializers(builder ->
+                                builder.registerAll(PlatformUtils.getSerializers())))
+                .build();
     }
 }

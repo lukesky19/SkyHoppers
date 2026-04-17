@@ -18,8 +18,8 @@
 package com.github.lukesky19.skyHoppers.database.table;
 
 import com.github.lukesky19.skyHoppers.database.QueueManager;
-import com.github.lukesky19.skylib.api.database.parameter.impl.IntegerParameter;
-import com.github.lukesky19.skylib.api.database.parameter.impl.StringParameter;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.IntegerParameter;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.StringParameter;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;

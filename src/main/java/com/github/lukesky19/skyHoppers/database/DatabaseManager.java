@@ -21,7 +21,7 @@ import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.database.table.HoppersTable;
 import com.github.lukesky19.skyHoppers.database.table.VersionsTable;
 import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
-import com.github.lukesky19.skylib.api.database.AbstractDatabaseManager;
+import com.github.lukesky19.skylib.common.api.database.AbstractDatabaseManager;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 import org.jetbrains.annotations.NotNull;

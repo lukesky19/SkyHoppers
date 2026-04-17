@@ -23,7 +23,7 @@ import com.github.lukesky19.skyHoppers.hook.HookManager;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -71,7 +71,7 @@ public class HopperPlaceListener implements Listener {
         if (!result) return;
 
         if (hookManager.canNotBuild(player, hopper.getLocation())) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.noBuild()));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.noBuild()));
 
             blockPlaceEvent.setCancelled(true);
 
@@ -94,7 +94,7 @@ public class HopperPlaceListener implements Listener {
 
             hopperManager.getSkyHopperDataManager().cacheSkyHopper(immutableLocation, skyHopper);
 
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperPlaced()));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.hopperPlaced()));
         } catch (RuntimeException e) {
             blockPlaceEvent.setCancelled(true);
 

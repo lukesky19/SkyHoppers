@@ -23,7 +23,7 @@ import com.github.lukesky19.skyHoppers.skyhopper.data.HopperKeys;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import com.github.lukesky19.skylib.libs.morepersistentdatatypes.DataType;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Location;
@@ -56,14 +56,14 @@ public class SkyHopperSaver {
     public void saveSkyHopper(@NotNull SkyHopper skyHopper) {
         ImmutableLocation location = skyHopper.getLocation();
         if(location == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to save SkyHopper to a Hopper's PDC due to a null location for the SkyHopper."));
+            logger.warn(AdventureUtility.plain("Unable to save SkyHopper to a Hopper's PDC due to a null location for the SkyHopper."));
             return;
         }
 
         if(location.getBlock().getState(false) instanceof Hopper hopper) {
             saveSkyHopper(skyHopper, hopper);
         } else {
-            logger.warn(AdventureUtil.deserialize("Unable to save SkyHopper to a Hopper's PDC as the block at the SkyHopper's location is not a Hopper."));
+            logger.warn(AdventureUtility.plain("Unable to save SkyHopper to a Hopper's PDC as the block at the SkyHopper's location is not a Hopper."));
         }
     }
 

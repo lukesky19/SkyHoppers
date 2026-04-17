@@ -19,15 +19,17 @@ package com.github.lukesky19.skyHoppers.config;
 
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.config.data.Settings;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.common.platform.PlatformUtils;
 import com.github.lukesky19.skylib.libs.configurate.CommentedConfigurationNode;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
+import com.github.lukesky19.skylib.libs.configurate.yaml.NodeStyle;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -145,7 +147,7 @@ public class SettingsManager {
         int startingPriority = settings.skyContainerConfig().startingPriority();
 
         // Return the priority clamped to the highest and lowest priorities
-        return Math.max(highestPriority, Math.min(lowestPriority, startingPriority));
+        return Math.clamp(startingPriority, highestPriority, lowestPriority);
     }
 
     /**
@@ -158,7 +160,7 @@ public class SettingsManager {
             plugin.saveResource("settings.yml", false);
         }
 
-        YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(path);
+        YamlConfigurationLoader loader = createLoader(path);
         try {
             settings = loader.load().get(Settings.class);
 
@@ -176,7 +178,7 @@ public class SettingsManager {
     private void saveSettings() {
         if(settings == null) return;
 
-        YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(path);
+        YamlConfigurationLoader loader = createLoader(path);
         try {
             CommentedConfigurationNode node = loader.createNode();
 
@@ -243,11 +245,11 @@ public class SettingsManager {
                 saveSettings();
             }
 
-            case null -> logger.warn(AdventureUtil.deserialize("Unable to check settings version as it is not configured."));
+            case null -> logger.warn(AdventureUtility.plain("Unable to check settings version as it is not configured."));
 
             default -> {
-                logger.warn(AdventureUtil.deserialize("Your plugin settings are outdated. Current version: " + settings.configVersion() + ". Latest version: 1.2.0.0."));
-                logger.warn(AdventureUtil.deserialize("You should regenerate your settings.yml or migrate your settings.yml to the new version."));
+                logger.warn(AdventureUtility.plain("Your plugin settings are outdated. Current version: " + settings.configVersion() + ". Latest version: 1.2.0.0."));
+                logger.warn(AdventureUtility.plain("You should regenerate your settings.yml or migrate your settings.yml to the new version."));
             }
         }
     }
@@ -276,5 +278,22 @@ public class SettingsManager {
      */
     private <K, V> TreeMap<K, V> createTreeMap(Map<K, V> map) {
         return new TreeMap<>(map);
+    }
+
+    /**
+     * Create the {@link YamlConfigurationLoader} for the path provided.
+     * @apiNote {@link PlatformUtils#getSerializers()} are included by default.
+     * @param path The {@link Path}.
+     * @return The {@link YamlConfigurationLoader}.
+     */
+    protected @NonNull YamlConfigurationLoader createLoader(@NonNull Path path) {
+        return YamlConfigurationLoader.builder()
+                .path(path)
+                .nodeStyle(NodeStyle.BLOCK)
+                .indent(4)
+                .defaultOptions(configurationOptions ->
+                        configurationOptions.serializers(builder ->
+                                builder.registerAll(PlatformUtils.getSerializers())))
+                .build();
     }
 }

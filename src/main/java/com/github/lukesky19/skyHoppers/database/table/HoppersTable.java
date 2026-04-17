@@ -20,9 +20,9 @@ package com.github.lukesky19.skyHoppers.database.table;
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.database.QueueManager;
 import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.database.parameter.impl.IntegerParameter;
-import com.github.lukesky19.skylib.api.database.parameter.impl.StringParameter;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.IntegerParameter;
+import com.github.lukesky19.skylib.common.api.database.parameter.impl.StringParameter;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -82,7 +82,7 @@ public class HoppersTable {
                 "UNIQUE (world, x, y, z))";
 
         // Create the table if it doesn't exist
-        queueManager.queueWriteTransaction(tableCreationSql).thenAccept(v1 ->
+        queueManager.queueWriteTransaction(tableCreationSql).thenAccept(_ ->
                 // Get the table version
                 versionsTable.getTableVersion(tableName).thenAccept(version -> {
                     // If -1, assume outdated format and data needs migrated
@@ -96,7 +96,7 @@ public class HoppersTable {
                                 "UNIQUE (world, x, y, z))";
 
                         // Create a temporary table to store the original table's data in.
-                        queueManager.queueWriteTransaction(temporaryTableCreationSql).thenAccept(v3 ->
+                        queueManager.queueWriteTransaction(temporaryTableCreationSql).thenAccept(_ ->
                                 // Get all locations stored in the table and insert them into the new table
                                 getSkyHopperLocations().thenAccept(list -> {
                                     List<CompletableFuture<Void>> futureList = new ArrayList<>();
@@ -114,14 +114,14 @@ public class HoppersTable {
 
                                     // Once all data is transferred, delete the old table
                                     CompletableFuture<Void> allFutures = CompletableFuture.allOf(futureList.toArray(new CompletableFuture[0]));
-                                    allFutures.thenAccept(v4 -> {
+                                    allFutures.thenAccept(_ -> {
                                         String dropTableSql = "DROP TABLE " + tableName;
                                         // Then rename the temporary table to the old table's name.
-                                        queueManager.queueWriteTransaction(dropTableSql).thenAccept(v5 -> {
+                                        queueManager.queueWriteTransaction(dropTableSql).thenAccept(_ -> {
                                             String alterSql = "ALTER TABLE " + temporaryTableName + " RENAME TO " + tableName;
 
                                             // And lastly update the version
-                                            queueManager.queueWriteTransaction(alterSql).thenAccept(v6 ->
+                                            queueManager.queueWriteTransaction(alterSql).thenAccept(_ ->
                                                     versionsTable.updateVersion(tableName, 1));
                                         });
                                     });
@@ -156,7 +156,7 @@ public class HoppersTable {
                     hopperLocations.add(new ImmutableLocation(world, x, y, z));
                 }
             } catch(SQLException e) {
-                logger.error(AdventureUtil.deserialize("Failed to load SkyHopper locations from the database."));
+                logger.error(AdventureUtility.plain("Failed to load SkyHopper locations from the database."));
                 return List.of();
             }
 
@@ -177,7 +177,7 @@ public class HoppersTable {
         IntegerParameter yParameter = new IntegerParameter(location.getY());
         IntegerParameter zParameter = new IntegerParameter(location.getZ());
 
-        return queueManager.queueWriteTransaction(updateSql, List.of(worldParameter, xParameter, yParameter, zParameter)).thenAccept(result -> {});
+        return queueManager.queueWriteTransaction(updateSql, List.of(worldParameter, xParameter, yParameter, zParameter)).thenAccept(_ -> {});
     }
 
     /**

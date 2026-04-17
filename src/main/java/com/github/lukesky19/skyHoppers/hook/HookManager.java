@@ -26,7 +26,7 @@ import com.github.lukesky19.skyHoppers.hook.impl.rosestacker.RoseStackerHook;
 import com.github.lukesky19.skyHoppers.hook.impl.vault.EconomyHook;
 import com.github.lukesky19.skyHoppers.hook.interfaces.Hook;
 import com.github.lukesky19.skyHoppers.hook.interfaces.ProtectionHook;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -67,7 +67,7 @@ public class HookManager {
 
         @Nullable Settings settings = settingsManager.getSettings();
         if(settings == null) {
-            skyHoppers.getComponentLogger().warn(AdventureUtil.deserialize("Unable to setup hooks due to invalid plugin settings."));
+            skyHoppers.getComponentLogger().warn(AdventureUtility.plain("Unable to setup hooks due to invalid plugin settings."));
             return;
         }
 

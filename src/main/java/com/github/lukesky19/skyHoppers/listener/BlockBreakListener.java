@@ -27,8 +27,8 @@ import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperDataManager;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.player.PlayerUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.player.PlayerUtil;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
@@ -89,7 +89,7 @@ public class BlockBreakListener implements Listener {
         SkyHopper skyHopper = hopperManager.getSkyHopperDataManager().getSkyHopper(immutableLocation);
         if(skyHopper == null) {
             if(hopperManager.isLocationSkyHopper(immutableLocation)) {
-                player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperNotLoaded()));
+                player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.hopperNotLoaded()));
                 blockBreakEvent.setCancelled(true);
             }
 
@@ -97,7 +97,7 @@ public class BlockBreakListener implements Listener {
         }
 
         if(hookManager.canNotBuild(player, immutableLocation.toBukkitLocation())) {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.noBuild()));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.noBuild()));
             blockBreakEvent.setCancelled(true);
             return;
         }
@@ -106,12 +106,12 @@ public class BlockBreakListener implements Listener {
             // Delete the hopper's data
             hopperManager.getSkyHopperDataManager().removeSkyHopper(immutableLocation);
 
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.hopperBroken()));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.hopperBroken()));
 
             boolean dropToInventory;
             @Nullable Settings settings = settingsManager.getSettings();
             if(settings == null) {
-                logger.warn(AdventureUtil.deserialize("Plugin settings are invalid. Broken SkyHoppers will be dropped to the ground by default."));
+                logger.warn(AdventureUtility.deserialize("Plugin settings are invalid. Broken SkyHoppers will be dropped to the ground by default."));
                 dropToInventory = false;
             } else {
                 dropToInventory = settings.dropToInventory();
@@ -142,7 +142,7 @@ public class BlockBreakListener implements Listener {
 
             hopperClickListener.disableLinkingForLocation(immutableLocation);
         } else {
-            player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.noBreak()));
+            player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.noBreak()));
             blockBreakEvent.setCancelled(true);
         }
     }

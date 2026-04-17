@@ -20,14 +20,16 @@ package com.github.lukesky19.skyHoppers.config;
 import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.config.data.Locale;
 import com.github.lukesky19.skyHoppers.config.data.Settings;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.configurate.ConfigurationUtility;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.common.platform.PlatformUtils;
 import com.github.lukesky19.skylib.libs.configurate.CommentedConfigurationNode;
 import com.github.lukesky19.skylib.libs.configurate.ConfigurateException;
+import com.github.lukesky19.skylib.libs.configurate.yaml.NodeStyle;
 import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -122,18 +124,18 @@ public class LocaleManager {
 
         Settings settings = settingsManager.getSettings();
         if(settings == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to load locale configuration as the plugin's settings.yml is invalid."));
+            logger.warn(AdventureUtility.plain("Unable to load locale configuration as the plugin's settings.yml is invalid."));
             return;
         }
 
         String localeString = settingsManager.getSettings().locale();
         if(localeString == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to load locale configuration as no locale name is configured in settings.yml."));
+            logger.warn(AdventureUtility.plain("Unable to load locale configuration as no locale name is configured in settings.yml."));
             return;
         }
 
         Path path = Path.of(plugin.getDataFolder() + File.separator + "locale" + File.separator + (localeString + ".yml"));
-        YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(path);
+        YamlConfigurationLoader loader = createLoader(path);
         try {
             locale = loader.load().get(Locale.class);
 
@@ -151,7 +153,7 @@ public class LocaleManager {
         if(locale == null) return;
 
         Path path = Path.of(plugin.getDataFolder() + File.separator + "locale" + File.separator + (localeString + ".yml"));
-        YamlConfigurationLoader loader = ConfigurationUtility.getYamlConfigurationLoader(path);
+        YamlConfigurationLoader loader = createLoader(path);
         try {
             CommentedConfigurationNode node = loader.createNode();
 
@@ -218,12 +220,12 @@ public class LocaleManager {
                 saveLocale(localeString);
             }
 
-            case null -> logger.warn(AdventureUtil.deserialize("Unable to check locale version as it is not configured."));
+            case null -> logger.warn(AdventureUtility.plain("Unable to check locale version as it is not configured."));
 
             default -> {
-                logger.warn(AdventureUtil.deserialize("Your plugin locale is outdated. Current version: " + locale.configVersion() + ". Latest version: 1.2.0.0."));
-                logger.warn(AdventureUtil.deserialize("You should regenerate your " + localeString + ".yml or migrate your " + localeString + ".yml to the new version."));
-                logger.warn(AdventureUtil.deserialize("The default config will be used until you fix your locale configuration."));
+                logger.warn(AdventureUtility.plain("Your plugin locale is outdated. Current version: " + locale.configVersion() + ". Latest version: 1.2.0.0."));
+                logger.warn(AdventureUtility.plain("You should regenerate your " + localeString + ".yml or migrate your " + localeString + ".yml to the new version."));
+                logger.warn(AdventureUtility.plain("The default config will be used until you fix your locale configuration."));
 
                 locale = null;
             }
@@ -238,5 +240,22 @@ public class LocaleManager {
         if (!path.toFile().exists()) {
             plugin.saveResource("locale" + File.separator + "en_US.yml", false);
         }
+    }
+
+    /**
+     * Create the {@link YamlConfigurationLoader} for the path provided.
+     * @apiNote {@link PlatformUtils#getSerializers()} are included by default.
+     * @param path The {@link Path}.
+     * @return The {@link YamlConfigurationLoader}.
+     */
+    protected @NonNull YamlConfigurationLoader createLoader(@NonNull Path path) {
+        return YamlConfigurationLoader.builder()
+                .path(path)
+                .nodeStyle(NodeStyle.BLOCK)
+                .indent(4)
+                .defaultOptions(configurationOptions ->
+                        configurationOptions.serializers(builder ->
+                                builder.registerAll(PlatformUtils.getSerializers())))
+                .build();
     }
 }

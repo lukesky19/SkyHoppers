@@ -21,9 +21,9 @@ import com.github.lukesky19.skyHoppers.SkyHoppers;
 import com.github.lukesky19.skyHoppers.config.SettingsManager;
 import com.github.lukesky19.skyHoppers.config.data.Settings;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackBuilder;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.inventory.ItemStack;
@@ -109,7 +109,7 @@ public class SkyHopperCreator {
         }
 
         if(itemStack == null) {
-            skyHoppers.getComponentLogger().error(AdventureUtil.deserialize("Failed to create the ItemStack for a SkyHopper."));
+            skyHoppers.getComponentLogger().error(AdventureUtility.plain("Failed to create the ItemStack for a SkyHopper."));
             return null;
         }
 

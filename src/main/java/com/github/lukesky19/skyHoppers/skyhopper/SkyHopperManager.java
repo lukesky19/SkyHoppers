@@ -25,7 +25,7 @@ import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.HopperKeys;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
@@ -110,11 +110,11 @@ public class SkyHopperManager {
         getSkyHopperDataManager().clearData();
 
         // Migrates the old database to the new
-        databaseManager.migrateLegacyDatabase().thenAccept(v1 -> {
+        databaseManager.migrateLegacyDatabase().thenAccept(_ -> {
             // Load SkyHopper Locations
             databaseManager.getHoppersTable().getSkyHopperLocations().thenAccept(list -> {
                 if(list.isEmpty()) {
-                    logger.warn(AdventureUtil.deserialize("SkyHopper Locations List from the database is empty."));
+                    logger.warn(AdventureUtility.plain("SkyHopper Locations List from the database is empty."));
                     return;
                 }
 
@@ -127,11 +127,11 @@ public class SkyHopperManager {
                                 .forEach(world -> Arrays.stream(world.getLoadedChunks())
                                         .forEach(skyHopperProcessor::loadSkyHoppersInChunk)), 1L);
             }).exceptionally(ex -> {
-                logger.warn(AdventureUtil.deserialize("Failed to get SkyHopper Locations from the database. " + ex.getMessage()));
+                logger.warn(AdventureUtility.plain("Failed to get SkyHopper Locations from the database. " + ex.getMessage()));
                 return null;
             });
         }).exceptionally(ex -> {
-            logger.warn(AdventureUtil.deserialize("Failed to migrate legacy database. " + ex.getMessage()));
+            logger.warn(AdventureUtility.plain("Failed to migrate legacy database. " + ex.getMessage()));
             return null;
         });
     }

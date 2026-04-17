@@ -29,11 +29,11 @@ import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.gui.GUIButton;
-import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.gui.GUIButton;
+import com.github.lukesky19.skylib.paper.api.gui.GUIType;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackBuilder;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.entity.Player;
@@ -96,19 +96,19 @@ public class PriorityGUI extends SkyHopperGUI {
      */
     public boolean create() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the priority GUI due to invalid GUI configuration."));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the priority GUI due to invalid GUI configuration."));
             return false;
         }
 
         GUIType guiType = guiConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the priority GUI due to an invalid GUIType"));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the priority GUI due to an invalid GUIType"));
             return false;
         }
 
         String guiName = guiConfig.name();
         if(guiName == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the priority GUI due to an invalid gui name."));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the priority GUI due to an invalid gui name."));
             return false;
         }
 
@@ -121,7 +121,7 @@ public class PriorityGUI extends SkyHopperGUI {
     @Override
     public boolean update() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to decorate the priority GUI due to invalid configuration for the links GUI."));
+            logger.warn(AdventureUtility.plain("Unable to decorate the priority GUI due to invalid configuration for the links GUI."));
             if(isOpen) close();
             return false;
         }
@@ -129,7 +129,7 @@ public class PriorityGUI extends SkyHopperGUI {
         clearButtons();
 
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to update the priority GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtility.plain("Unable to update the priority GUI as the InventoryView was not created."));
             if(isOpen) close();
             return false;
         }
@@ -217,7 +217,7 @@ public class PriorityGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().increasePriority();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the increase button in the priority gui due to no slot configured."));
+            logger.warn(AdventureUtility.plain("Unable to create the increase button in the priority gui due to no slot configured."));
             return;
         }
 
@@ -230,7 +230,7 @@ public class PriorityGUI extends SkyHopperGUI {
 
             guiButtonBuilder.setItemStack(optionalItemStack.get());
 
-            guiButtonBuilder.setAction(inventoryClickEvent -> {
+            guiButtonBuilder.setAction(_ -> {
                 if(skyContainer.getPriority() == settingsManager.getHighestPriority()) return;
 
                 skyContainer.increasePriority();
@@ -252,7 +252,7 @@ public class PriorityGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().decreasePriority();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the decrease button in the priority gui due to no slot configured."));
+            logger.warn(AdventureUtility.plain("Unable to create the decrease button in the priority gui due to no slot configured."));
             return;
         }
 
@@ -265,7 +265,7 @@ public class PriorityGUI extends SkyHopperGUI {
 
             guiButtonBuilder.setItemStack(optionalItemStack.get());
 
-            guiButtonBuilder.setAction(inventoryClickEvent -> {
+            guiButtonBuilder.setAction(_ -> {
                 if(skyContainer.getPriority() == settingsManager.getLowestPriority()) return;
 
                 skyContainer.decreasePriority();
@@ -287,7 +287,7 @@ public class PriorityGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().currentPriority();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the current priority button in the priority gui due to no slot configured."));
+            logger.warn(AdventureUtility.plain("Unable to create the current priority button in the priority gui due to no slot configured."));
             return;
         }
 
@@ -314,7 +314,7 @@ public class PriorityGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().highestPriority();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the highest priority button in the priority gui due to no slot configured."));
+            logger.warn(AdventureUtility.plain("Unable to create the highest priority button in the priority gui due to no slot configured."));
             return;
         }
 
@@ -327,7 +327,7 @@ public class PriorityGUI extends SkyHopperGUI {
 
             guiButtonBuilder.setItemStack(optionalItemStack.get());
 
-            guiButtonBuilder.setAction(inventoryClickEvent -> {
+            guiButtonBuilder.setAction(_ -> {
                 skyContainer.setPriority(settingsManager.getHighestPriority());
 
                 skyHopper.sortLinkedContainers();
@@ -347,7 +347,7 @@ public class PriorityGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().lowestPriority();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the lowest priority button in the priority gui due to no slot configured."));
+            logger.warn(AdventureUtility.plain("Unable to create the lowest priority button in the priority gui due to no slot configured."));
             return;
         }
 
@@ -360,7 +360,7 @@ public class PriorityGUI extends SkyHopperGUI {
 
             guiButtonBuilder.setItemStack(optionalItemStack.get());
 
-            guiButtonBuilder.setAction(inventoryClickEvent -> {
+            guiButtonBuilder.setAction(_ -> {
                 @Nullable Settings settings = settingsManager.getSettings();
                 int lowestPriority = settings != null ? settings.skyContainerConfig().lowestPriority() : 255;
 
@@ -383,7 +383,7 @@ public class PriorityGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().defaultPriority();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the default priority button in the priority gui due to no slot configured."));
+            logger.warn(AdventureUtility.plain("Unable to create the default priority button in the priority gui due to no slot configured."));
             return;
         }
 
@@ -396,7 +396,7 @@ public class PriorityGUI extends SkyHopperGUI {
 
             guiButtonBuilder.setItemStack(optionalItemStack.get());
 
-            guiButtonBuilder.setAction(inventoryClickEvent -> {
+            guiButtonBuilder.setAction(_ -> {
                 @Nullable Settings settings = settingsManager.getSettings();
                 int defaultPriority = settings != null ? settings.skyContainerConfig().startingPriority() : 1;
 
@@ -419,7 +419,7 @@ public class PriorityGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().exit();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the exit button in the priority gui due to no slot configured."));
+            logger.warn(AdventureUtility.plain("Unable to create the exit button in the priority gui due to no slot configured."));
             return;
         }
 
@@ -432,7 +432,7 @@ public class PriorityGUI extends SkyHopperGUI {
 
             builder.setItemStack(optionalItemStack.get());
 
-            builder.setAction(event -> close());
+            builder.setAction(_ -> close());
 
             setButton(buttonConfig.slot(), builder.build());
         }
@@ -446,7 +446,7 @@ public class PriorityGUI extends SkyHopperGUI {
 
         guiConfig.entries().dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the priority GUI due to an invalid slot."));
+                logger.warn(AdventureUtility.plain("Unable to add a dummy button to the priority GUI due to an invalid slot."));
                 return;
             }
 

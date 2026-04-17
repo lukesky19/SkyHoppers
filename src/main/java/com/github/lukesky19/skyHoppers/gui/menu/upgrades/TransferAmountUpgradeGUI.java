@@ -32,11 +32,12 @@ import com.github.lukesky19.skyHoppers.hook.impl.vault.EconomyHook;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.gui.GUIButton;
-import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.adventure.PaperAdventureUtility;
+import com.github.lukesky19.skylib.paper.api.gui.GUIButton;
+import com.github.lukesky19.skylib.paper.api.gui.GUIType;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackBuilder;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Location;
@@ -104,19 +105,19 @@ public class TransferAmountUpgradeGUI extends SkyHopperGUI {
      */
     public boolean create() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the transfer amount upgrade GUI due to invalid GUI configuration."));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the transfer amount upgrade GUI due to invalid GUI configuration."));
             return false;
         }
 
         GUIType guiType = guiConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the transfer amount upgrade GUI due to an invalid GUIType"));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the transfer amount upgrade GUI due to an invalid GUIType"));
             return false;
         }
 
         String guiName = guiConfig.name();
         if(guiName == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the transfer amount upgrade GUI due to an invalid gui name."));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the transfer amount upgrade GUI due to an invalid gui name."));
             return false;
         }
 
@@ -129,27 +130,27 @@ public class TransferAmountUpgradeGUI extends SkyHopperGUI {
     @Override
     public boolean update() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to decorate the GUI due to invalid configuration for the transfer amount upgrade GUI."));
+            logger.warn(AdventureUtility.plain("Unable to decorate the GUI due to invalid configuration for the transfer amount upgrade GUI."));
             if(isOpen) close();
             return false;
         }
 
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to update the transfer amount upgrade GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtility.plain("Unable to update the transfer amount upgrade GUI as the InventoryView was not created."));
             if(isOpen) close();
             return false;
         }
 
         Settings settings = settingsManager.getSettings();
         if(settings == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to update the transfer amount upgrade GUI as the plugin settings are invalid."));
+            logger.warn(AdventureUtility.plain("Unable to update the transfer amount upgrade GUI as the plugin settings are invalid."));
             if(isOpen) close();
             return false;
         }
 
         TreeMap<Integer, Double> upgrades = settingsManager.getTransferAmountUpgrades();
         if(upgrades == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to update the transfer amount upgrade GUI as the transfer amount upgrade settings are invalid."));
+            logger.warn(AdventureUtility.plain("Unable to update the transfer amount upgrade GUI as the transfer amount upgrade settings are invalid."));
             if(isOpen) close();
             return false;
         }
@@ -233,7 +234,7 @@ public class TransferAmountUpgradeGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().exit();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the exit button in the transfer amount upgrade gui due to no slot configured."));
+            logger.warn(AdventureUtility.plain("Unable to create the exit button in the transfer amount upgrade gui due to no slot configured."));
             return;
         }
 
@@ -246,7 +247,7 @@ public class TransferAmountUpgradeGUI extends SkyHopperGUI {
 
             builder.setItemStack(optionalItemStack.get());
 
-            builder.setAction(event -> close());
+            builder.setAction(_ -> close());
 
             setButton(buttonConfig.slot(), builder.build());
         }
@@ -262,7 +263,7 @@ public class TransferAmountUpgradeGUI extends SkyHopperGUI {
             ButtonConfig buttonConfig = guiConfig.entries().increase();
 
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to create the increase button in the transfer amount upgrade gui due to no slot configured."));
+                logger.warn(AdventureUtility.plain("Unable to create the increase button in the transfer amount upgrade gui due to no slot configured."));
                 return;
             }
 
@@ -283,7 +284,7 @@ public class TransferAmountUpgradeGUI extends SkyHopperGUI {
 
                 buttonBuilder.setItemStack(optionalItemStack.get());
 
-                buttonBuilder.setAction(inventoryClickEvent -> {
+                buttonBuilder.setAction(_ -> {
                     skyHopper.setTransferAmount(upgrade.getKey());
 
                     guiManager.refreshGUIsByLocation(location);
@@ -297,7 +298,7 @@ public class TransferAmountUpgradeGUI extends SkyHopperGUI {
             ButtonConfig buttonConfig = guiConfig.entries().increaseMax();
 
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to create the increase max button in the transfer amount upgrade gui due to no slot configured."));
+                logger.warn(AdventureUtility.plain("Unable to create the increase max button in the transfer amount upgrade gui due to no slot configured."));
                 return;
             }
 
@@ -325,7 +326,7 @@ public class TransferAmountUpgradeGUI extends SkyHopperGUI {
             ButtonConfig buttonConfig = guiConfig.entries().decrease();
 
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to create the decrease button in the transfer amount upgrade gui due to no slot configured."));
+                logger.warn(AdventureUtility.plain("Unable to create the decrease button in the transfer amount upgrade gui due to no slot configured."));
                 return;
             }
 
@@ -346,7 +347,7 @@ public class TransferAmountUpgradeGUI extends SkyHopperGUI {
 
                 buttonBuilder.setItemStack(optionalItemStack.get());
 
-                buttonBuilder.setAction(inventoryClickEvent -> {
+                buttonBuilder.setAction(_ -> {
                     skyHopper.setTransferAmount(upgrade.getKey());
 
                     guiManager.refreshGUIsByLocation(location);
@@ -360,7 +361,7 @@ public class TransferAmountUpgradeGUI extends SkyHopperGUI {
             ButtonConfig buttonConfig = guiConfig.entries().decreaseMin();
 
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to create the decrease min button in the transfer amount upgrade gui due to no slot configured."));
+                logger.warn(AdventureUtility.plain("Unable to create the decrease min button in the transfer amount upgrade gui due to no slot configured."));
                 return;
             }
 
@@ -389,7 +390,7 @@ public class TransferAmountUpgradeGUI extends SkyHopperGUI {
             ButtonConfig buttonConfig = guiConfig.entries().upgrade();
 
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to create the upgrade button in the transfer amount upgrade gui due to no slot configured."));
+                logger.warn(AdventureUtility.plain("Unable to create the upgrade button in the transfer amount upgrade gui due to no slot configured."));
                 return;
             }
 
@@ -411,7 +412,7 @@ public class TransferAmountUpgradeGUI extends SkyHopperGUI {
 
                 buttonBuilder.setItemStack(optionalItemStack.get());
 
-                buttonBuilder.setAction(inventoryClickEvent -> {
+                buttonBuilder.setAction(_ -> {
                     Locale locale = localeManager.getLocale();
 
                     EconomyHook economyHook = hookManager.getHook(EconomyHook.class);
@@ -426,13 +427,13 @@ public class TransferAmountUpgradeGUI extends SkyHopperGUI {
                         skyHopper.setTransferAmount(upgradeAmount);
                         skyHopper.setMaxTransferAmount(upgradeAmount);
 
-                        player.sendMessage(AdventureUtil.deserialize(player, locale.prefix() + locale.transferAmountUpgrade(), messagePlaceholders));
+                        player.sendMessage(PaperAdventureUtility.deserialize(player, locale.prefix() + locale.transferAmountUpgrade(), messagePlaceholders));
 
                         guiManager.refreshGUIsByLocation(location);
 
                         update();
                     } else {
-                        player.sendMessage(AdventureUtil.deserialize(player, locale.prefix() + locale.notEnoughMoney()));
+                        player.sendMessage(PaperAdventureUtility.deserialize(player, locale.prefix() + locale.notEnoughMoney()));
                     }
                 });
 
@@ -442,7 +443,7 @@ public class TransferAmountUpgradeGUI extends SkyHopperGUI {
             ButtonConfig buttonConfig = guiConfig.entries().upgradeMax();
 
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to create the upgrade max button in the transfer amount upgrade gui due to no slot configured."));
+                logger.warn(AdventureUtility.plain("Unable to create the upgrade max button in the transfer amount upgrade gui due to no slot configured."));
                 return;
             }
 
@@ -468,7 +469,7 @@ public class TransferAmountUpgradeGUI extends SkyHopperGUI {
 
         guiConfig.entries().dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the transfer amount upgrade GUI due to an invalid slot."));
+                logger.warn(AdventureUtility.plain("Unable to add a dummy button to the transfer amount upgrade GUI due to an invalid slot."));
                 return;
             }
 

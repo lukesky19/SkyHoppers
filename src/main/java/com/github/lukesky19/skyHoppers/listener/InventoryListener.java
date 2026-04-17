@@ -19,7 +19,7 @@ package com.github.lukesky19.skyHoppers.listener;
 
 import com.github.lukesky19.skyHoppers.gui.GUIManager;
 import com.github.lukesky19.skyHoppers.util.LocationUUIDKey;
-import com.github.lukesky19.skylib.api.gui.interfaces.BaseGUI;
+import com.github.lukesky19.skylib.paper.api.gui.interfaces.BaseGUI;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;

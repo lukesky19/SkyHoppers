@@ -31,11 +31,11 @@ import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.gui.GUIButton;
-import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.gui.GUIButton;
+import com.github.lukesky19.skylib.paper.api.gui.GUIType;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackBuilder;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackConfig;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.Location;
@@ -107,19 +107,19 @@ public class SkyContainerGUI extends SkyHopperGUI {
      */
     public boolean create() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the hopper.yml GUI due to invalid GUI configuration."));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the hopper.yml GUI due to invalid GUI configuration."));
             return false;
         }
 
         GUIType guiType = guiConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the hopper.yml GUI due to an invalid GUIType"));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the hopper.yml GUI due to an invalid GUIType"));
             return false;
         }
 
         String guiName = guiConfig.name();
         if(guiName == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the hopper.yml GUI due to an invalid gui name."));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the hopper.yml GUI due to an invalid gui name."));
             return false;
         }
 
@@ -132,14 +132,14 @@ public class SkyContainerGUI extends SkyHopperGUI {
     @Override
     public boolean update() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to decorate the GUI due to invalid configuration for the hopper.yml GUI."));
+            logger.warn(AdventureUtility.plain("Unable to decorate the GUI due to invalid configuration for the hopper.yml GUI."));
             return false;
         }
 
         clearButtons();
 
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to update the main hopper GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtility.plain("Unable to update the main hopper GUI as the InventoryView was not created."));
             if(isOpen) close();
             return false;
         }
@@ -240,7 +240,7 @@ public class SkyContainerGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().filter();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the filter button in the sky container GUI due to no slot configured."));
+            logger.warn(AdventureUtility.plain("Unable to create the filter button in the sky container GUI due to no slot configured."));
             return;
         }
 
@@ -253,7 +253,7 @@ public class SkyContainerGUI extends SkyHopperGUI {
 
             builder.setItemStack(optionalItemStack.get());
 
-            builder.setAction(event -> {
+            builder.setAction(_ -> {
                 skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
                     player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
 
@@ -264,19 +264,19 @@ public class SkyContainerGUI extends SkyHopperGUI {
 
                 boolean creationResult = outputFilterGUI.create();
                 if(!creationResult) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean updateResult = outputFilterGUI.update();
                 if(!updateResult) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean openResult = outputFilterGUI.open();
                 if(!openResult) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                 }
             });
 
@@ -294,7 +294,7 @@ public class SkyContainerGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().priority();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the priority button in the sky container gui due to no slot configured."));
+            logger.warn(AdventureUtility.deserialize("Unable to create the priority button in the sky container gui due to no slot configured."));
             return;
         }
 
@@ -307,7 +307,7 @@ public class SkyContainerGUI extends SkyHopperGUI {
 
             builder.setItemStack(optionalItemStack.get());
 
-            builder.setAction(event -> {
+            builder.setAction(_ -> {
                 skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () -> {
                     player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
 
@@ -318,19 +318,19 @@ public class SkyContainerGUI extends SkyHopperGUI {
 
                 boolean creationResult = priorityGUI.create();
                 if(!creationResult) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean updateResult = priorityGUI.update();
                 if(!updateResult) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean openResult = priorityGUI.open();
                 if(!openResult) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                 }
             });
 
@@ -346,7 +346,7 @@ public class SkyContainerGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().exit();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the exit button due to no slot configured."));
+            logger.warn(AdventureUtility.plain("Unable to create the exit button due to no slot configured."));
             return;
         }
 
@@ -359,7 +359,7 @@ public class SkyContainerGUI extends SkyHopperGUI {
 
             builder.setItemStack(optionalItemStack.get());
 
-            builder.setAction(event ->
+            builder.setAction(_ ->
                     skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, this::close, 1L));
 
             setButton(buttonConfig.slot(), builder.build());
@@ -374,7 +374,7 @@ public class SkyContainerGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().info();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the info button for the sky container gui due to no slot configured."));
+            logger.warn(AdventureUtility.plain("Unable to create the info button for the sky container gui due to no slot configured."));
             return;
         }
 
@@ -411,7 +411,7 @@ public class SkyContainerGUI extends SkyHopperGUI {
 
         guiConfig.entries().dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the main hopper GUI due to an invalid slot."));
+                logger.warn(AdventureUtility.plain("Unable to add a dummy button to the main hopper GUI due to an invalid slot."));
                 return;
             }
 

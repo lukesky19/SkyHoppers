@@ -30,12 +30,12 @@ import com.github.lukesky19.skyHoppers.gui.menu.HopperGUI;
 import com.github.lukesky19.skyHoppers.skyhopper.SkyHopperManager;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.gui.GUIButton;
-import com.github.lukesky19.skylib.api.gui.GUIType;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackBuilder;
-import com.github.lukesky19.skylib.api.itemstack.ItemStackConfig;
-import com.github.lukesky19.skylib.api.player.PlayerUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
+import com.github.lukesky19.skylib.paper.api.gui.GUIButton;
+import com.github.lukesky19.skylib.paper.api.gui.GUIType;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackBuilder;
+import com.github.lukesky19.skylib.paper.api.itemstack.ItemStackConfig;
+import com.github.lukesky19.skylib.paper.api.player.PlayerUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -103,19 +103,19 @@ public class MembersGUI extends SkyHopperGUI {
      */
     public boolean create() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the members.yml GUI due to invalid GUI configuration."));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the members.yml GUI due to invalid GUI configuration."));
             return false;
         }
 
         GUIType guiType = guiConfig.guiType();
         if(guiType == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the members.yml GUI due to an invalid GUIType"));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the members.yml GUI due to an invalid GUIType"));
             return false;
         }
 
         String guiName = guiConfig.name();
         if(guiName == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the InventoryView for the members.yml GUI due to an invalid gui name."));
+            logger.warn(AdventureUtility.plain("Unable to create the InventoryView for the members.yml GUI due to an invalid gui name."));
             return false;
         }
 
@@ -128,13 +128,13 @@ public class MembersGUI extends SkyHopperGUI {
     @Override
     public boolean update() {
         if(guiConfig == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to decorate the GUI due to invalid configuration for the members GUI."));
+            logger.warn(AdventureUtility.plain("Unable to decorate the GUI due to invalid configuration for the members GUI."));
             if(isOpen) close();
             return false;
         }
 
         if(inventoryView == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to update the members GUI as the InventoryView was not created."));
+            logger.warn(AdventureUtility.plain("Unable to update the members GUI as the InventoryView was not created."));
             if(isOpen) close();
             return false;
         }
@@ -258,10 +258,10 @@ public class MembersGUI extends SkyHopperGUI {
                     if(itemStackConfig.name() != null) {
                         List<TagResolver.Single> placeholders = List.of(Placeholder.parsed("player_name", playerName));
 
-                        itemStackBuilder.setName(AdventureUtil.deserialize(itemStackConfig.name(), placeholders));
+                        itemStackBuilder.setName(AdventureUtility.deserialize(itemStackConfig.name(), placeholders));
                     }
 
-                    List<Component> lore = itemStackConfig.lore().stream().map(AdventureUtil::deserialize).toList();
+                    List<Component> lore = itemStackConfig.lore().stream().map(AdventureUtility::deserialize).toList();
                     List<ItemFlag> itemFlags = itemStackConfig.itemFlags().stream().map(ItemFlag::valueOf).toList();
 
                     itemStackBuilder.setLore(lore);
@@ -275,7 +275,7 @@ public class MembersGUI extends SkyHopperGUI {
 
                         buttonBuilder.setItemStack(optionalItemStack.get());
 
-                        buttonBuilder.setAction(inventoryClickEvent -> {
+                        buttonBuilder.setAction(_ -> {
                             skyHopper.removeMember(memberId);
 
                             guiManager.refreshGUIsByLocation(location);
@@ -291,7 +291,7 @@ public class MembersGUI extends SkyHopperGUI {
                         added++;
                         playerNum++;
                     } else {
-                        logger.warn(AdventureUtil.deserialize("Failed to create the ItemStack for a member button."));
+                        logger.warn(AdventureUtility.plain("Failed to create the ItemStack for a member button."));
                     }
                 }
             }
@@ -307,7 +307,7 @@ public class MembersGUI extends SkyHopperGUI {
             ButtonConfig buttonConfig = guiConfig.entries().nextPage();
 
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to create the next page button in the members gui due to no slot configured."));
+                logger.warn(AdventureUtility.plain("Unable to create the next page button in the members gui due to no slot configured."));
                 return;
             }
 
@@ -320,7 +320,7 @@ public class MembersGUI extends SkyHopperGUI {
 
                 builder.setItemStack(optionalItemStack.get());
 
-                builder.setAction(event -> {
+                builder.setAction(_ -> {
                     added = 0;
                     update();
                 });
@@ -338,7 +338,7 @@ public class MembersGUI extends SkyHopperGUI {
             assert guiConfig != null;
             ButtonConfig buttonConfig = guiConfig.entries().previousPage();
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to create the previous page button in the members gui due to no slot configured."));
+                logger.warn(AdventureUtility.plain("Unable to create the previous page button in the members gui due to no slot configured."));
                 return;
             }
 
@@ -351,7 +351,7 @@ public class MembersGUI extends SkyHopperGUI {
 
                 builder.setItemStack(optionalItemStack.get());
 
-                builder.setAction(event -> {
+                builder.setAction(_ -> {
                     if (playerNum > (guiSize - 9) + added) {
                         playerNum -= (guiSize - 9) + added;
                     } else {
@@ -378,7 +378,7 @@ public class MembersGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().add();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the add member button in the members gui due to no slot configured."));
+            logger.warn(AdventureUtility.plain("Unable to create the add member button in the members gui due to no slot configured."));
             return;
         }
 
@@ -391,7 +391,7 @@ public class MembersGUI extends SkyHopperGUI {
 
             buttonBuilder.setItemStack(optionalItemStack.get());
 
-            buttonBuilder.setAction(event -> {
+            buttonBuilder.setAction(_ -> {
                 skyHoppers.getServer().getScheduler().runTaskLater(skyHoppers, () ->
                         player.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW), 1L);
 
@@ -401,19 +401,19 @@ public class MembersGUI extends SkyHopperGUI {
 
                 boolean creationResult = selectPlayerGUI.create();
                 if(!creationResult) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean updateResult = selectPlayerGUI.update();
                 if(!updateResult) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                     return;
                 }
 
                 boolean openResult = selectPlayerGUI.open();
                 if(!openResult) {
-                    player.sendMessage(AdventureUtil.deserialize(locale.prefix() + locale.guiOpenError()));
+                    player.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.guiOpenError()));
                 }
             });
 
@@ -429,7 +429,7 @@ public class MembersGUI extends SkyHopperGUI {
         ButtonConfig buttonConfig = guiConfig.entries().exit();
 
         if(buttonConfig.slot() == null) {
-            logger.warn(AdventureUtil.deserialize("Unable to create the exit button in the members gui due to no slot configured."));
+            logger.warn(AdventureUtility.plain("Unable to create the exit button in the members gui due to no slot configured."));
             return;
         }
 
@@ -442,7 +442,7 @@ public class MembersGUI extends SkyHopperGUI {
 
             builder.setItemStack(optionalItemStack.get());
 
-            builder.setAction(event -> close());
+            builder.setAction(_ -> close());
 
             setButton(buttonConfig.slot(), builder.build());
         }
@@ -456,7 +456,7 @@ public class MembersGUI extends SkyHopperGUI {
 
         guiConfig.entries().dummyButtons().forEach(buttonConfig -> {
             if(buttonConfig.slot() == null) {
-                logger.warn(AdventureUtil.deserialize("Unable to add a dummy button to the members GUI due to an invalid slot."));
+                logger.warn(AdventureUtility.plain("Unable to add a dummy button to the members GUI due to an invalid slot."));
                 return;
             }
 

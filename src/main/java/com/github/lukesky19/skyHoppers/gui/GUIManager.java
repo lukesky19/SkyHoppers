@@ -24,8 +24,8 @@ import com.github.lukesky19.skyHoppers.skyhopper.data.SkyContainer;
 import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skyHoppers.util.LocationUUIDKey;
-import com.github.lukesky19.skylib.api.gui.interfaces.BaseGUI;
-import com.github.lukesky19.skylib.api.gui.interfaces.IGUIManager;
+import com.github.lukesky19.skylib.paper.api.gui.interfaces.BaseGUI;
+import com.github.lukesky19.skylib.paper.api.gui.interfaces.IGUIManager;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 
@@ -47,7 +47,7 @@ public class GUIManager implements IGUIManager<LocationUUIDKey> {
 
     @Override
     public void addOpenGUI(@NotNull LocationUUIDKey identifier, @NotNull BaseGUI<LocationUUIDKey> data) {
-        Map<UUID, BaseGUI<LocationUUIDKey>> uuidGuiMap = openGUIsByLocationAndPlayer.computeIfAbsent(identifier.location(), location -> new HashMap<>());
+        Map<UUID, BaseGUI<LocationUUIDKey>> uuidGuiMap = openGUIsByLocationAndPlayer.computeIfAbsent(identifier.location(), _ -> new HashMap<>());
 
         uuidGuiMap.put(identifier.uuid(), data);
     }

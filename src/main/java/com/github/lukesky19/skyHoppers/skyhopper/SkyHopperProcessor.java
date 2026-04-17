@@ -29,9 +29,9 @@ import com.github.lukesky19.skyHoppers.skyhopper.data.SkyHopper;
 import com.github.lukesky19.skyHoppers.task.data.QueuedTransfer;
 import com.github.lukesky19.skyHoppers.util.ImmutableLocation;
 import com.github.lukesky19.skyHoppers.util.PluginUtils;
-import com.github.lukesky19.skylib.api.adventure.AdventureUtil;
-import com.github.lukesky19.skylib.api.registry.RegistryUtil;
+import com.github.lukesky19.skylib.common.api.adventure.AdventureUtility;
 import com.github.lukesky19.skylib.libs.morepersistentdatatypes.DataType;
+import com.github.lukesky19.skylib.paper.api.registry.RegistryUtil;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Chunk;
 import org.bukkit.Location;
@@ -182,7 +182,7 @@ public class SkyHopperProcessor {
         @NotNull Locale locale = localeManager.getLocale();
 
         if(settings == null) {
-            logger.info(AdventureUtil.deserialize(locale.prefix() + locale.failedSkyHopperLoad()));
+            logger.info(AdventureUtility.deserialize(locale.prefix() + locale.failedSkyHopperLoad()));
             return null;
         }
 
@@ -425,7 +425,7 @@ public class SkyHopperProcessor {
                         // Get the SkyContainer's priority or the default priority if not set
                         int priority = linkedPDC.getOrDefault(HopperKeys.PRIORITY.getKey(), PersistentDataType.INTEGER, startingPriority);
                         // Clamp the priority to the highest and lowest priorities
-                        priority = Math.max(highestPriority, Math.min(lowestPriority, priority));
+                        priority = Math.clamp(priority, highestPriority, lowestPriority);
 
                         // Create the SkyContainer and add it to the list
                         skyHopper.addLinkedContainer(new SkyContainer(ImmutableLocation.fromBukkitLocation(linkedLocation), outputFilterType, linkedContainerFilterItems, priority), false);
