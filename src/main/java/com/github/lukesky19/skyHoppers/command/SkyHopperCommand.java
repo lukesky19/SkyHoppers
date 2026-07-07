@@ -40,7 +40,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -121,7 +120,7 @@ public class SkyHopperCommand {
                                                 CommandSender sender = ctx.getSource().getSender();
                                                 Locale locale = localeManager.getLocale();
 
-                                                @Nullable Settings settings = settingsManager.getSettings();
+                                                Settings settings = settingsManager.getSettings();
                                                 if(settings == null) {
                                                     sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.skyhopperCreationFailed()));
                                                     sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.invalidSettings()));
@@ -179,7 +178,7 @@ public class SkyHopperCommand {
                                             CommandSender sender = ctx.getSource().getSender();
                                             Locale locale = localeManager.getLocale();
 
-                                            @Nullable Settings settings = settingsManager.getSettings();
+                                            Settings settings = settingsManager.getSettings();
                                             if(settings == null) {
                                                 sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.skyhopperCreationFailed()));
                                                 sender.sendMessage(AdventureUtility.deserialize(locale.prefix() + locale.invalidSettings()));

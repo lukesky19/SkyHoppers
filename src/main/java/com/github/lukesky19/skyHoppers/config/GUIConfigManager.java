@@ -27,8 +27,8 @@ import com.github.lukesky19.skylib.libs.configurate.yaml.YamlConfigurationLoader
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Path;
 
@@ -146,7 +146,7 @@ public class GUIConfigManager {
      * @return true if valid, or false if out of date.
      */
     private boolean checkConfigVersion(@NotNull String fileName, @NotNull IGUIConfig config) {
-        @Nullable String version = config.getConfigVersion();
+        String version = config.getConfigVersion();
 
         if(version == null) {
             logger.warn(AdventureUtility.plain("Unable to check the config version in " + fileName + " as it is not configured."));

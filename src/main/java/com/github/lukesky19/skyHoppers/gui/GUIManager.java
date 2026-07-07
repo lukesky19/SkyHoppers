@@ -28,8 +28,8 @@ import com.github.lukesky19.skylib.paper.api.gui.interfaces.BaseGUI;
 import com.github.lukesky19.skylib.paper.api.gui.interfaces.IGUIManager;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;

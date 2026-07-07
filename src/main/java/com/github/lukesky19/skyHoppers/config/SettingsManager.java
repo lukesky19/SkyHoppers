@@ -30,8 +30,8 @@ import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Map;

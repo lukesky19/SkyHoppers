@@ -17,7 +17,7 @@
 */
 package com.github.lukesky19.skyHoppers.config.data.gui;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This interface is used to define a method to get the configuration version of the config.

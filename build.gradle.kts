@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.github.lukesky19"
-version = "1.4.0.0"
+version = "1.4.1.0"
 
 repositories {
     mavenCentral()
@@ -28,14 +28,14 @@ repositories {
 
 dependencies {
     // Paper
-    compileOnly("io.papermc.paper:paper-api:26.1.2.build.+")
+    compileOnly("io.papermc.paper:paper-api:26.2.build.+")
 
     // SkyLib
-    compileOnly("com.github.lukesky19:SkyLib:2.0.0.0")
+    compileOnly("com.github.lukesky19:SkyLib:2.0.2.0")
 
     // Integration
     compileOnly("com.github.MilkBowl:VaultAPI:1.7.1")
-    compileOnly("dev.rosewood:rosestacker:1.5.36")
+    compileOnly("dev.rosewood:rosestacker:1.5.41")
     compileOnly("world.bentobox:bentobox:2.7.0-SNAPSHOT")
     compileOnly("com.ghostchu:quickshop-bukkit:6.2.0.10")
     compileOnly("com.ghostchu:quickshop-api:6.2.0.10")
